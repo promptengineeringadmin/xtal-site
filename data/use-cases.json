@@ -11,7 +11,7 @@
       "type": "page-hero",
       "eyebrow": "Use Cases",
       "headline": "Built for merchants stuck in the middle",
-      "subhead": "You've outgrown native platform search. Enterprise tools are overkill. XTAL is search that just works—for catalogs like yours.",
+      "subhead": "You've outgrown native platform search. Enterprise tools are overkill. XTAL is search that just works for catalogs like yours.",
       "cta": {
         "label": "Find Your Use Case",
         "href": "#verticals"
@@ -52,7 +52,7 @@
           "id": "wine-spirits",
           "title": "Wine & Spirits",
           "icon": "wine",
-          "challenge": "Customers search by grape, region, occasion, food pairing, price point—often all at once. Traditional search chokes on 'dry red under 30 for steak dinner'.",
+          "challenge": "Customers search by grape, region, occasion, food pairing, price point, often all at once. Traditional search chokes on 'dry red under 30 for steak dinner'.",
           "solution": "XTAL parses varietal, style, price, and pairing intent. Returns Cabernets, Malbecs, and Syrahs sorted by value and food compatibility.",
           "exampleQueries": [
             "crisp white wine for seafood under 25",
@@ -90,7 +90,7 @@
           "id": "craft-hobby",
           "title": "Craft & Hobby Supplies",
           "icon": "scissors",
-          "challenge": "Customers describe projects, not products. 'Stuff to make friendship bracelets' should return thread, beads, clasps, patterns—not a single SKU.",
+          "challenge": "Customers describe projects, not products. 'Stuff to make friendship bracelets' should return thread, beads, clasps, and patterns. Not a single SKU.",
           "solution": "XTAL understands project-based intent and can return curated product sets, related items, and appropriate skill-level matches.",
           "exampleQueries": [
             "beginner knitting kit for 10 year old",
@@ -110,7 +110,7 @@
           "title": "Outdoor & Sporting Goods",
           "icon": "mountain",
           "challenge": "Searches combine activity, conditions, experience level, and brand preferences. 'Warm sleeping bag for winter backpacking not too heavy' has five constraints.",
-          "solution": "XTAL extracts temperature rating, weight class, activity type, and experience level—returns ranked results without requiring filter gymnastics.",
+          "solution": "XTAL extracts temperature rating, weight class, activity type, and experience level, then returns ranked results without requiring filter gymnastics.",
           "exampleQueries": [
             "ultralight tent for AT thru-hike",
             "warm sleeping bag 20 degree under 3 lbs",
@@ -128,7 +128,7 @@
           "id": "health-supplements",
           "title": "Health & Supplements",
           "icon": "pill",
-          "challenge": "Customers search by symptom, ingredient, dietary restriction, and goal—not product name. 'Vegan omega-3 for joint health' needs semantic understanding.",
+          "challenge": "Customers search by symptom, ingredient, dietary restriction, and goal. Not product name. 'Vegan omega-3 for joint health' needs semantic understanding.",
           "solution": "XTAL maps symptoms to ingredients, respects dietary filters, and surfaces relevant products without requiring medical-grade tagging.",
           "exampleQueries": [
             "vegan omega 3 for joint pain",
@@ -176,7 +176,7 @@
           "title": "Growing DTC Brands",
           "subtitle": "$500K–$10M revenue, 50–5,000 SKUs",
           "icon": "package",
-          "profile": "You've got product-market fit. Traffic is growing. But you don't have a search engineer—and you shouldn't need one.",
+          "profile": "You've got product-market fit. Traffic is growing. But you don't have a search engineer, and you shouldn't need one.",
           "painPoints": [
             "Native Shopify/BigCommerce search returning embarrassing results",
             "Customers searching for products you definitely have and getting 'no results'",
@@ -199,7 +199,7 @@
             "Spending hours on synonym lists and redirect rules",
             "Search that works for 'red dress' but fails on real queries"
           ],
-          "xtalFit": "Full-Spectrum Search handles expert queries and casual browsers equally. Jargon, part numbers, intent-based descriptions—all in one search bar.",
+          "xtalFit": "Full-Spectrum Search handles expert queries and casual browsers equally. Jargon, part numbers, intent-based descriptions: all in one search bar.",
           "platforms": ["Shopify Plus", "Magento", "Custom/Headless"],
           "slug": "specialty-retail"
         },
@@ -208,7 +208,7 @@
           "title": "B2B & Wholesale",
           "subtitle": "Reorders + acquisition in one experience",
           "icon": "building",
-          "profile": "Your best customers know exactly what they want—part number, quantity, done. But you also need to convert new accounts browsing by application.",
+          "profile": "Your best customers know exactly what they want: part number, quantity, done. But you also need to convert new accounts browsing by application.",
           "painPoints": [
             "Search optimized for one mode or the other, never both",
             "Procurement managers complaining about too many clicks",
@@ -232,7 +232,7 @@
         {
           "from": "Native Platform Search",
           "fromLogo": "shopify",
-          "verdict": "Not a comparison—it's an upgrade",
+          "verdict": "Not a comparison. An upgrade.",
           "details": "Built-in search is fine for 20 products. At scale, it's costing you sales. XTAL installs in minutes and the difference is immediate.",
           "migrationTime": "Same day"
         },
@@ -284,7 +284,7 @@
           "category": "Vague Problem",
           "query": "my back hurts from my office chair",
           "traditional": {
-            "result": "Results for 'back office chair' — showing office chairs",
+            "result": "Results for 'back office chair' - showing office chairs",
             "productCount": 47
           },
           "xtal": {
@@ -297,7 +297,7 @@
           "category": "Natural Constraints",
           "query": "running shoes wide feet flat arches under 150",
           "traditional": {
-            "result": "Results for 'running shoes' — 200+ items, user must filter manually",
+            "result": "Results for 'running shoes' - 200+ items, user must filter manually",
             "productCount": 200
           },
           "xtal": {
@@ -349,7 +349,7 @@
       },
       {
         "question": "What is Full-Spectrum Search?",
-        "answer": "Full-Spectrum Search is XTAL's hybrid approach that combines vector/semantic search with precision keyword matching. This means it handles exact SKU lookups and vague intent queries equally well—in the same search bar, automatically."
+        "answer": "Full-Spectrum Search is XTAL's hybrid approach that combines vector/semantic search with precision keyword matching. This means it handles exact SKU lookups and vague intent queries equally well, in the same search bar, automatically."
       },
       {
         "question": "How long does it take to set up XTAL Search?",
@@ -363,7 +363,7 @@
     "defined terms": [
       {
         "term": "Full-Spectrum Search",
-        "definition": "A hybrid search methodology combining semantic vector search with precision keyword matching to handle any query type—from exact SKUs to vague intent descriptions."
+        "definition": "A hybrid search methodology combining semantic vector search with precision keyword matching to handle any query type, from exact SKUs to vague intent descriptions."
       },
       {
         "term": "XTAL Intelligence",

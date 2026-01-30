@@ -23,7 +23,7 @@ export function StructuredData() {
     applicationSubCategory: "E-commerce Search",
     operatingSystem: "Web-based",
     description:
-      "AI-native product discovery platform that combines LLM intelligence with vector and keyword precision. Full-Spectrum Search™ handles any query type—from exact SKUs to natural language descriptions.",
+      "AI-native product discovery platform that combines LLM intelligence with vector and keyword precision. Full-Spectrum Search™ handles any query type, from exact SKUs to natural language descriptions.",
     url: "https://xtalsearch.com",
     offers: {
       "@type": "Offer",
@@ -107,7 +107,7 @@ export function StructuredData() {
         name: "What is Full-Spectrum Search?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Full-Spectrum Search is XTAL's hybrid approach that combines vector/semantic search with precision keyword matching. This means it handles exact SKU lookups and vague intent queries equally well—in the same search bar, automatically.",
+          text: "Full-Spectrum Search is XTAL's hybrid approach that combines vector/semantic search with precision keyword matching. This means it handles exact SKU lookups and vague intent queries equally well, in the same search bar, automatically.",
         },
       },
       {

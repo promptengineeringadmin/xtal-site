@@ -19,38 +19,85 @@
     },
 
     {
+      "id": "anti-features",
+      "type": "comparison-grid",
+      "eyebrow": "What You Don't Have To Do",
+      "headline": "Finally, a search tool that doesn't create more work",
+      "intro": "Most 'powerful' search tools are powerful the way a fighter jet is powerful: technically impressive, requires years of training, crashes if you push the wrong button.",
+      "items": [
+        {
+          "task": "Maintain synonym lists",
+          "traditional": "Manually map 'couch' → 'sofa', 'sneakers' → 'trainers', hundreds of variations",
+          "xtal": "XTAL already knows they're the same thing",
+          "icon": "book"
+        },
+        {
+          "task": "Configure boost rules",
+          "traditional": "JSON configs, weight multipliers, A/B test every change",
+          "xtal": "Tell it in English: 'prioritize new arrivals and in-stock items'",
+          "icon": "sliders"
+        },
+        {
+          "task": "Tune relevance algorithms",
+          "traditional": "Adjust BM25 parameters, field weights, proximity scoring",
+          "xtal": "It learns from your catalog structure automatically",
+          "icon": "settings"
+        },
+        {
+          "task": "Tag products for AI",
+          "traditional": "Enrich every SKU with custom attributes for ML models",
+          "xtal": "Works with your existing product data as-is",
+          "icon": "tag"
+        },
+        {
+          "task": "Build filter logic",
+          "traditional": "Faceted navigation setup, filter dependencies, UI configuration",
+          "xtal": "Constraints extracted from natural language. Filters become optional",
+          "icon": "filter"
+        },
+        {
+          "task": "Handle edge cases",
+          "traditional": "Null results pages, redirect rules, 'did you mean' logic",
+          "xtal": "LLM understands intent even when queries are weird",
+          "icon": "alert-triangle"
+        }
+      ],
+      "summary": "Traditional search tools like Algolia, Searchspring, and Klevu are powerful if you have an engineer to configure them. XTAL gives you the results without the PhD."
+    },
+
+    {
       "id": "full-spectrum",
       "type": "feature-showcase",
       "eyebrow": "Full-Spectrum Search™",
       "headline": "One search bar. Any kind of query.",
-      "description": "Your customers don't all search the same way. Some know exactly what they want. Some are exploring. Most are somewhere in between. Traditional search forces you to pick a lane—keyword OR semantic. XTAL does both, simultaneously.",
+      "description": "Your customers don't all search the same way. Some know exactly what they want. Some are exploring. Most are somewhere in between. Traditional search forces you to pick a lane: keyword OR semantic. XTAL does both, simultaneously.",
       "examples": [
         {
           "type": "Precision",
           "icon": "target",
           "query": "WD-40 11oz",
-          "explanation": "Part numbers, SKUs, exact product names—when they know what they need, we get out of the way",
+          "explanation": "Part numbers, SKUs, exact product names. When they know what they need, we get out of the way",
           "tags": ["Exact Match", "SKU Lookup"]
         },
         {
           "type": "Intent",
           "icon": "lightbulb",
           "query": "something to stop squeaky door hinges",
-          "explanation": "Natural language, use-case descriptions—semantic understanding finds products keyword search would miss",
+          "explanation": "Natural language, use-case descriptions. Semantic understanding finds products keyword search would miss",
           "tags": ["Vector Search", "Intent Parsing"]
         },
         {
           "type": "Hybrid",
           "icon": "merge",
           "query": "WD-40 or similar for bike chain",
-          "explanation": "Brand + use case in one query—XTAL parses both signals and ranks accordingly",
+          "explanation": "Brand + use case in one query. XTAL parses both signals and ranks accordingly",
           "tags": ["Hybrid Ranking", "Brand + Intent"]
         },
         {
           "type": "Constrained",
           "icon": "filter",
           "query": "red dress beach wedding under 200",
-          "explanation": "Multiple constraints extracted and applied: color, occasion, price—no filters needed",
+          "explanation": "Multiple constraints extracted and applied: color, occasion, price. No filters needed",
           "tags": ["Constraint Extraction", "Price Parsing"]
         }
       ],
@@ -105,7 +152,7 @@
           "number": "03",
           "title": "Refine",
           "subtitle": "Business Logic Layer",
-          "detail": "A reasoning layer applies your merchandising priorities—in plain English:",
+          "detail": "A reasoning layer applies your merchandising priorities in plain English:",
           "bullets": [
             "Inventory awareness: deprioritize out-of-stock without hiding",
             "Margin optimization: boost higher-margin alternatives",
@@ -121,54 +168,7 @@
           "engineeringRequired": "None"
         }
       ],
-      "footnote": "You don't need to understand any of this to use XTAL. But if you're the type who likes knowing how things work—now you know."
-    },
-
-    {
-      "id": "anti-features",
-      "type": "comparison-grid",
-      "eyebrow": "What You Don't Have To Do",
-      "headline": "Finally, a search tool that doesn't create more work",
-      "intro": "Most 'powerful' search tools are powerful the way a fighter jet is powerful—technically impressive, requires years of training, crashes if you push the wrong button.",
-      "items": [
-        {
-          "task": "Maintain synonym lists",
-          "traditional": "Manually map 'couch' → 'sofa', 'sneakers' → 'trainers', hundreds of variations",
-          "xtal": "XTAL already knows they're the same thing",
-          "icon": "book"
-        },
-        {
-          "task": "Configure boost rules",
-          "traditional": "JSON configs, weight multipliers, A/B test every change",
-          "xtal": "Tell it in English: 'prioritize new arrivals and in-stock items'",
-          "icon": "sliders"
-        },
-        {
-          "task": "Tune relevance algorithms",
-          "traditional": "Adjust BM25 parameters, field weights, proximity scoring",
-          "xtal": "It learns from your catalog structure automatically",
-          "icon": "settings"
-        },
-        {
-          "task": "Tag products for AI",
-          "traditional": "Enrich every SKU with custom attributes for ML models",
-          "xtal": "Works with your existing product data as-is",
-          "icon": "tag"
-        },
-        {
-          "task": "Build filter logic",
-          "traditional": "Faceted navigation setup, filter dependencies, UI configuration",
-          "xtal": "Constraints extracted from natural language—filters become optional",
-          "icon": "filter"
-        },
-        {
-          "task": "Handle edge cases",
-          "traditional": "Null results pages, redirect rules, 'did you mean' logic",
-          "xtal": "LLM understands intent even when queries are weird",
-          "icon": "alert-triangle"
-        }
-      ],
-      "summary": "Traditional search tools like Algolia, Searchspring, and Klevu are powerful—if you have an engineer to configure them. XTAL gives you the results without the PhD."
+      "footnote": "You don't need to understand any of this to use XTAL. But if you're the type who likes knowing how things work, well, now you know."
     },
 
     {
