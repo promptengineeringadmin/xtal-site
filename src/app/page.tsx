@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Sparkles, CheckCircle2 } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import Logo from "@/components/Logo";
 import Navbar from "@/components/Navbar";
 import SearchTerminal from "@/components/SearchTerminal";
@@ -65,7 +65,7 @@ export default function Home() {
             {/* Abstract Glow behind the console */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-500/20 blur-[100px] rounded-full pointer-events-none" />
 
-            <div className="glass-card rounded-2xl border border-white/10 shadow-2xl shadow-blue-900/50 backdrop-blur-xl relative overflow-hidden transform rotate-[-1deg] hover:rotate-0 transition-all duration-500">
+            <div className="glass-card rounded-2xl border border-white/10 shadow-2xl shadow-blue-900/50 backdrop-blur-xl relative overflow-hidden transform rotate-[-1deg]">
 
               {/* Console Header */}
               <div className="bg-white/5 border-b border-white/10 p-4 flex items-center justify-between">
@@ -74,8 +74,8 @@ export default function Home() {
                   <div className="w-3 h-3 rounded-full bg-amber-400/80" />
                   <div className="w-3 h-3 rounded-full bg-green-400/80" />
                 </div>
-                <div className="text-[10px] font-bold uppercase tracking-widest text-blue-200/50">
-                  Merchant Control Layer
+                <div className="text-[10px] font-bold uppercase tracking-widest text-slate-700">
+                  Natural Language Control Layer
                 </div>
               </div>
 
@@ -105,26 +105,37 @@ export default function Home() {
                     <span className="px-3 py-1 rounded-md bg-blue-500/20 border border-blue-500/30 text-blue-300 text-xs font-bold uppercase">
                       Rule Active
                     </span>
-                    <span className="px-3 py-1 rounded-md bg-purple-500/20 border border-purple-500/30 text-purple-300 text-xs font-bold uppercase">
-                      Global Scope
-                    </span>
                   </div>
-                  <button className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase tracking-widest rounded transition-colors shadow-lg shadow-blue-600/20">
+                  <span className="px-4 py-2 bg-blue-600 text-white text-xs font-bold uppercase tracking-widest rounded shadow-lg shadow-blue-600/20">
                     Save Logic
-                  </button>
+                  </span>
                 </div>
 
               </div>
             </div>
 
-            {/* Floating Decoration: "No Code" Badge */}
-            <div className="absolute -bottom-6 -right-6 bg-white text-xtal-navy px-6 py-4 rounded-xl shadow-xl border border-slate-200 flex items-center gap-3 animate-bounce duration-[3000ms]">
-              <div className="bg-green-100 p-1.5 rounded-full text-green-700">
-                <CheckCircle2 size={16} />
+            {/* Floating Decoration: "Dev Effort" Badge */}
+            <div className="absolute -bottom-6 -right-6 inline-flex items-center gap-4 bg-white py-3 px-5 rounded-xl shadow-2xl shadow-blue-900/10 border border-slate-100 ring-1 ring-slate-50/50 animate-bounce duration-[3000ms]">
+              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-cyan-500 shadow-lg shadow-cyan-500/30 shrink-0">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-5 h-5"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
               </div>
-              <div>
-                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Engineering Req</div>
-                <div className="font-bold text-lg">None</div>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] mb-0.5">
+                  Dev Effort?
+                </span>
+                <span className="text-[21px] font-black text-[#0F1A35] tracking-tight text-center">
+                  ZERO
+                </span>
               </div>
             </div>
           </div>

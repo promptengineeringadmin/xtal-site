@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Search, AlertCircle, Sparkles, XCircle, CheckCircle2 } from "lucide-react";
+import Logo from "./Logo";
 
 const EXAMPLES = [
   {
@@ -125,7 +126,7 @@ export default function SearchTerminal() {
             <div className={`relative z-10 transition-all duration-500 ${isAnimating ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"}`}>
               <div className="flex items-center gap-3 mb-10 text-blue-300">
                 <CheckCircle2 size={20} className="text-blue-400" />
-                <span className="text-xs font-bold uppercase tracking-widest">XTAL Intelligence</span>
+                <Logo className="h-5 [&_svg]:text-white [&_span]:text-white" />
               </div>
 
               {/* INCREASED FONT SIZE HERE: text-lg */}
