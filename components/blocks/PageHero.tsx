@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import DemoButton from "../DemoButton";
 
 interface PageHeroProps {
   eyebrow?: string;
@@ -8,6 +11,10 @@ interface PageHeroProps {
     label: string;
     href: string;
   };
+}
+
+function isDemoLink(href: string): boolean {
+  return href === "/demo" || href.startsWith("/demo?");
 }
 
 export default function PageHero({ eyebrow, headline, subhead, cta }: PageHeroProps) {
@@ -35,12 +42,21 @@ export default function PageHero({ eyebrow, headline, subhead, cta }: PageHeroPr
           </p>
         )}
         {cta && (
-          <Link
-            href={cta.href}
-            className="inline-block px-8 py-4 bg-white text-xtal-navy font-bold rounded-xl shadow-2xl hover:bg-slate-100 transition-all"
-          >
-            {cta.label}
-          </Link>
+          isDemoLink(cta.href) ? (
+            <DemoButton
+              source="page-hero"
+              className="inline-block px-8 py-4 bg-white text-xtal-navy font-bold rounded-xl shadow-2xl hover:bg-slate-100 transition-all"
+            >
+              {cta.label}
+            </DemoButton>
+          ) : (
+            <Link
+              href={cta.href}
+              className="inline-block px-8 py-4 bg-white text-xtal-navy font-bold rounded-xl shadow-2xl hover:bg-slate-100 transition-all"
+            >
+              {cta.label}
+            </Link>
+          )
         )}
       </div>
     </div>

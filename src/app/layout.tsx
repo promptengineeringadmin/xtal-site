@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { StructuredData } from '../../components/StructuredData'
+import { DemoModalProvider } from '@/contexts/DemoModalContext'
+import DemoModal from '@/components/DemoModal'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -51,7 +53,10 @@ export default function RootLayout({
         <StructuredData />
       </head>
       <body className={`${inter.className} bg-white text-gray-900 antialiased`}>
-        {children}
+        <DemoModalProvider>
+          {children}
+          <DemoModal />
+        </DemoModalProvider>
       </body>
     </html>
   )

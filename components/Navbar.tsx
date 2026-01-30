@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Logo from "./Logo";
+import DemoButton from "./DemoButton";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -30,12 +31,12 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
-          <Link
-            href="/#demo"
+          <DemoButton
+            source="navbar"
             className="bg-xtal-navy text-white px-6 py-2.5 rounded-full hover:scale-105 transition-transform shadow-lg shadow-blue-900/20"
           >
             Request Demo
-          </Link>
+          </DemoButton>
         </div>
       </div>
     </nav>

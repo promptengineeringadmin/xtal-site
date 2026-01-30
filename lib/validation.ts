@@ -2,24 +2,15 @@ export interface DemoRequestData {
   name: string
   email: string
   company: string
-  platform: string
   pain?: string
+  source?: string
+  plan?: string
 }
 
 export interface ValidationResult {
   isValid: boolean
   errors: Record<string, string>
 }
-
-const validPlatforms = [
-  'Shopify',
-  'Shopify Plus',
-  'WooCommerce',
-  'BigCommerce',
-  'Magento',
-  'Custom/Headless',
-  'Other',
-]
 
 export function validateDemoRequest(data: unknown): ValidationResult {
   const errors: Record<string, string> = {}
@@ -56,13 +47,6 @@ export function validateDemoRequest(data: unknown): ValidationResult {
     errors.company = 'Company must be at least 2 characters'
   } else if (formData.company.trim().length > 100) {
     errors.company = 'Company must be less than 100 characters'
-  }
-
-  // Platform validation
-  if (!formData.platform || typeof formData.platform !== 'string') {
-    errors.platform = 'Platform is required'
-  } else if (!validPlatforms.includes(formData.platform)) {
-    errors.platform = 'Please select a valid platform'
   }
 
   // Pain (optional) validation

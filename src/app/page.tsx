@@ -1,30 +1,12 @@
 "use client";
-import { useState } from "react";
 import { Sparkles } from "lucide-react";
 import Logo from "@/components/Logo";
 import Navbar from "@/components/Navbar";
 import SearchTerminal from "@/components/SearchTerminal";
 import IntegrationStrip from "@/components/IntegrationStrip";
+import DemoForm from "@/components/DemoForm";
 
 export default function Home() {
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setStatus("loading");
-
-    const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData);
-
-    const res = await fetch("/api/demo-request", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
-
-    if (res.ok) setStatus("success");
-    else setStatus("error");
-  };
-
   return (
     <main className="min-h-screen">
       {/* Navigation */}
@@ -167,38 +149,7 @@ export default function Home() {
           <h2 className="text-3xl font-bold mb-2 text-xtal-navy">Request a Demo</h2>
           <p className="text-slate-500 mb-8">See how XTAL Search transforms your store's conversion rate.</p>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <input type="text" name="honeyPot" className="hidden" />
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold mb-2">Name</label>
-                <input required name="name" className="w-full p-3 bg-slate-100 rounded-lg focus:ring-2 focus:ring-xtal-navy outline-none" />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-2">Work Email</label>
-                <input required name="email" type="email" className="w-full p-3 bg-slate-100 rounded-lg focus:ring-2 focus:ring-xtal-navy outline-none" />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-semibold mb-2">Company</label>
-              <input required name="company" className="w-full p-3 bg-slate-100 rounded-lg focus:ring-2 focus:ring-xtal-navy outline-none" />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold mb-2">Primary Search Pain Point</label>
-              <textarea name="message" rows={4} className="w-full p-3 bg-slate-100 rounded-lg focus:ring-2 focus:ring-xtal-navy outline-none" />
-            </div>
-
-            <button
-              disabled={status === "loading"}
-              className="w-full py-4 bg-xtal-navy text-white font-bold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
-            >
-              {status === "loading" ? "Processing..." : "Send Request"}
-            </button>
-
-            {status === "success" && <p className="text-green-600 font-medium text-center">Thanks! We'll be in touch shortly.</p>}
-            {status === "error" && <p className="text-red-600 font-medium text-center">Something went wrong. Please try again.</p>}
-          </form>
+          <DemoForm source="homepage" />
         </div>
       </section>
 

@@ -1,5 +1,8 @@
+"use client";
+
 import { Check } from "lucide-react";
 import Link from "next/link";
+import DemoButton from "../DemoButton";
 
 interface Plan {
   name: string;
@@ -24,6 +27,10 @@ interface Plan {
 
 interface PricingCardsProps {
   plans: Plan[];
+}
+
+function isDemoLink(href: string): boolean {
+  return href === "/demo" || href.startsWith("/demo?");
 }
 
 export default function PricingCards({ plans }: PricingCardsProps) {
@@ -68,16 +75,29 @@ export default function PricingCards({ plans }: PricingCardsProps) {
               )}
             </div>
 
-            <Link
-              href={plan.cta.href}
-              className={`block w-full py-4 rounded-xl text-center font-bold transition-colors ${
-                plan.highlight
-                  ? "bg-white text-xtal-navy hover:bg-slate-100"
-                  : "bg-xtal-navy text-white hover:bg-blue-900"
-              }`}
-            >
-              {plan.cta.label}
-            </Link>
+            {isDemoLink(plan.cta.href) ? (
+              <DemoButton
+                source={`pricing-${plan.name.toLowerCase().replace(/\s+/g, '-')}`}
+                className={`block w-full py-4 rounded-xl text-center font-bold transition-colors ${
+                  plan.highlight
+                    ? "bg-white text-xtal-navy hover:bg-slate-100"
+                    : "bg-xtal-navy text-white hover:bg-blue-900"
+                }`}
+              >
+                {plan.cta.label}
+              </DemoButton>
+            ) : (
+              <Link
+                href={plan.cta.href}
+                className={`block w-full py-4 rounded-xl text-center font-bold transition-colors ${
+                  plan.highlight
+                    ? "bg-white text-xtal-navy hover:bg-slate-100"
+                    : "bg-xtal-navy text-white hover:bg-blue-900"
+                }`}
+              >
+                {plan.cta.label}
+              </Link>
+            )}
             {plan.cta.note && (
               <p className={`text-center text-xs mt-3 ${plan.highlight ? "text-slate-400" : "text-slate-500"}`}>
                 {plan.cta.note}

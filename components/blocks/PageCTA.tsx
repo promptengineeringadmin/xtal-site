@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { Check } from "lucide-react";
+import DemoButton from "../DemoButton";
 
 interface PageCTAProps {
   headline: string;
@@ -20,6 +23,10 @@ interface PageCTAProps {
   };
 }
 
+function isDemoLink(href: string): boolean {
+  return href === "/demo" || href.startsWith("/demo?");
+}
+
 export default function PageCTA({ headline, description, cta, trust }: PageCTAProps) {
   return (
     <div className="py-24 px-6 bg-xtal-navy text-white">
@@ -34,19 +41,37 @@ export default function PageCTA({ headline, description, cta, trust }: PageCTAPr
         )}
 
         <div className="flex flex-wrap justify-center gap-4 mb-10">
-          <Link
-            href={cta.primary.href}
-            className="px-8 py-4 bg-white text-xtal-navy font-bold rounded-xl shadow-2xl hover:bg-slate-100 transition-all"
-          >
-            {cta.primary.label}
-          </Link>
-          {cta.secondary && (
-            <Link
-              href={cta.secondary.href}
-              className="px-8 py-4 bg-transparent border border-white/20 text-white font-bold rounded-xl hover:bg-white/5 transition-all"
+          {isDemoLink(cta.primary.href) ? (
+            <DemoButton
+              source="page-cta-primary"
+              className="px-8 py-4 bg-white text-xtal-navy font-bold rounded-xl shadow-2xl hover:bg-slate-100 transition-all"
             >
-              {cta.secondary.label}
+              {cta.primary.label}
+            </DemoButton>
+          ) : (
+            <Link
+              href={cta.primary.href}
+              className="px-8 py-4 bg-white text-xtal-navy font-bold rounded-xl shadow-2xl hover:bg-slate-100 transition-all"
+            >
+              {cta.primary.label}
             </Link>
+          )}
+          {cta.secondary && (
+            isDemoLink(cta.secondary.href) ? (
+              <DemoButton
+                source="page-cta-secondary"
+                className="px-8 py-4 bg-transparent border border-white/20 text-white font-bold rounded-xl hover:bg-white/5 transition-all"
+              >
+                {cta.secondary.label}
+              </DemoButton>
+            ) : (
+              <Link
+                href={cta.secondary.href}
+                className="px-8 py-4 bg-transparent border border-white/20 text-white font-bold rounded-xl hover:bg-white/5 transition-all"
+              >
+                {cta.secondary.label}
+              </Link>
+            )
           )}
         </div>
 
