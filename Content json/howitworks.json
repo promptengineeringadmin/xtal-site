@@ -1,0 +1,243 @@
+{
+  "meta": {
+    "title": "How it Works | XTAL Search",
+    "description": "Full-Spectrum Search combines LLM intelligence with vector and keyword precision. See how XTAL understands queries traditional search engines can't.",
+    "ogImage": "/og-technology.png"
+  },
+
+  "sections": [
+    {
+      "id": "hero",
+      "type": "page-hero",
+      "eyebrow": "How It Works",
+      "headline": "Don't just search. Understand.",
+      "subhead": "XTAL combines large language models, vector search, and precision matching into one seamless experience. We call it Full-Spectrum Search™.",
+      "cta": {
+        "label": "See It In Action",
+        "href": "/demo"
+      }
+    },
+
+    {
+      "id": "full-spectrum",
+      "type": "feature-showcase",
+      "eyebrow": "Full-Spectrum Search™",
+      "headline": "One search bar. Any kind of query.",
+      "description": "Your customers don't all search the same way. Some know exactly what they want. Some are exploring. Most are somewhere in between. Traditional search forces you to pick a lane—keyword OR semantic. XTAL does both, simultaneously.",
+      "examples": [
+        {
+          "type": "Precision",
+          "icon": "target",
+          "query": "WD-40 11oz",
+          "explanation": "Part numbers, SKUs, exact product names—when they know what they need, we get out of the way",
+          "tags": ["Exact Match", "SKU Lookup"]
+        },
+        {
+          "type": "Intent",
+          "icon": "lightbulb",
+          "query": "something to stop squeaky door hinges",
+          "explanation": "Natural language, use-case descriptions—semantic understanding finds products keyword search would miss",
+          "tags": ["Vector Search", "Intent Parsing"]
+        },
+        {
+          "type": "Hybrid",
+          "icon": "merge",
+          "query": "WD-40 or similar for bike chain",
+          "explanation": "Brand + use case in one query—XTAL parses both signals and ranks accordingly",
+          "tags": ["Hybrid Ranking", "Brand + Intent"]
+        },
+        {
+          "type": "Constrained",
+          "icon": "filter",
+          "query": "red dress beach wedding under 200",
+          "explanation": "Multiple constraints extracted and applied: color, occasion, price—no filters needed",
+          "tags": ["Constraint Extraction", "Price Parsing"]
+        }
+      ],
+      "summary": "Keyword precision meets semantic intelligence. No mode-switching required."
+    },
+
+    {
+      "id": "how-it-works",
+      "type": "process-deep-dive",
+      "eyebrow": "Under The Hood",
+      "headline": "Three layers working together",
+      "intro": "Every query passes through a pipeline designed to maximize relevance without requiring configuration. Here's what happens in the ~200ms between keystroke and results.",
+      "steps": [
+        {
+          "number": "01",
+          "title": "Understand",
+          "subtitle": "LLM Query Intelligence",
+          "detail": "A large language model analyzes the query in real-time, identifying:",
+          "bullets": [
+            "Intent type: browsing, researching, or ready to buy",
+            "Explicit constraints: price ranges, colors, sizes, quantities",
+            "Implicit context: occasion, recipient, use case",
+            "Query structure: exact match signals vs. exploratory language"
+          ],
+          "example": {
+            "input": "gift for mom who likes gardening under 50",
+            "output": {
+              "intent": "Gift purchase",
+              "recipient": "Mother",
+              "interest": "Gardening",
+              "priceMax": 50,
+              "occasion": "Likely birthday or Mother's Day"
+            }
+          },
+          "engineeringRequired": "None"
+        },
+        {
+          "number": "02",
+          "title": "Match",
+          "subtitle": "Full-Spectrum Retrieval",
+          "detail": "The parsed query hits multiple retrieval paths simultaneously:",
+          "bullets": [
+            "Vector similarity: finds products by meaning, not just words",
+            "Keyword precision: exact matches for SKUs, brands, part numbers",
+            "Attribute filtering: applies extracted constraints (price, color, etc.)",
+            "Fuzzy matching: handles typos and spelling variations"
+          ],
+          "techNote": "We use a hybrid scoring model that dynamically weights each retrieval path based on query characteristics. A SKU lookup gets 90% keyword weight. A vague intent query gets 90% vector weight. Most queries fall somewhere in between.",
+          "engineeringRequired": "None"
+        },
+        {
+          "number": "03",
+          "title": "Refine",
+          "subtitle": "Business Logic Layer",
+          "detail": "A reasoning layer applies your merchandising priorities—in plain English:",
+          "bullets": [
+            "Inventory awareness: deprioritize out-of-stock without hiding",
+            "Margin optimization: boost higher-margin alternatives",
+            "Seasonal relevance: surface timely products automatically",
+            "Brand rules: handle exclusives, restrictions, preferences"
+          ],
+          "example": {
+            "rule": "For any search related to 'gifts' or 'presents', always prioritize the Holiday Bundle Collection",
+            "scope": "Global",
+            "status": "Active"
+          },
+          "contrast": "In traditional search, this requires boost rules, custom scoring functions, and constant tuning. In XTAL, you just tell it what you want.",
+          "engineeringRequired": "None"
+        }
+      ],
+      "footnote": "You don't need to understand any of this to use XTAL. But if you're the type who likes knowing how things work—now you know."
+    },
+
+    {
+      "id": "anti-features",
+      "type": "comparison-grid",
+      "eyebrow": "What You Don't Have To Do",
+      "headline": "Finally, a search tool that doesn't create more work",
+      "intro": "Most 'powerful' search tools are powerful the way a fighter jet is powerful—technically impressive, requires years of training, crashes if you push the wrong button.",
+      "items": [
+        {
+          "task": "Maintain synonym lists",
+          "traditional": "Manually map 'couch' → 'sofa', 'sneakers' → 'trainers', hundreds of variations",
+          "xtal": "XTAL already knows they're the same thing",
+          "icon": "book"
+        },
+        {
+          "task": "Configure boost rules",
+          "traditional": "JSON configs, weight multipliers, A/B test every change",
+          "xtal": "Tell it in English: 'prioritize new arrivals and in-stock items'",
+          "icon": "sliders"
+        },
+        {
+          "task": "Tune relevance algorithms",
+          "traditional": "Adjust BM25 parameters, field weights, proximity scoring",
+          "xtal": "It learns from your catalog structure automatically",
+          "icon": "settings"
+        },
+        {
+          "task": "Tag products for AI",
+          "traditional": "Enrich every SKU with custom attributes for ML models",
+          "xtal": "Works with your existing product data as-is",
+          "icon": "tag"
+        },
+        {
+          "task": "Build filter logic",
+          "traditional": "Faceted navigation setup, filter dependencies, UI configuration",
+          "xtal": "Constraints extracted from natural language—filters become optional",
+          "icon": "filter"
+        },
+        {
+          "task": "Handle edge cases",
+          "traditional": "Null results pages, redirect rules, 'did you mean' logic",
+          "xtal": "LLM understands intent even when queries are weird",
+          "icon": "alert-triangle"
+        }
+      ],
+      "summary": "Traditional search tools like Algolia, Searchspring, and Klevu are powerful—if you have an engineer to configure them. XTAL gives you the results without the PhD."
+    },
+
+    {
+      "id": "xtal-intelligence",
+      "type": "feature-detail",
+      "eyebrow": "XTAL Intelligence",
+      "headline": "AI reasoning you can actually see",
+      "description": "Most AI is a black box. XTAL shows its work. Every search result includes an explanation of what the system understood and why it ranked products the way it did.",
+      "capabilities": [
+        {
+          "title": "Query Parsing",
+          "detail": "See exactly how XTAL interpreted the search: identified constraints, inferred intent, extracted entities"
+        },
+        {
+          "title": "Match Explanation",
+          "detail": "Understand why each product ranked where it did—which signals matched, which rules applied"
+        },
+        {
+          "title": "Confidence Scoring",
+          "detail": "Know when XTAL is certain vs. making educated guesses, so you can tune edge cases"
+        },
+        {
+          "title": "Rule Tracing",
+          "detail": "Track which merchandising rules affected which results—full audit trail"
+        }
+      ],
+      "uiMockup": {
+        "query": "red dress beach wedding under 200",
+        "reasoning": "Identified: Color (Red tones) + Occasion (Beach/Outdoor) + Price (<$200)",
+        "ruleApplied": "Summer Collection Boost (Active)",
+        "confidence": "High"
+      }
+    },
+
+    {
+      "id": "integration",
+      "type": "tech-specs",
+      "eyebrow": "Integration",
+      "headline": "Works with what you have",
+      "description": "XTAL connects to your existing stack. No replatforming. No data migration project.",
+      "platforms": [
+        { "name": "Shopify", "status": "Native App" },
+        { "name": "Shopify Plus", "status": "Native App" },
+        { "name": "BigCommerce", "status": "API Integration" },
+        { "name": "WooCommerce", "status": "Plugin" },
+        { "name": "Magento", "status": "API Integration" },
+        { "name": "Custom/Headless", "status": "REST API + SDK" }
+      ],
+      "specs": [
+        { "label": "Average Response Time", "value": "<200ms" },
+        { "label": "Uptime SLA", "value": "99.9%" },
+        { "label": "Catalog Sync", "value": "Real-time webhooks or batch" },
+        { "label": "Setup Time", "value": "Same day for standard integrations" }
+      ],
+      "cta": {
+        "label": "View API Docs",
+        "href": "/docs"
+      }
+    },
+
+    {
+      "id": "cta",
+      "type": "page-cta",
+      "headline": "See the difference on your own catalog",
+      "description": "We'll connect to your store, run real searches side-by-side, and show you exactly what your customers are missing.",
+      "cta": {
+        "primary": { "label": "Request Demo", "href": "/demo" },
+        "secondary": { "label": "View Use Cases", "href": "/use-cases" }
+      }
+    }
+  ]
+}

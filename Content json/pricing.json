@@ -1,0 +1,279 @@
+{
+  "meta": {
+    "title": "Pricing | XTAL Search",
+    "description": "Simple usage-based pricing. $0.10 per search, up to 50,000 searches/month. No setup fees. No contracts. Pay for what you use.",
+    "ogImage": "/og-pricing.png"
+  },
+
+  "sections": [
+    {
+      "id": "hero",
+      "type": "page-hero",
+      "eyebrow": "Pricing",
+      "headline": "Pay for searches, not seats or SKUs",
+      "subhead": "Simple usage-based pricing that scales with your business. No setup fees. No annual contracts. No surprise overages."
+    },
+
+    {
+      "id": "pricing-table",
+      "type": "pricing-cards",
+      "plans": [
+        {
+          "name": "Growth",
+          "description": "For stores ready to upgrade from native search",
+          "price": {
+            "amount": "0.10",
+            "unit": "per search",
+            "cap": "Up to 50,000 searches/month"
+          },
+          "monthlyEstimate": {
+            "note": "Typical monthly cost",
+            "examples": [
+              { "searches": "5,000", "cost": "$500" },
+              { "searches": "15,000", "cost": "$1,500" },
+              { "searches": "30,000", "cost": "$3,000" },
+              { "searches": "50,000", "cost": "$5,000" }
+            ]
+          },
+          "features": [
+            { "text": "Full-Spectrum Search™", "included": true },
+            { "text": "LLM query understanding", "included": true },
+            { "text": "Plain-English merchandising rules", "included": true },
+            { "text": "XTAL Intelligence (reasoning visibility)", "included": true },
+            { "text": "Real-time catalog sync", "included": true },
+            { "text": "All platform integrations", "included": true },
+            { "text": "Standard support (email + docs)", "included": true },
+            { "text": "Analytics dashboard", "included": true }
+          ],
+          "cta": {
+            "label": "Request Demo",
+            "href": "/demo",
+            "note": "See XTAL in action with your catalog."
+          },
+          "highlight": true
+        },
+        {
+          "name": "Enterprise",
+          "description": "For high-volume stores needing custom solutions",
+          "price": {
+            "amount": "Custom",
+            "unit": "volume pricing",
+            "cap": "50,000+ searches/month"
+          },
+          "features": [
+            { "text": "Everything in Growth, plus:", "included": true, "isHeader": true },
+            { "text": "Volume pricing discounts", "included": true },
+            { "text": "Dedicated success manager", "included": true },
+            { "text": "Custom SLA (up to 99.99%)", "included": true },
+            { "text": "Priority support (Slack + phone)", "included": true },
+            { "text": "Advanced analytics + exports", "included": true },
+            { "text": "Custom integrations", "included": true },
+            { "text": "Multi-store / multi-region", "included": true }
+          ],
+          "cta": {
+            "label": "Contact Sales",
+            "href": "/demo?plan=enterprise",
+            "note": "Let's talk about your volume"
+          },
+          "highlight": false
+        }
+      ]
+    },
+
+    {
+      "id": "calculator",
+      "type": "cost-calculator",
+      "headline": "Estimate your monthly cost",
+      "description": "Enter your average monthly search volume to see what XTAL would cost.",
+      "input": {
+        "label": "Monthly searches",
+        "placeholder": "e.g., 15000",
+        "helper": "Check your analytics for 'site search' sessions"
+      },
+      "output": {
+        "format": "${amount}/month",
+        "formula": "searches × $0.10",
+        "maxNote": "Over 50,000 searches? Contact us for volume pricing."
+      },
+      "benchmarks": [
+        { "label": "Small store (1K-5K searches)", "range": "$100–$500/mo" },
+        { "label": "Growing brand (5K-20K searches)", "range": "$500–$2,000/mo" },
+        { "label": "Established retailer (20K-50K searches)", "range": "$2,000–$5,000/mo" }
+      ]
+    },
+
+    {
+      "id": "value-context",
+      "type": "value-comparison",
+      "eyebrow": "Is It Worth It?",
+      "headline": "The math on search that actually works",
+      "scenario": {
+        "headline": "A typical XTAL customer",
+        "assumptions": [
+          { "label": "Monthly searches", "value": "15,000" },
+          { "label": "XTAL cost", "value": "$1,500/mo" },
+          { "label": "Search conversion rate improvement", "value": "15% → 22%" },
+          { "label": "Average order value", "value": "$85" }
+        ],
+        "calculation": {
+          "before": {
+            "label": "Before XTAL",
+            "searchUsers": "15,000",
+            "conversionRate": "15%",
+            "orders": "2,250",
+            "revenue": "$191,250/mo"
+          },
+          "after": {
+            "label": "With XTAL",
+            "searchUsers": "15,000",
+            "conversionRate": "22%",
+            "orders": "3,300",
+            "revenue": "$280,500/mo"
+          },
+          "delta": {
+            "additionalRevenue": "$89,250/mo",
+            "xtalCost": "$1,500/mo",
+            "roi": "59x"
+          }
+        },
+        "footnote": "Conservative estimate. Search users convert 2-3x higher than browsers—when search works."
+      }
+    },
+
+    {
+      "id": "comparison",
+      "type": "competitor-pricing",
+      "eyebrow": "How We Compare",
+      "headline": "Transparent pricing vs. the usual runaround",
+      "competitors": [
+        {
+          "name": "Native Platform Search",
+          "price": "Free",
+          "catches": ["Limited functionality", "No semantic understanding", "Poor results = lost sales"],
+          "verdict": "You get what you pay for"
+        },
+        {
+          "name": "Algolia",
+          "price": "$1+ per 1,000 searches",
+          "catches": ["Plus record storage fees", "Implementation costs extra", "Requires engineering to configure"],
+          "verdict": "Cheaper per search, but total cost is higher"
+        },
+        {
+          "name": "Searchspring",
+          "price": "$500–$2,500+/mo",
+          "catches": ["Annual contracts", "Tiered by features, not usage", "Setup fees common"],
+          "verdict": "Similar total cost, less AI-native"
+        },
+        {
+          "name": "Klevu",
+          "price": "$449–$1,499+/mo",
+          "catches": ["Per product limits", "AI features in higher tiers only", "Onboarding fees"],
+          "verdict": "Feature-gated, complex pricing"
+        }
+      ],
+      "xtalAdvantage": "One price. All features. No setup fees. No contracts. Pay for what you use."
+    },
+
+    {
+      "id": "faq",
+      "type": "faq-accordion",
+      "eyebrow": "Common Questions",
+      "headline": "Pricing FAQs",
+      "questions": [
+        {
+          "q": "What counts as a search?",
+          "a": "A search is any query submitted through the XTAL search endpoint. Autocomplete suggestions, search-as-you-type keystrokes, and analytics pings don't count—only completed search requests."
+        },
+        {
+          "q": "How do I get started?",
+          "a": "Request a demo and we'll connect to your real catalog so you can see real results with your own products and searches."
+        },
+        {
+          "q": "What happens if I go over 50,000 searches?",
+          "a": "We'll reach out to discuss volume pricing before you hit the cap. No surprise cutoffs, no automatic overage charges. We'll find a rate that works for your volume."
+        },
+        {
+          "q": "Are there any other fees?",
+          "a": "No. No setup fees, no per-SKU charges, no implementation costs, no annual commitments. The per-search price includes everything: all features, all integrations, standard support."
+        },
+        {
+          "q": "How does billing work?",
+          "a": "Monthly billing based on actual usage. You'll get an invoice at the end of each month for searches used. We accept all major credit cards and can do invoicing/ACH for Enterprise plans."
+        },
+        {
+          "q": "Can I estimate my search volume?",
+          "a": "Check your analytics for 'site search' sessions or queries. In Google Analytics, it's under Behavior > Site Search. In Shopify, look at your Search Terms report. If you're not sure, we can help estimate during the demo."
+        },
+        {
+          "q": "What if my volume varies seasonally?",
+          "a": "Usage-based pricing handles this automatically. You pay more in peak months, less in slow months. No need to commit to a tier that covers your Black Friday volume year-round."
+        },
+        {
+          "q": "Do you offer discounts for startups or non-profits?",
+          "a": "Yes. Reach out and we'll talk. We're not going to let budget be the reason you're stuck with bad search."
+        }
+      ]
+    },
+
+    {
+      "id": "cta",
+      "type": "page-cta",
+      "headline": "See the value before you pay anything",
+      "description": "Live demo with your real catalog. Real searches. If the ROI isn't obvious, we'll tell you.",
+      "cta": {
+        "primary": { "label": "Request Demo", "href": "/demo" },
+        "secondary": { "label": "Talk to Sales", "href": "/demo?plan=enterprise" }
+      },
+      "trust": {
+        "items": [
+          "No credit card required",
+          "Cancel anytime",
+          "No setup fees"
+        ]
+      }
+    }
+  ],
+
+  "seo": {
+    "faqSchema": [
+      {
+        "question": "How much does XTAL Search cost?",
+        "answer": "XTAL Search costs $0.10 per search, up to 50,000 searches per month. A store with 15,000 monthly searches would pay $1,500/month. Volume pricing is available for stores exceeding 50,000 searches."
+      },
+      {
+        "question": "How do I get started with XTAL Search?",
+        "answer": "Request a demo and we'll connect XTAL to your real product catalog. You'll see how it handles your actual search queries and product data before making any commitment."
+      },
+      {
+        "question": "Are there setup fees for XTAL Search?",
+        "answer": "No. XTAL has no setup fees, no implementation costs, and no annual contracts. The per-search price includes all features, all platform integrations, and standard support."
+      },
+      {
+        "question": "How does XTAL Search pricing compare to Algolia?",
+        "answer": "Algolia charges around $1 per 1,000 searches plus record storage fees and typically requires engineering resources to configure. XTAL's $0.10/search includes full LLM-powered search with no configuration required, often resulting in lower total cost of ownership."
+      }
+    ]
+  }
+}
+```
+
+---
+
+**Add this to the Claude Code prompt:**
+```
+## Pricing Page (/pricing)
+
+Content source: pricing.json
+
+Key implementation notes:
+- Interactive cost calculator: input field for monthly searches, real-time calculation display
+- Pricing cards: Growth (highlighted) and Enterprise side-by-side
+- ROI calculator section with before/after scenario
+- Competitor comparison table (don't use their logos—just names)
+- FAQ accordion with schema markup for SEO
+- Trust badges at bottom CTA (no credit card, cancel anytime, no setup fees)
+
+Design notes:
+- Growth plan card should have visual emphasis (border, subtle background, "Most Popular" badge)
+- Calculator should feel interactive but simple—not a complex configurator
+- Keep the ROI math visible but not overwhelming; it's supporting evidence, not the headline

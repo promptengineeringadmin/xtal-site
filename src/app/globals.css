@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply antialiased bg-[#FCFDFF] text-slate-900;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-[0_8px_32px_0_rgba(27,45,91,0.05)];
+  }
+
+  .brand-gradient {
+    background: radial-gradient(circle at top right, #1B2D5B 0%, #0F1A35 100%);
+  }
+
+  /* Custom soft shadow for professionalism */
+  .shadow-xtal {
+    box-shadow: 0 10px 15px -3px rgba(27, 45, 91, 0.1), 0 4px 6px -4px rgba(27, 45, 91, 0.1);
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}

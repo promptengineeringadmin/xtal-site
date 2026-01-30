@@ -1,0 +1,7 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- The 4 rounded rectangular bars forming an X -->
+  <rect x="42" y="10" width="16" height="35" rx="8" fill="#1B2D5B" transform="rotate(45 50 50)" />
+  <rect x="42" y="55" width="16" height="35" rx="8" fill="#1B2D5B" transform="rotate(45 50 50)" />
+  <rect x="10" y="42" width="35" height="16" rx="8" fill="#1B2D5B" transform="rotate(45 50 50)" />
+  <rect x="55" y="42" width="35" height="16" rx="8" fill="#1B2D5B" transform="rotate(45 50 50)" />
+</svg>

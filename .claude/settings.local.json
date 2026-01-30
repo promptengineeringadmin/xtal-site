@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(npx vercel-deploy-source-downloader:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
