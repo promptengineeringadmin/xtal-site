@@ -172,38 +172,6 @@
     },
 
     {
-      "id": "xtal-intelligence",
-      "type": "feature-detail",
-      "eyebrow": "XTAL Intelligence",
-      "headline": "AI reasoning you can actually see",
-      "description": "Most AI is a black box. XTAL shows its work. Every search result includes an explanation of what the system understood and why it ranked products the way it did.",
-      "capabilities": [
-        {
-          "title": "Query Parsing",
-          "detail": "See exactly how XTAL interpreted the search: identified constraints, inferred intent, extracted entities"
-        },
-        {
-          "title": "Match Explanation",
-          "detail": "Understand why each product ranked where it did—which signals matched, which rules applied"
-        },
-        {
-          "title": "Confidence Scoring",
-          "detail": "Know when XTAL is certain vs. making educated guesses, so you can tune edge cases"
-        },
-        {
-          "title": "Rule Tracing",
-          "detail": "Track which merchandising rules affected which results—full audit trail"
-        }
-      ],
-      "uiMockup": {
-        "query": "red dress beach wedding under 200",
-        "reasoning": "Identified: Color (Red tones) + Occasion (Beach/Outdoor) + Price (<$200)",
-        "ruleApplied": "Summer Collection Boost (Active)",
-        "confidence": "High"
-      }
-    },
-
-    {
       "id": "cta",
       "type": "page-cta",
       "headline": "See the difference on your own catalog",
