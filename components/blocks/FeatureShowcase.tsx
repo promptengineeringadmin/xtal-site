@@ -116,8 +116,25 @@ export default function FeatureShowcase({
                   )}
 
                   {item.contrast && (
-                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
-                      <p className="text-sm text-amber-800">{item.contrast}</p>
+                    <div className="grid md:grid-cols-2 gap-4 mb-6">
+                      <div className="bg-red-50/50 border border-red-100 rounded-xl p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-4 h-4 rounded-full bg-[#f87171] flex items-center justify-center">
+                            <span className="text-[8px] text-white font-bold">✕</span>
+                          </div>
+                          <span className="text-xs font-bold text-red-400 uppercase tracking-wider">Traditional</span>
+                        </div>
+                        <p className="text-slate-600 text-sm">Boost rules, custom scoring functions, and constant tuning</p>
+                      </div>
+                      <div className="bg-cyan-50/50 border border-cyan-100 rounded-xl p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-4 h-4 rounded-full bg-[#4ade80] flex items-center justify-center">
+                            <span className="text-[8px] text-[#004225] font-bold">✓</span>
+                          </div>
+                          <span className="text-xs font-bold text-cyan-600 uppercase tracking-wider">XTAL</span>
+                        </div>
+                        <p className="text-slate-700 text-sm font-medium">Just tell it what you want</p>
+                      </div>
                     </div>
                   )}
 
