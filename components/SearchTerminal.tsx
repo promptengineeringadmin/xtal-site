@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Search, AlertCircle, Sparkles, XCircle, CheckCircle2 } from "lucide-react";
-import Logo from "./Logo";
+import { Search, AlertCircle, Sparkles } from "lucide-react";
 
 const EXAMPLES = [
   {
@@ -103,10 +102,12 @@ export default function SearchTerminal() {
         <div className="grid md:grid-cols-2 min-h-[500px]">
 
           {/* LEFT: Legacy */}
-          <div className={`p-8 md:p-14 border-b md:border-b-0 md:border-r border-slate-100 bg-slate-50/30 flex flex-col justify-center transition-opacity duration-300 ${isAnimating ? "opacity-50" : "opacity-100"}`}>
-            <div className="flex items-center gap-3 mb-10 opacity-60">
-              <XCircle size={20} className="text-red-500" />
-              <span className="text-xs font-bold uppercase tracking-widest text-slate-500">Standard Search</span>
+          <div className={`relative p-8 md:p-14 pt-16 md:pt-20 border-b md:border-b-0 md:border-r border-slate-100 bg-slate-50/30 flex flex-col justify-center transition-opacity duration-300 ${isAnimating ? "opacity-50" : "opacity-100"}`}>
+            <div className="absolute top-8 md:top-10 left-8 md:left-14 flex items-center gap-2">
+              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-[#f87171]">
+                <span className="text-[10px] text-white font-bold">✕</span>
+              </div>
+              <span className="text-slate-500 font-bold tracking-[0.2em] text-lg uppercase">Standard Search</span>
             </div>
 
             <div className="border-2 border-dashed border-red-100 bg-red-50/50 rounded-3xl p-10 text-center">
@@ -120,17 +121,20 @@ export default function SearchTerminal() {
           </div>
 
           {/* RIGHT: XTAL */}
-          <div className="relative bg-xtal-navy overflow-hidden flex flex-col justify-center p-8 md:p-14">
+          <div className="relative bg-xtal-navy overflow-hidden flex flex-col justify-center p-8 md:p-14 pt-16 md:pt-20">
             <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
-            <div className={`relative z-10 transition-all duration-500 ${isAnimating ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"}`}>
-              <div className="flex items-center gap-3 mb-10 text-blue-300">
-                <CheckCircle2 size={20} className="text-blue-400" />
-                <Logo className="h-5 [&_svg]:text-white [&_span]:text-white" />
+            <div className="absolute top-8 md:top-10 left-8 md:left-14 flex items-center gap-2 z-10">
+              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-[#4ade80]">
+                <span className="text-[10px] text-[#004225] font-bold">✓</span>
               </div>
+              <span className="text-white font-bold tracking-[0.2em] text-lg">XTAL</span>
+            </div>
 
-              {/* INCREASED FONT SIZE HERE: text-lg */}
-              <div className="mb-8 bg-blue-900/30 border border-blue-500/30 rounded-2xl p-6 text-lg text-blue-100 leading-relaxed backdrop-blur-sm">
+            <div className={`relative z-10 transition-all duration-500 ${isAnimating ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"}`}>
+
+              {/* AI Reasoning Box */}
+              <div className="bg-blue-900/30 border border-blue-500/30 rounded-2xl p-6 text-lg text-blue-100 leading-relaxed backdrop-blur-sm">
                 <div className="flex items-center gap-2 mb-3 text-blue-400 text-xs font-bold uppercase">
                   <Sparkles size={14} />
                   AI Reasoning
@@ -138,17 +142,36 @@ export default function SearchTerminal() {
                 {active.xtal.analysis}
               </div>
 
-              <div className="bg-white text-slate-900 rounded-2xl p-8 shadow-2xl shadow-black/20">
-                <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
-                  {/* INCREASED FONT SIZE HERE: text-xl */}
+              {/* Data Flow: Line → Badge → Line */}
+              <div className="flex flex-col items-center">
+                {/* Top line */}
+                <div className="w-[2px] h-4 bg-gradient-to-b from-blue-500/30 to-cyan-400/60" />
+
+                {/* Badge */}
+                <div className="bg-slate-900/80 backdrop-blur-md border border-cyan-400/30 px-5 py-1.5 rounded-full flex items-center gap-2 shadow-[0_0_15px_rgba(34,211,238,0.2)]">
+                  <div className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                  </div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-xl font-black text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]">3</span>
+                    <span className="text-[10px] font-bold text-cyan-400/80 uppercase tracking-[0.2em]">Matches</span>
+                  </div>
+                </div>
+
+                {/* Bottom line */}
+                <div className="w-[2px] h-4 bg-gradient-to-b from-cyan-400/60 to-white/40" />
+              </div>
+
+              {/* Results Card */}
+              <div className="relative bg-white text-slate-900 rounded-2xl p-8 shadow-2xl shadow-black/20">
+                <div className="mb-6 border-b border-slate-100 pb-4">
                   <h3 className="font-bold text-xtal-navy text-lg md:text-xl">{active.xtal.headline}</h3>
-                  <span className="text-xs bg-green-100 text-green-700 font-bold px-3 py-1 rounded-full">3 Matches</span>
                 </div>
                 <div className="space-y-4">
                   {active.xtal.items.map((item, i) => (
                     <div key={i} className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 shrink-0" />
-                      {/* INCREASED FONT SIZE HERE: text-lg */}
                       <div className="text-lg font-medium text-slate-600">
                         {item}
                       </div>
