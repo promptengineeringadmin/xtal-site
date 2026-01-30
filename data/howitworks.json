@@ -204,32 +204,6 @@
     },
 
     {
-      "id": "integration",
-      "type": "tech-specs",
-      "eyebrow": "Integration",
-      "headline": "Works with what you have",
-      "description": "XTAL connects to your existing stack. No replatforming. No data migration project.",
-      "platforms": [
-        { "name": "Shopify", "status": "Native App" },
-        { "name": "Shopify Plus", "status": "Native App" },
-        { "name": "BigCommerce", "status": "API Integration" },
-        { "name": "WooCommerce", "status": "Plugin" },
-        { "name": "Magento", "status": "API Integration" },
-        { "name": "Custom/Headless", "status": "REST API + SDK" }
-      ],
-      "specs": [
-        { "label": "Average Response Time", "value": "Fast" },
-        { "label": "Reliability", "value": "High availability" },
-        { "label": "Catalog Sync", "value": "Real-time webhooks or batch" },
-        { "label": "Setup Time", "value": "Same day for standard integrations" }
-      ],
-      "cta": {
-        "label": "Request Demo",
-        "href": "/demo"
-      }
-    },
-
-    {
       "id": "cta",
       "type": "page-cta",
       "headline": "See the difference on your own catalog",
