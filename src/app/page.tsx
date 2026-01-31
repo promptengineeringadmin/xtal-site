@@ -158,7 +158,7 @@ export default function Home() {
         <div className="flex justify-center mb-6">
           <Logo className="h-6 opacity-50 grayscale" />
         </div>
-        <p>© Prompt Engineering, Inc 2025. All Rights Reserved.</p>
+        <p>© Prompt Engineering, Inc 2026. All Rights Reserved.</p>
       </footer>
     </main>
   );
