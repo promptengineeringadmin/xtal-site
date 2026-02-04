@@ -1,4 +1,4 @@
-import { Wine, Car, Scissors, Mountain, Pill, Wrench, ArrowRight, LucideIcon } from "lucide-react";
+import { Wine, Car, Scissors, Mountain, Pill, Wrench, ArrowRight, LucideIcon, Package, Store, Building } from "lucide-react";
 
 // Map string icons to Lucide components
 const ICONS: Record<string, LucideIcon> = {
@@ -7,16 +7,26 @@ const ICONS: Record<string, LucideIcon> = {
   scissors: Scissors,
   mountain: Mountain,
   pill: Pill,
-  wrench: Wrench
+  wrench: Wrench,
+  package: Package,
+  store: Store,
+  building: Building
 };
 
 interface UseCase {
   title: string;
+  subtitle?: string;
   icon: string;
-  challenge: string;
-  solution: string;
-  exampleQueries: string[];
+  // Industry format
+  challenge?: string;
+  solution?: string;
+  exampleQueries?: string[];
   benefits?: string[];
+  // Business type format
+  profile?: string;
+  painPoints?: string[];
+  xtalFit?: string;
+  platforms?: string[];
 }
 
 interface UseCaseGridProps {
@@ -55,21 +65,60 @@ export default function UseCaseGrid({ eyebrow, headline, cases }: UseCaseGridPro
                   <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner">
                     <Icon size={24} strokeWidth={1.5} />
                   </div>
-                  <h3 className="text-xl font-bold text-xtal-navy">{item.title}</h3>
+                  <div>
+                    <h3 className="text-xl font-bold text-xtal-navy">{item.title}</h3>
+                    {item.subtitle && (
+                      <p className="text-sm text-slate-500">{item.subtitle}</p>
+                    )}
+                  </div>
                 </div>
 
-                {/* Challenge/Solution */}
-                <div className="mb-8 space-y-4">
-                  <p className="text-sm text-slate-500 leading-relaxed">
-                    <span className="font-bold text-slate-900 block mb-1">Challenge:</span>
-                    {item.challenge}
-                  </p>
-                  <div className="w-full h-px bg-slate-100" />
-                  <p className="text-sm text-slate-500 leading-relaxed">
-                    <span className="font-bold text-blue-600 block mb-1">XTAL Solution:</span>
-                    {item.solution}
-                  </p>
-                </div>
+                {/* Challenge/Solution - Industry format */}
+                {item.challenge && item.solution && (
+                  <div className="mb-8 space-y-4">
+                    <p className="text-sm text-slate-500 leading-relaxed">
+                      <span className="font-bold text-slate-900 block mb-1">Challenge:</span>
+                      {item.challenge}
+                    </p>
+                    <div className="w-full h-px bg-slate-100" />
+                    <p className="text-sm text-slate-500 leading-relaxed">
+                      <span className="font-bold text-blue-600 block mb-1">XTAL Solution:</span>
+                      {item.solution}
+                    </p>
+                  </div>
+                )}
+
+                {/* Profile/Pain Points/Fit - Business type format */}
+                {item.profile && (
+                  <div className="mb-8 space-y-4">
+                    <p className="text-sm text-slate-500 leading-relaxed">{item.profile}</p>
+                    {item.painPoints && (
+                      <>
+                        <div className="w-full h-px bg-slate-100" />
+                        <div>
+                          <span className="font-bold text-slate-900 block mb-2 text-sm">Pain Points:</span>
+                          <ul className="space-y-1.5">
+                            {item.painPoints.slice(0, 3).map((point, k) => (
+                              <li key={k} className="text-sm text-slate-500 leading-relaxed flex items-start gap-2">
+                                <span className="text-red-400 mt-1">•</span>
+                                {point}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </>
+                    )}
+                    {item.xtalFit && (
+                      <>
+                        <div className="w-full h-px bg-slate-100" />
+                        <p className="text-sm text-slate-500 leading-relaxed">
+                          <span className="font-bold text-blue-600 block mb-1">XTAL Fit:</span>
+                          {item.xtalFit}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
 
                 {/* "Code" Queries */}
                 {item.exampleQueries && (
@@ -93,6 +142,19 @@ export default function UseCaseGrid({ eyebrow, headline, cases }: UseCaseGridPro
                         <ArrowRight size={14} /> {b}
                       </div>
                     ))}
+                  </div>
+                )}
+
+                {/* Platforms Footer - Business type */}
+                {item.platforms && (
+                  <div className="pt-4 border-t border-slate-100">
+                    <div className="flex flex-wrap gap-2">
+                      {item.platforms.map((platform, k) => (
+                        <span key={k} className="text-xs font-medium text-slate-600 bg-slate-100 px-2.5 py-1 rounded-full">
+                          {platform}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
