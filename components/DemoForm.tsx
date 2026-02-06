@@ -11,6 +11,7 @@ interface DemoFormProps {
 export default function DemoForm({ onSuccess, source = "website", preselectedPlan }: DemoFormProps) {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
   const [errorMessage, setErrorMessage] = useState<string>("")
+  const [bookingUrl, setBookingUrl] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -22,6 +23,7 @@ export default function DemoForm({ onSuccess, source = "website", preselectedPla
       ...Object.fromEntries(formData),
       source,
       plan: preselectedPlan,
+      page: window.location.pathname,
     }
 
     try {
@@ -35,6 +37,7 @@ export default function DemoForm({ onSuccess, source = "website", preselectedPla
 
       if (res.ok) {
         setStatus("success")
+        setBookingUrl(result.bookingUrl || null)
         onSuccess?.()
 
         // Redirect to booking after short delay
@@ -62,8 +65,14 @@ export default function DemoForm({ onSuccess, source = "website", preselectedPla
           </svg>
         </div>
         <h3 className="text-xl font-bold text-xtal-navy mb-2">Request Received!</h3>
-        <p className="text-slate-500 mb-4">Redirecting you to schedule your demo...</p>
-        <div className="animate-pulse text-sm text-blue-600">Loading calendar...</div>
+        {bookingUrl ? (
+          <>
+            <p className="text-slate-500 mb-4">Redirecting you to schedule your demo...</p>
+            <div className="animate-pulse text-sm text-blue-600">Loading calendar...</div>
+          </>
+        ) : (
+          <p className="text-slate-500">We&apos;ll be in touch shortly to schedule your demo.</p>
+        )}
       </div>
     )
   }

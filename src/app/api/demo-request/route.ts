@@ -34,6 +34,7 @@ export async function POST(request: Request) {
       pain: normalizedBody.pain ? sanitizeString(normalizedBody.pain) : '',
       source: sanitizeString(normalizedBody.source || 'website'),
       plan: normalizedBody.plan ? sanitizeString(normalizedBody.plan) : '',
+      page: normalizedBody.page ? sanitizeString(normalizedBody.page) : '',
       timestamp: new Date().toISOString(),
     }
 
@@ -45,6 +46,7 @@ export async function POST(request: Request) {
         company: sanitizedData.company,
         pain: sanitizedData.pain,
         source: `${sanitizedData.source}${sanitizedData.plan ? ` (${sanitizedData.plan})` : ''}`,
+        page: sanitizedData.page,
         timestamp: sanitizedData.timestamp,
       })
     } catch (sheetError) {
@@ -71,6 +73,7 @@ export async function POST(request: Request) {
             <p><strong>Company:</strong> ${sanitizedData.company}</p>
             <p><strong>Source:</strong> ${sanitizedData.source}</p>
             ${sanitizedData.plan ? `<p><strong>Plan Interest:</strong> ${sanitizedData.plan}</p>` : ''}
+            ${sanitizedData.page ? `<p><strong>Page:</strong> ${sanitizedData.page}</p>` : ''}
             <p><strong>What's broken:</strong></p>
             <p>${sanitizedData.pain || 'Not provided'}</p>
             <hr />

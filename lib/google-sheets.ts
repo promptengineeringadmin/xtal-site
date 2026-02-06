@@ -1,50 +1,28 @@
-import { google } from 'googleapis'
-
 interface LeadData {
   name: string
   email: string
   company: string
   pain: string
   source: string
+  page: string
   timestamp: string
 }
 
+const SHEETS_WEBHOOK_URL = process.env.GOOGLE_SHEETS_WEBHOOK_URL
+
 export async function appendLeadToSheet(data: LeadData): Promise<void> {
-  // Return early if credentials not configured (for local dev)
-  if (
-    !process.env.GOOGLE_SHEETS_PRIVATE_KEY ||
-    !process.env.GOOGLE_SHEETS_CLIENT_EMAIL ||
-    !process.env.GOOGLE_SHEETS_SPREADSHEET_ID
-  ) {
-    console.warn('Google Sheets credentials not configured, skipping lead storage')
+  if (!SHEETS_WEBHOOK_URL) {
+    console.warn('Google Sheets webhook URL not configured, skipping lead storage')
     return
   }
 
-  const auth = new google.auth.GoogleAuth({
-    credentials: {
-      client_email: process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
-      private_key: process.env.GOOGLE_SHEETS_PRIVATE_KEY.replace(/\\n/g, '\n'),
-    },
-    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+  const res = await fetch(SHEETS_WEBHOOK_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
   })
 
-  const sheets = google.sheets({ version: 'v4', auth })
-
-  const row = [
-    data.timestamp,
-    data.name,
-    data.email,
-    data.company,
-    data.pain || '',
-    data.source || 'website',
-  ]
-
-  await sheets.spreadsheets.values.append({
-    spreadsheetId: process.env.GOOGLE_SHEETS_SPREADSHEET_ID,
-    range: 'Sheet1!A:F',
-    valueInputOption: 'USER_ENTERED',
-    requestBody: {
-      values: [row],
-    },
-  })
+  if (!res.ok) {
+    throw new Error(`Google Sheets webhook returned ${res.status}`)
+  }
 }
