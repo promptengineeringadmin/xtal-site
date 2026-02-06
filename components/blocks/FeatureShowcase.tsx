@@ -116,8 +116,11 @@ export default function FeatureShowcase({
                   )}
 
                   {item.contrast && (
-                    <div className="border-l-2 border-blue-500 bg-blue-50/50 pl-4 py-3 rounded-r-lg mb-6">
-                      <p className="text-slate-600 text-sm">{item.contrast}</p>
+                    <div className="flex gap-3 mb-6">
+                      <div className="w-1 bg-blue-500 shrink-0" />
+                      <div className="bg-blue-50 px-4 py-3">
+                        <p className="text-slate-600 text-sm">{item.contrast}</p>
+                      </div>
                     </div>
                   )}
 

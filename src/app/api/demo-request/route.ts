@@ -36,6 +36,8 @@ export async function POST(request: Request) {
       source: sanitizeString(normalizedBody.source || 'website'),
       plan: normalizedBody.plan ? sanitizeString(normalizedBody.plan) : '',
       page: normalizedBody.page ? sanitizeString(normalizedBody.page) : '',
+      referrer: normalizedBody.referrer ? sanitizeString(normalizedBody.referrer) : '',
+      utm: normalizedBody.utm ? sanitizeString(normalizedBody.utm) : '',
       timestamp: new Date().toISOString(),
     }
 
@@ -48,6 +50,8 @@ export async function POST(request: Request) {
         pain: sanitizedData.pain,
         source: `${sanitizedData.source}${sanitizedData.plan ? ` (${sanitizedData.plan})` : ''}`,
         page: sanitizedData.page,
+        referrer: sanitizedData.referrer,
+        utm: sanitizedData.utm,
         timestamp: sanitizedData.timestamp,
       })
     } catch (sheetError) {

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { trackEvent } from "@/lib/gtag"
 
 interface DemoFormProps {
   onSuccess?: () => void
@@ -19,11 +20,15 @@ export default function DemoForm({ onSuccess, source = "website", preselectedPla
     setErrorMessage("")
 
     const formData = new FormData(e.currentTarget)
+    const params = new URLSearchParams(window.location.search)
     const data = {
       ...Object.fromEntries(formData),
       source,
       plan: preselectedPlan,
       page: window.location.pathname,
+      referrer: document.referrer || '',
+      utm: [params.get('utm_source'), params.get('utm_medium'), params.get('utm_campaign')]
+        .filter(Boolean).join(' / ') || '',
     }
 
     try {
@@ -38,6 +43,10 @@ export default function DemoForm({ onSuccess, source = "website", preselectedPla
       if (res.ok) {
         setStatus("success")
         setBookingUrl(result.bookingUrl || null)
+        trackEvent('demo_form_submit', {
+          source,
+          ...(preselectedPlan ? { plan: preselectedPlan } : {}),
+        })
         onSuccess?.()
 
         // Redirect to booking after short delay

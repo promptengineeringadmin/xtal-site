@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import SearchTerminal from "@/components/SearchTerminal";
 import IntegrationStrip from "@/components/IntegrationStrip";
 import DemoForm from "@/components/DemoForm";
+import FooterSubscribe from "@/components/FooterSubscribe";
 
 export default function Home() {
   return (
@@ -157,6 +158,10 @@ export default function Home() {
       <footer className="py-12 px-6 border-t border-slate-200 text-center text-slate-500 text-sm">
         <div className="flex justify-center mb-6">
           <Logo className="h-6 opacity-50 grayscale" />
+        </div>
+        <p className="mb-6 text-slate-400">Stay in the loop on AI-powered e-commerce search.</p>
+        <div className="mb-8">
+          <FooterSubscribe />
         </div>
         <p>© Prompt Engineering, Inc 2026. All Rights Reserved.</p>
       </footer>

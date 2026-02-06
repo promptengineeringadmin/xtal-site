@@ -1,7 +1,7 @@
 interface Stat {
-  value: string;
   label: string;
-  subtext?: string;
+  metric: string;
+  context: string;
 }
 
 interface StatsBarProps {
@@ -20,16 +20,23 @@ export default function StatsBar({ headline, stats, kicker }: StatsBarProps) {
           </h2>
         )}
 
-        <div className="grid md:grid-cols-3 gap-8 mb-12">
+        <div className="grid md:grid-cols-3 gap-6 md:gap-8 mb-12">
           {stats.map((stat, i) => (
-            <div key={i} className="text-center">
-              <div className="text-5xl md:text-6xl font-bold text-blue-400 mb-2">
-                {stat.value}
-              </div>
-              <p className="text-lg text-white font-medium mb-1">{stat.label}</p>
-              {stat.subtext && (
-                <p className="text-sm text-slate-400">{stat.subtext}</p>
-              )}
+            <div key={i} className="relative border border-slate-700 rounded-lg pt-8 pb-6 px-6 text-center">
+              {/* Label breaking the top border */}
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-slate-900 px-3 text-xs uppercase tracking-widest text-slate-500">
+                {stat.label}
+              </span>
+
+              {/* Metric - hero number */}
+              <p className="text-5xl md:text-6xl font-black text-blue-400 mb-2">
+                {stat.metric}
+              </p>
+
+              {/* Context - single line explanation */}
+              <p className="text-sm text-slate-400">
+                {stat.context}
+              </p>
             </div>
           ))}
         </div>

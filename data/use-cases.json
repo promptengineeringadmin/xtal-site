@@ -21,22 +21,22 @@
     {
       "id": "pain-points",
       "type": "stats-bar",
-      "headline": "Search is where sales go to die",
+      "headline": "Bad search is where sales go to die",
       "stats": [
         {
-          "value": "Intent",
-          "label": "High-intent buyers use search first",
-          "subtext": "They know what they want"
+          "label": "Intent",
+          "metric": "15%",
+          "context": "of visitors drive 45% of revenue"
         },
         {
-          "value": "Bounce",
-          "label": "Failed searches drive customers away",
-          "subtext": "Straight to Amazon"
+          "label": "Bounce",
+          "metric": "80%",
+          "context": "leave after failed searches"
         },
         {
-          "value": "Convert",
-          "label": "Good search turns browsers into buyers",
-          "subtext": "When search actually works"
+          "label": "Convert",
+          "metric": "4x",
+          "context": "higher conversion with AI search"
         }
       ],
       "kicker": "You're not losing to competitors. You're losing to your own search bar."

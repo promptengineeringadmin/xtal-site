@@ -5,6 +5,8 @@ interface LeadData {
   pain: string
   source: string
   page: string
+  referrer: string
+  utm: string
   timestamp: string
 }
 

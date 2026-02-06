@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useCallback, ReactNode } from "react"
+import { trackEvent } from "@/lib/gtag"
 
 interface DemoModalContextType {
   isOpen: boolean
@@ -18,6 +19,7 @@ export function DemoModalProvider({ children }: { children: ReactNode }) {
   const open = useCallback((src = "modal") => {
     setSource(src)
     setIsOpen(true)
+    trackEvent('demo_modal_open', { source: src })
   }, [])
 
   const close = useCallback(() => {
