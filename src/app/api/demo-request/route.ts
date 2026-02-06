@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { createHash } from 'crypto'
 import { validateDemoRequest, sanitizeString } from '@/lib/validation'
 import { appendLeadToSheet } from '@/lib/google-sheets'
 
@@ -51,6 +52,37 @@ export async function POST(request: Request) {
       })
     } catch (sheetError) {
       console.error('Failed to store lead in Google Sheets:', sheetError)
+    }
+
+    // Add to Mailchimp audience (non-blocking)
+    if (process.env.MAILCHIMP_API_KEY && process.env.MAILCHIMP_AUDIENCE_ID) {
+      try {
+        const dc = process.env.MAILCHIMP_API_KEY.split('-').pop()
+        const subscriberHash = createHash('md5').update(sanitizedData.email).digest('hex')
+        const [firstName, ...lastParts] = sanitizedData.name.split(' ')
+
+        await fetch(
+          `https://${dc}.api.mailchimp.com/3.0/lists/${process.env.MAILCHIMP_AUDIENCE_ID}/members/${subscriberHash}`,
+          {
+            method: 'PUT',
+            headers: {
+              Authorization: `apikey ${process.env.MAILCHIMP_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email_address: sanitizedData.email,
+              status_if_new: 'subscribed',
+              merge_fields: {
+                FNAME: firstName || '',
+                LNAME: lastParts.join(' ') || '',
+                COMPANY: sanitizedData.company,
+              },
+            }),
+          }
+        )
+      } catch (mailchimpError) {
+        console.error('Failed to add subscriber to Mailchimp:', mailchimpError)
+      }
     }
 
     // Log the submission
