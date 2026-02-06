@@ -1,6 +1,5 @@
 import { Metadata } from "next"
 import Navbar from "@/components/Navbar"
-import Logo from "@/components/Logo"
 import DemoForm from "@/components/DemoForm"
 
 export const metadata: Metadata = {
@@ -48,13 +47,6 @@ export default async function DemoPage({
           </div>
         </div>
       </main>
-
-      <footer className="py-12 px-6 border-t border-slate-200 text-center text-slate-500 text-sm bg-white">
-        <div className="flex justify-center mb-6">
-          <Logo className="h-6 opacity-50 grayscale" />
-        </div>
-        <p>&copy; Prompt Engineering, Inc 2026. All Rights Reserved.</p>
-      </footer>
     </>
   )
 }

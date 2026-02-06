@@ -31,27 +31,27 @@ export default function FooterSubscribe() {
   }
 
   if (status === "success") {
-    return <p className="text-green-600 text-sm font-medium">You're subscribed!</p>
+    return <p className="text-green-400 text-sm font-medium">You're subscribed!</p>
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2 max-w-sm mx-auto">
+    <form onSubmit={handleSubmit} className="space-y-3">
       <input
         type="email"
         required
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="your@email.com"
-        className="flex-1 px-4 py-2 text-sm bg-slate-100 rounded-lg border border-slate-200 focus:ring-2 focus:ring-xtal-navy outline-none"
+        placeholder="Enter email"
+        className="w-full px-4 py-2.5 text-sm bg-white/10 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-400 outline-none"
       />
       <button
         type="submit"
         disabled={status === "loading"}
-        className="px-4 py-2 text-sm font-semibold bg-xtal-navy text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+        className="w-full px-4 py-2.5 text-sm font-semibold bg-white text-xtal-navy rounded-lg hover:bg-slate-100 transition-colors disabled:opacity-50"
       >
         {status === "loading" ? "..." : "Subscribe"}
       </button>
-      {status === "error" && <span className="text-red-500 text-xs self-center">Failed</span>}
+      {status === "error" && <p className="text-red-400 text-xs">Failed. Please try again.</p>}
     </form>
   )
 }

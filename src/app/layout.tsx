@@ -6,6 +6,7 @@ import { StructuredData } from '../../components/StructuredData'
 import { DemoModalProvider } from '@/contexts/DemoModalContext'
 import DemoModal from '@/components/DemoModal'
 import ExitIntent from '@/components/ExitIntent'
+import Footer from '@/components/Footer'
 import { Analytics } from '@vercel/analytics/react'
 
 const GA_MEASUREMENT_ID = 'G-KP4GHK2WGC'
@@ -72,6 +73,7 @@ export default function RootLayout({
       <body className={`${inter.className} bg-white text-gray-900 antialiased`}>
         <DemoModalProvider>
           {children}
+          <Footer />
           <DemoModal />
           <ExitIntent />
         </DemoModalProvider>

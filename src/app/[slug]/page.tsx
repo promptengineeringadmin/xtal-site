@@ -22,7 +22,6 @@ import ComparisonSection from "@/components/blocks/ComparisonSection";
 import BeforeAfterShowcase from "@/components/blocks/BeforeAfterShowcase";
 import ValueComparison from "@/components/blocks/ValueComparison";
 import UseCaseGrid from "@/components/blocks/UseCaseGrid";
-import Logo from "@/components/Logo";
 
 // Map JSON "type" to React Components
 const COMPONENT_MAP: Record<string, React.ComponentType<any>> = {
@@ -117,14 +116,6 @@ export default async function SecondaryPage({
           );
         })}
       </main>
-
-      {/* Footer */}
-      <footer className="py-12 px-6 border-t border-slate-200 text-center text-slate-500 text-sm bg-white">
-        <div className="flex justify-center mb-6">
-          <Logo className="h-6 opacity-50 grayscale" />
-        </div>
-        <p>&copy; Prompt Engineering, Inc 2026. All Rights Reserved.</p>
-      </footer>
     </>
   );
 }
