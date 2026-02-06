@@ -22,7 +22,6 @@ const SOCIAL_LINKS = [
     ),
   },
   {
-    // TODO: verify @xtalsearch Instagram account exists; remove link if not
     name: "Instagram",
     href: "https://www.instagram.com/xtalsearch",
     icon: (
