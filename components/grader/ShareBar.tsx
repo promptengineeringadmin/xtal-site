@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { Link2, Download, Check } from "lucide-react"
+import { useState, useMemo } from "react"
+import { Link2, Check } from "lucide-react"
 import { trackEvent } from "@/lib/gtag"
 
 interface ShareBarProps {
@@ -13,21 +13,20 @@ interface ShareBarProps {
 export default function ShareBar({ reportId, storeName, score }: ShareBarProps) {
   const [copied, setCopied] = useState(false)
 
-  const shareUrl = `${window.location.origin}/grade/${reportId}`
+  const shareUrl = useMemo(() => {
+    if (typeof window === "undefined") return `/grade/${reportId}`
+    return `${window.location.origin}/grade/${reportId}`
+  }, [reportId])
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(shareUrl)
     setCopied(true)
+    trackEvent("grader_share_copy", { reportId })
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const handlePdfDownload = async () => {
-    trackEvent("grader_pdf_download", { reportId, score: String(score) })
-    window.open(`/api/grader/report/${reportId}/pdf`, "_blank")
-  }
-
-  const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`
   const twitterText = `${storeName} scored ${score}/100 on search health. Check your store's search for free:`
+  const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(twitterText)}&url=${encodeURIComponent(shareUrl)}`
 
   return (
@@ -47,14 +46,6 @@ export default function ShareBar({ reportId, storeName, score }: ShareBarProps) 
             Copy Link
           </>
         )}
-      </button>
-
-      <button
-        onClick={handlePdfDownload}
-        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-slate-200 text-sm font-medium text-slate-600 hover:border-xtal-navy/30 hover:text-xtal-navy transition-colors"
-      >
-        <Download className="w-4 h-4" />
-        Download PDF
       </button>
 
       <a

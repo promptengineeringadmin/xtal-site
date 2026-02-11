@@ -41,8 +41,8 @@ export default function BatchGraderForm() {
         // Step 1: Analyze
         const analyzeRes = await fetch("/api/grader/analyze", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: batchResults[i].url, source: "batch" }),
+          headers: { "Content-Type": "application/json", "x-grader-source": "batch" },
+          body: JSON.stringify({ url: batchResults[i].url }),
         })
         if (!analyzeRes.ok) throw new Error("Analyze failed")
         const analyzeData = await analyzeRes.json()

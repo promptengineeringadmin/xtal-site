@@ -6,13 +6,43 @@ import { createRun, updateRun, checkRateLimit } from "@/lib/grader/logger"
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { url, source = "web" } = body as { url: string; source?: "web" | "batch" | "admin" }
+    const { url } = body as { url: string }
 
     if (!url || typeof url !== "string") {
       return NextResponse.json({ error: "URL is required" }, { status: 400 })
     }
 
-    // Rate limiting (skip for admin/batch)
+    // Validate URL to prevent SSRF
+    let parsedUrl: URL
+    try {
+      const normalized = url.startsWith("http") ? url : `https://${url}`
+      parsedUrl = new URL(normalized)
+    } catch {
+      return NextResponse.json({ error: "Invalid URL" }, { status: 400 })
+    }
+
+    // Block private IPs, localhost, and cloud metadata
+    const hostname = parsedUrl.hostname.toLowerCase()
+    if (
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname === "0.0.0.0" ||
+      hostname.startsWith("10.") ||
+      hostname.startsWith("172.") ||
+      hostname.startsWith("192.168.") ||
+      hostname === "169.254.169.254" ||
+      hostname.endsWith(".internal") ||
+      parsedUrl.protocol === "file:"
+    ) {
+      return NextResponse.json({ error: "Invalid store URL" }, { status: 400 })
+    }
+
+    // Determine source from internal header (not request body)
+    const internalSource = request.headers.get("x-grader-source")
+    const source: "web" | "batch" | "admin" =
+      internalSource === "batch" || internalSource === "admin" ? internalSource : "web"
+
+    // Rate limiting (only for public web requests)
     if (source === "web") {
       const ip = request.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown"
       const rateCheck = await checkRateLimit(ip)
