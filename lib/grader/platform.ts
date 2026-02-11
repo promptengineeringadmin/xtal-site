@@ -51,18 +51,32 @@ export function detectPlatform(html: string): Platform {
   return "custom"
 }
 
+// ─── Decode common HTML entities ────────────────────────────
+
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&#x27;/g, "'")
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)))
+}
+
 // ─── Extract store name ─────────────────────────────────────
 
 export function extractStoreName(html: string, url: string): string {
   // Try OG title
   const ogMatch = html.match(/<meta\s+property="og:site_name"\s+content="([^"]+)"/i)
-  if (ogMatch) return ogMatch[1].trim()
+  if (ogMatch) return decodeHtmlEntities(ogMatch[1].trim())
 
   // Try <title>
   const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
   if (titleMatch) {
     // Strip common suffixes like " – Online Store" or " | Home"
-    const raw = titleMatch[1].trim()
+    const raw = decodeHtmlEntities(titleMatch[1].trim())
     const cleaned = raw.split(/\s*[–|—|-]\s*/)[0].trim()
     if (cleaned.length > 0 && cleaned.length < 60) return cleaned
   }
@@ -123,6 +137,29 @@ export function extractProductSamples(html: string): string[] {
   return samples.slice(0, 15)
 }
 
+// ─── Shopify products.json fallback for age-gated stores ────
+
+async function fetchShopifyProducts(origin: string): Promise<string[]> {
+  try {
+    const res = await fetch(`${origin}/products.json?limit=15`, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+      },
+      signal: AbortSignal.timeout(10_000),
+    })
+    if (!res.ok) return []
+    const data = await res.json()
+    const products = data?.products ?? []
+    return products
+      .map((p: Record<string, unknown>) => String(p.title ?? ""))
+      .filter((t: string) => t.length > 0)
+      .slice(0, 15)
+  } catch {
+    return []
+  }
+}
+
 // ─── Full detection pipeline ────────────────────────────────
 
 export async function detectStore(url: string): Promise<PlatformDetectionResult> {
@@ -150,12 +187,21 @@ export async function detectStore(url: string): Promise<PlatformDetectionResult>
   const html = await res.text()
   const platform = detectPlatform(html)
   const name = extractStoreName(html, normalizedUrl)
-  const productSamples = extractProductSamples(html)
+  let productSamples = extractProductSamples(html)
 
   // Build search URL
   const origin = new URL(res.url).origin
   const searchPath = SEARCH_PATHS[platform] ?? null
   const searchUrl = searchPath ? `${origin}${searchPath}` : null
+
+  // For Shopify stores with few product samples (e.g., age-gated sites),
+  // try the /products.json API as a fallback
+  if (platform === "shopify" && productSamples.length < 3) {
+    const apiProducts = await fetchShopifyProducts(origin)
+    if (apiProducts.length > productSamples.length) {
+      productSamples = apiProducts
+    }
+  }
 
   return { platform, name, searchUrl, productSamples }
 }
