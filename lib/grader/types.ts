@@ -108,6 +108,7 @@ export interface GraderReport {
   dimensions: DimensionScore[]
   revenueImpact: RevenueImpact
   recommendations: Recommendation[]
+  queriesTested?: TestQuery[]
   summary: string
   createdAt: string
   emailCaptured: boolean

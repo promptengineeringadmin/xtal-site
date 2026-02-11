@@ -4,7 +4,7 @@ import { adminFetch } from "@/lib/admin/api"
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
-    const collection = process.env.XTAL_COLLECTION
+    const collection = searchParams.get("collection") || process.env.XTAL_COLLECTION
 
     const params = new URLSearchParams()
     const days = searchParams.get("days")

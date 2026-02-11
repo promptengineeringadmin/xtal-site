@@ -4,9 +4,11 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import { RefreshCw } from "lucide-react"
 import SearchPipelineCard from "@/components/admin/SearchPipelineCard"
 import DateRangePicker from "@/components/admin/DateRangePicker"
+import { useCollection } from "@/lib/admin/CollectionContext"
 import type { MetricEvent, SearchEventData } from "@/lib/admin/types"
 
 export default function SearchesPage() {
+  const { collection } = useCollection()
   const [events, setEvents] = useState<MetricEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -25,6 +27,7 @@ export default function SearchesPage() {
     try {
       const params = new URLSearchParams()
       params.set("event_types", "search_request")
+      params.set("collection", collection)
       params.set("limit", String(limit))
       if (startDate) params.set("start_date", startDate)
       if (endDate) params.set("end_date", endDate)
@@ -39,7 +42,7 @@ export default function SearchesPage() {
     } finally {
       setLoading(false)
     }
-  }, [limit, startDate, endDate])
+  }, [limit, startDate, endDate, collection])
 
   useEffect(() => {
     setLoading(true)

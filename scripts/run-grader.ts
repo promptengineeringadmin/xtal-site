@@ -145,6 +145,7 @@ async function main() {
       dimensions: evaluation.dimensions,
       revenueImpact,
       recommendations: evaluation.recommendations,
+      queriesTested: analysis.queries,
       summary: evaluation.summary,
       createdAt: new Date().toISOString(),
     }

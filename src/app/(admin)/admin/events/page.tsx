@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import EventsTable from "@/components/admin/EventsTable"
 import DateRangePicker from "@/components/admin/DateRangePicker"
+import { useCollection } from "@/lib/admin/CollectionContext"
 import type { MetricEvent, EventType } from "@/lib/admin/types"
 import { EVENT_TYPE_LABELS } from "@/lib/admin/types"
 
@@ -15,6 +16,7 @@ const ALL_EVENT_TYPES: EventType[] = [
 ]
 
 export default function EventsPage() {
+  const { collection } = useCollection()
   const [events, setEvents] = useState<MetricEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -34,6 +36,7 @@ export default function EventsPage() {
       if (filterType !== "all") {
         params.set("event_types", filterType)
       }
+      params.set("collection", collection)
       params.set("limit", String(limit))
       if (startDate) params.set("start_date", startDate)
       if (endDate) params.set("end_date", endDate)
@@ -48,7 +51,7 @@ export default function EventsPage() {
     } finally {
       setLoading(false)
     }
-  }, [filterType, limit, startDate, endDate])
+  }, [filterType, limit, startDate, endDate, collection])
 
   useEffect(() => {
     setLoading(true)

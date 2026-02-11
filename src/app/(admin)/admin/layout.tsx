@@ -1,5 +1,6 @@
 import PasswordGate from "@/components/admin/PasswordGate"
 import AdminSidebar from "@/components/admin/AdminSidebar"
+import { CollectionProvider } from "@/lib/admin/CollectionContext"
 
 export const metadata = {
   title: "XTAL Admin",
@@ -13,12 +14,14 @@ export default function AdminLayout({
 }) {
   return (
     <PasswordGate>
-      <div className="min-h-screen bg-slate-50">
-        <AdminSidebar />
-        <main className="ml-60 min-h-screen">
-          <div className="p-8">{children}</div>
-        </main>
-      </div>
+      <CollectionProvider>
+        <div className="min-h-screen bg-slate-50">
+          <AdminSidebar />
+          <main className="ml-60 min-h-screen">
+            <div className="p-8">{children}</div>
+          </main>
+        </div>
+      </CollectionProvider>
     </PasswordGate>
   )
 }

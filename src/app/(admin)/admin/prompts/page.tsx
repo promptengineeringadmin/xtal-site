@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react"
 import PromptEditor from "@/components/admin/PromptEditor"
+import { useCollection } from "@/lib/admin/CollectionContext"
 import type { PromptDefaults } from "@/lib/admin/types"
 
 export default function PromptsPage() {
+  const { collection } = useCollection()
   const [brandPrompt, setBrandPrompt] = useState("")
   const [marketingPrompt, setMarketingPrompt] = useState("")
   const [defaults, setDefaults] = useState<PromptDefaults | null>(null)
@@ -14,12 +16,14 @@ export default function PromptsPage() {
   const [savingMarketing, setSavingMarketing] = useState(false)
 
   useEffect(() => {
+    setLoading(true)
     async function load() {
       try {
+        const cp = `?collection=${encodeURIComponent(collection)}`
         const [brandRes, marketingRes, defaultsRes] = await Promise.all([
-          fetch("/api/admin/prompts/brand"),
-          fetch("/api/admin/prompts/marketing"),
-          fetch("/api/admin/prompts/defaults"),
+          fetch(`/api/admin/prompts/brand${cp}`),
+          fetch(`/api/admin/prompts/marketing${cp}`),
+          fetch(`/api/admin/prompts/defaults${cp}`),
         ])
 
         if (brandRes.ok) {
@@ -43,12 +47,12 @@ export default function PromptsPage() {
       }
     }
     load()
-  }, [])
+  }, [collection])
 
   async function saveBrand(newPrompt: string) {
     setSavingBrand(true)
     try {
-      const res = await fetch("/api/admin/prompts/brand", {
+      const res = await fetch(`/api/admin/prompts/brand?collection=${encodeURIComponent(collection)}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ brand_prompt: newPrompt }),
@@ -63,7 +67,7 @@ export default function PromptsPage() {
   async function saveMarketing(newPrompt: string) {
     setSavingMarketing(true)
     try {
-      const res = await fetch("/api/admin/prompts/marketing", {
+      const res = await fetch(`/api/admin/prompts/marketing?collection=${encodeURIComponent(collection)}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ marketing_prompt: newPrompt }),

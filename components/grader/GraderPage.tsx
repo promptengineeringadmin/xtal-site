@@ -119,6 +119,7 @@ export default function GraderPage() {
         body: JSON.stringify({
           runId: analyzeData.runId,
           ...evalData,
+          queriesTested: analyzeData.queries,
         }),
       })
 

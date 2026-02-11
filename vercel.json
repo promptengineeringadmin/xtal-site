@@ -11,6 +11,9 @@
     },
     "src/app/api/grader/evaluate/route.ts": {
       "maxDuration": 30
+    },
+    "src/app/api/grader/report/*/pdf/route.ts": {
+      "maxDuration": 30
     }
   },
   "headers": [

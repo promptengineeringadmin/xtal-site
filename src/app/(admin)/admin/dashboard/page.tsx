@@ -11,11 +11,13 @@ import {
 } from "lucide-react"
 import StatCard from "@/components/admin/StatCard"
 import TimeRangeSelector from "@/components/admin/TimeRangeSelector"
+import { useCollection } from "@/lib/admin/CollectionContext"
 import type { MetricsSummary } from "@/lib/admin/types"
 
 const COST_PER_SEARCH = 0.1
 
 export default function DashboardPage() {
+  const { collection } = useCollection()
   const [days, setDays] = useState(30)
   const [metrics, setMetrics] = useState<MetricsSummary | null>(null)
   const [loading, setLoading] = useState(true)
@@ -25,7 +27,7 @@ export default function DashboardPage() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch(`/api/admin/metrics/summary?days=${days}`)
+      const res = await fetch(`/api/admin/metrics/summary?days=${days}&collection=${encodeURIComponent(collection)}`)
       if (!res.ok) throw new Error(`Failed to fetch metrics: ${res.status}`)
       const data = await res.json()
       setMetrics(data)
@@ -34,7 +36,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }, [days])
+  }, [days, collection])
 
   useEffect(() => {
     fetchMetrics()

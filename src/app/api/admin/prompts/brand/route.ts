@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server"
 import { adminFetch } from "@/lib/admin/api"
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const collection = process.env.XTAL_COLLECTION
+    const { searchParams } = new URL(request.url)
+    const collection = searchParams.get("collection") || process.env.XTAL_COLLECTION
     const params = new URLSearchParams({ collection: collection ?? "" })
 
     const res = await adminFetch(`/api/vendor/brand-prompt?${params.toString()}`)
@@ -17,7 +18,8 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   try {
-    const collection = process.env.XTAL_COLLECTION
+    const { searchParams } = new URL(request.url)
+    const collection = searchParams.get("collection") || process.env.XTAL_COLLECTION
     const body = await request.json()
 
     const payload = { brand_prompt: body.brand_prompt, collection }

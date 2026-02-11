@@ -42,5 +42,11 @@ next-env.d.ts
 .vscode/*
 !.vscode/extensions.json
 
+# Grader test output
+grader-output/
+
+# Windows
+desktop.ini
+
 .vercel
 nul
