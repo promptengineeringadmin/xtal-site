@@ -13,13 +13,16 @@ async function getCognitoToken(): Promise<string> {
     return cachedToken
   }
 
+  const basicAuth = Buffer.from(`${COGNITO_CLIENT_ID}:${COGNITO_CLIENT_SECRET}`).toString("base64")
+
   const resp = await fetch(COGNITO_TOKEN_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: `Basic ${basicAuth}`,
+    },
     body:
       `grant_type=client_credentials` +
-      `&client_id=${encodeURIComponent(COGNITO_CLIENT_ID)}` +
-      `&client_secret=${encodeURIComponent(COGNITO_CLIENT_SECRET)}` +
       `&scope=${encodeURIComponent(COGNITO_SCOPE)}`,
   })
 
