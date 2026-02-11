@@ -120,7 +120,7 @@ export async function evaluateResults(opts: {
   const anthropic = getClient()
   const message = await anthropic.messages.create({
     model: MODEL,
-    max_tokens: 4096,
+    max_tokens: 8192,
     messages: [{ role: "user", content: prompt }],
   })
 
@@ -132,11 +132,18 @@ export async function evaluateResults(opts: {
     .replace(/```\n?/g, "")
     .trim()
 
-  const parsed = JSON.parse(jsonStr) as {
+  let parsed: {
     dimensions: Omit<DimensionScore, "label" | "grade" | "weight">[]
     overallScore: number
     summary: string
     recommendations: Recommendation[]
+  }
+  try {
+    parsed = JSON.parse(jsonStr)
+  } catch {
+    throw new Error(
+      `Failed to parse evaluation response from Claude. The model may have returned truncated output. Response length: ${rawResponse.length} chars.`
+    )
   }
 
   // Enrich dimensions with labels, grades, and weights
