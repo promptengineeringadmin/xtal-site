@@ -13,14 +13,14 @@ interface ProductCardProps {
 
 function formatPrice(price: number | number[]): string {
   if (Array.isArray(price)) {
-    const sorted = [...price].sort((a, b) => a - b)
+    const sorted = [...price].map(p => p / 100).sort((a, b) => a - b)
     if (sorted.length === 0) return "N/A"
     if (sorted.length === 1 || sorted[0] === sorted[sorted.length - 1]) {
       return `$${sorted[0].toFixed(2)}`
     }
     return `$${sorted[0].toFixed(2)} – $${sorted[sorted.length - 1].toFixed(2)}`
   }
-  return `$${price.toFixed(2)}`
+  return `$${(price / 100).toFixed(2)}`
 }
 
 function getAccentStyle(score?: number) {

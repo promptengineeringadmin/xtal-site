@@ -2,11 +2,6 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Script from 'next/script'
 import './globals.css'
-import { StructuredData } from '../../components/StructuredData'
-import { DemoModalProvider } from '@/contexts/DemoModalContext'
-import DemoModal from '@/components/DemoModal'
-import ExitIntent from '@/components/ExitIntent'
-import Footer from '@/components/Footer'
 import { Analytics } from '@vercel/analytics/react'
 
 const GA_MEASUREMENT_ID = 'G-KP4GHK2WGC'
@@ -56,7 +51,6 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <StructuredData />
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
           strategy="afterInteractive"
@@ -71,12 +65,7 @@ export default function RootLayout({
         </Script>
       </head>
       <body className={`${inter.className} bg-white text-gray-900 antialiased`}>
-        <DemoModalProvider>
-          {children}
-          <Footer />
-          <DemoModal />
-          <ExitIntent />
-        </DemoModalProvider>
+        {children}
         <Analytics />
       </body>
     </html>

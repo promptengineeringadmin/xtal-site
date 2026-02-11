@@ -1,0 +1,177 @@
+import type { Platform, StoreInfo } from "./types"
+
+interface PlatformDetectionResult {
+  platform: Platform
+  name: string
+  searchUrl: string | null
+  productSamples: string[]
+}
+
+// ─── Platform signatures ────────────────────────────────────
+
+const PLATFORM_SIGNALS: { platform: Platform; patterns: RegExp[] }[] = [
+  {
+    platform: "shopify",
+    patterns: [/cdn\.shopify\.com/i, /Shopify\.theme/i, /shopify-section/i],
+  },
+  {
+    platform: "bigcommerce",
+    patterns: [/bigcommerce\.com/i, /data-stencil/i, /bc-sf-filter/i],
+  },
+  {
+    platform: "woocommerce",
+    patterns: [/woocommerce/i, /wp-content/i, /wc-block/i],
+  },
+  {
+    platform: "magento",
+    patterns: [/mage\/cookies/i, /magento/i, /Magento_Ui/i],
+  },
+  {
+    platform: "squarespace",
+    patterns: [/squarespace\.com/i, /static\.squarespace/i],
+  },
+]
+
+// ─── Search URL patterns per platform ───────────────────────
+
+const SEARCH_PATHS: Partial<Record<Platform, string>> = {
+  shopify: "/search?q=",
+  bigcommerce: "/search.php?search_query=",
+  woocommerce: "/?s=",
+  magento: "/catalogsearch/result/?q=",
+  squarespace: "/search?q=",
+}
+
+// ─── Detect platform from HTML ──────────────────────────────
+
+export function detectPlatform(html: string): Platform {
+  for (const { platform, patterns } of PLATFORM_SIGNALS) {
+    if (patterns.some((p) => p.test(html))) return platform
+  }
+  return "custom"
+}
+
+// ─── Extract store name ─────────────────────────────────────
+
+export function extractStoreName(html: string, url: string): string {
+  // Try OG title
+  const ogMatch = html.match(/<meta\s+property="og:site_name"\s+content="([^"]+)"/i)
+  if (ogMatch) return ogMatch[1].trim()
+
+  // Try <title>
+  const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
+  if (titleMatch) {
+    // Strip common suffixes like " – Online Store" or " | Home"
+    const raw = titleMatch[1].trim()
+    const cleaned = raw.split(/\s*[–|—|-]\s*/)[0].trim()
+    if (cleaned.length > 0 && cleaned.length < 60) return cleaned
+  }
+
+  // Fallback: hostname
+  try {
+    return new URL(url).hostname.replace("www.", "")
+  } catch {
+    return url
+  }
+}
+
+// ─── Extract sample product titles from HTML ────────────────
+
+export function extractProductSamples(html: string): string[] {
+  const samples: string[] = []
+
+  // JSON-LD Product data
+  const jsonLdMatches = Array.from(html.matchAll(
+    /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi
+  ))
+  for (const m of jsonLdMatches) {
+    try {
+      const data = JSON.parse(m[1])
+      if (data["@type"] === "Product" && data.name) {
+        samples.push(data.name)
+      }
+      if (Array.isArray(data["@graph"])) {
+        for (const item of data["@graph"]) {
+          if (item["@type"] === "Product" && item.name) {
+            samples.push(item.name)
+          }
+        }
+      }
+    } catch {
+      // ignore malformed JSON-LD
+    }
+  }
+
+  // Fallback: common product title selectors in raw HTML
+  if (samples.length < 5) {
+    const titlePatterns = [
+      /class="[^"]*product[_-]?title[^"]*"[^>]*>([^<]{3,80})</gi,
+      /class="[^"]*product[_-]?name[^"]*"[^>]*>([^<]{3,80})</gi,
+      /class="[^"]*card[_-]?title[^"]*"[^>]*>([^<]{3,80})</gi,
+    ]
+    for (const pattern of titlePatterns) {
+      for (const match of Array.from(html.matchAll(pattern))) {
+        const title = match[1].trim()
+        if (title && !samples.includes(title)) {
+          samples.push(title)
+        }
+      }
+      if (samples.length >= 10) break
+    }
+  }
+
+  return samples.slice(0, 15)
+}
+
+// ─── Full detection pipeline ────────────────────────────────
+
+export async function detectStore(url: string): Promise<PlatformDetectionResult> {
+  // Normalize URL
+  let normalizedUrl = url.trim()
+  if (!normalizedUrl.startsWith("http")) {
+    normalizedUrl = `https://${normalizedUrl}`
+  }
+
+  const res = await fetch(normalizedUrl, {
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (compatible; XTALGrader/1.0; +https://xtalsearch.com)",
+    },
+    redirect: "follow",
+    signal: AbortSignal.timeout(15_000),
+  })
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch store: ${res.status} ${res.statusText}`)
+  }
+
+  const html = await res.text()
+  const platform = detectPlatform(html)
+  const name = extractStoreName(html, normalizedUrl)
+  const productSamples = extractProductSamples(html)
+
+  // Build search URL
+  const origin = new URL(res.url).origin
+  const searchPath = SEARCH_PATHS[platform] ?? null
+  const searchUrl = searchPath ? `${origin}${searchPath}` : null
+
+  return { platform, name, searchUrl, productSamples }
+}
+
+// ─── Build full StoreInfo (called after LLM analysis) ───────
+
+export function buildStoreInfo(
+  url: string,
+  detection: PlatformDetectionResult,
+  llmAnalysis: { storeType: string; vertical: string }
+): StoreInfo {
+  return {
+    url,
+    name: detection.name,
+    platform: detection.platform,
+    storeType: llmAnalysis.storeType,
+    vertical: llmAnalysis.vertical,
+    searchUrl: detection.searchUrl,
+    productSamples: detection.productSamples,
+  }
+}

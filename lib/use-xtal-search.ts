@@ -99,7 +99,15 @@ export function useXtalSearch() {
       setQueryTime(searchData.query_time || 0)
       setRelevanceScores(searchData.relevance_scores || {})
       setSearchContext(searchData.search_context || null)
+
+      // Debug: surface whether backend returns facets at all
+      if (!searchData.computed_facets) {
+        console.warn("Search response missing computed_facets — backend returned none.")
+      } else if (Object.keys(searchData.computed_facets).length === 0) {
+        console.warn("Search response has empty computed_facets {} — products may lack {prefix}_{value} tags.")
+      }
       setComputedFacets(searchData.computed_facets || null)
+
       setAspects(aspectsData.aspects || [])
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return
@@ -135,6 +143,14 @@ export function useXtalSearch() {
 
     const hasActiveFacets = Object.values(facetsToSend).some(v => v.length > 0)
 
+    // Convert user-facing dollar price range back to cents for the backend
+    const priceRangeInCents = priceToSend
+      ? {
+          min: priceToSend.min != null ? Math.round(priceToSend.min * 100) : null,
+          max: priceToSend.max != null ? Math.round(priceToSend.max * 100) : null,
+        }
+      : undefined
+
     try {
       const res = await fetch("/api/xtal/search", {
         method: "POST",
@@ -144,7 +160,7 @@ export function useXtalSearch() {
           search_context: searchContext,
           selected_aspects: aspectsToSend.length > 0 ? aspectsToSend : undefined,
           facet_filters: hasActiveFacets ? facetsToSend : undefined,
-          price_range: priceToSend ?? undefined,
+          price_range: priceRangeInCents,
         }),
         signal: controller.signal,
       })
@@ -233,11 +249,17 @@ export function useXtalSearch() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query, product_id: productId, score }),
       })
+      if (!res.ok) {
+        const errBody = await res.text()
+        console.error(`Explain API error ${res.status}:`, errBody)
+        return `Explanation unavailable (${res.status}).`
+      }
       const data = await res.json()
       const explanation = data.explanation || "No explanation available."
       explainCache.current.set(cacheKey, explanation)
       return explanation
-    } catch {
+    } catch (err) {
+      console.error("Explain fetch error:", err)
       return "Failed to load explanation."
     }
   }, [query])

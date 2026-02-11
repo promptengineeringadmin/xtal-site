@@ -1,0 +1,231 @@
+"use client"
+
+import { useState } from "react"
+import { ChevronDown, ChevronRight, ArrowRight } from "lucide-react"
+import type { SearchEventData } from "@/lib/admin/types"
+
+interface SearchPipelineCardProps {
+  event: {
+    event_data: SearchEventData
+    timestamp: string
+  }
+  defaultExpanded?: boolean
+}
+
+function PipelineDot({ color }: { color: string }) {
+  return (
+    <div
+      className={`w-3 h-3 rounded-full border-2 shrink-0 ${color}`}
+    />
+  )
+}
+
+function StepCard({
+  stepNumber,
+  label,
+  borderColor,
+  dotColor,
+  isLast,
+  children,
+}: {
+  stepNumber: number
+  label: string
+  borderColor: string
+  dotColor: string
+  isLast: boolean
+  children: React.ReactNode
+}) {
+  return (
+    <div className="flex gap-3">
+      {/* Timeline connector */}
+      <div className="flex flex-col items-center pt-3">
+        <PipelineDot color={dotColor} />
+        {!isLast && (
+          <div className="flex-1 w-px border-l-2 border-dashed border-slate-200 mt-1" />
+        )}
+      </div>
+
+      {/* Step content */}
+      <div className={`flex-1 mb-4 rounded-lg border ${borderColor} bg-white p-3`}>
+        <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1.5">
+          Step {stepNumber} &mdash; {label}
+        </p>
+        {children}
+      </div>
+    </div>
+  )
+}
+
+export default function SearchPipelineCard({
+  event,
+  defaultExpanded = false,
+}: SearchPipelineCardProps) {
+  const [expanded, setExpanded] = useState(defaultExpanded)
+  const d = event.event_data
+
+  const ts = new Date(event.timestamp).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  })
+
+  const queryChanged = d.enriched_query !== d.user_query
+
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      {/* Collapsed bar */}
+      <button
+        onClick={() => setExpanded((v) => !v)}
+        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50 transition-colors"
+      >
+        {expanded ? (
+          <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
+        ) : (
+          <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+        )}
+        <span className="text-xs text-slate-400 font-medium whitespace-nowrap">
+          {ts}
+        </span>
+        <span className="text-sm text-slate-800 font-medium truncate flex-1 min-w-0">
+          {d.user_query}
+        </span>
+        <span className="text-xs text-slate-500 whitespace-nowrap">
+          {d.results_count} results
+        </span>
+        <span className="text-xs text-slate-400 whitespace-nowrap">
+          {d.query_time.toFixed(2)}s
+        </span>
+      </button>
+
+      {/* Expanded pipeline view */}
+      {expanded && (
+        <div className="px-4 pb-4 pt-1 border-t border-slate-100">
+          {/* Step 1 - Original Query */}
+          <StepCard
+            stepNumber={1}
+            label="Original Query"
+            borderColor="border-slate-200"
+            dotColor="border-slate-400 bg-slate-100"
+            isLast={false}
+          >
+            <p className="text-sm text-slate-800 font-medium">{d.user_query}</p>
+          </StepCard>
+
+          {/* Step 2 - Query Augmentation */}
+          <StepCard
+            stepNumber={2}
+            label="Query Augmentation"
+            borderColor="border-blue-200"
+            dotColor="border-blue-500 bg-blue-100"
+            isLast={false}
+          >
+            {queryChanged ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm text-slate-500 line-through">
+                  {d.user_query}
+                </span>
+                <ArrowRight className="w-4 h-4 text-blue-400 shrink-0" />
+                <span className="text-sm text-blue-700 font-medium">
+                  {d.enriched_query}
+                </span>
+              </div>
+            ) : (
+              <p className="text-sm text-slate-500 italic">
+                No augmentation &mdash; query unchanged
+              </p>
+            )}
+          </StepCard>
+
+          {/* Step 3 - Aspect Selection */}
+          <StepCard
+            stepNumber={3}
+            label="Aspect Selection"
+            borderColor="border-purple-200"
+            dotColor="border-purple-500 bg-purple-100"
+            isLast={false}
+          >
+            {d.selected_aspects && d.selected_aspects.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5">
+                {d.selected_aspects.map((aspect, i) => (
+                  <span
+                    key={i}
+                    className="inline-block px-2 py-0.5 bg-purple-50 text-purple-700 text-xs font-medium rounded-full border border-purple-200"
+                  >
+                    {aspect}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-slate-400 italic">None</p>
+            )}
+          </StepCard>
+
+          {/* Step 4 - Final Query */}
+          <StepCard
+            stepNumber={4}
+            label="Final Query"
+            borderColor="border-teal-200"
+            dotColor="border-teal-500 bg-teal-100"
+            isLast={false}
+          >
+            <code className="block text-sm text-teal-800 bg-teal-50 rounded px-2.5 py-1.5 font-mono break-words">
+              {d.final_query}
+            </code>
+          </StepCard>
+
+          {/* Step 5 - Results */}
+          <StepCard
+            stepNumber={5}
+            label="Results"
+            borderColor="border-green-200"
+            dotColor="border-green-500 bg-green-100"
+            isLast={true}
+          >
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <span className="text-sm font-semibold text-slate-800">
+                {d.results_count} product{d.results_count !== 1 ? "s" : ""}
+              </span>
+              <span className="text-xs text-slate-400">
+                in {d.query_time.toFixed(2)}s
+              </span>
+              <span
+                className={`inline-block px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide rounded-full ${
+                  d.filter_in_place
+                    ? "bg-amber-100 text-amber-700"
+                    : "bg-green-100 text-green-700"
+                }`}
+              >
+                {d.filter_in_place ? "Filter-in-place" : "Full pipeline"}
+              </span>
+            </div>
+
+            {d.result_ids_titles && d.result_ids_titles.length > 0 ? (
+              <ul className="space-y-1">
+                {d.result_ids_titles.slice(0, 5).map((item, i) => (
+                  <li
+                    key={item.id}
+                    className="flex items-baseline gap-2 text-xs text-slate-600"
+                  >
+                    <span className="text-slate-300 font-mono shrink-0">
+                      {i + 1}.
+                    </span>
+                    <span className="truncate">{item.title}</span>
+                  </li>
+                ))}
+                {d.result_ids_titles.length > 5 && (
+                  <li className="text-xs text-slate-400 pl-5">
+                    +{d.result_ids_titles.length - 5} more
+                  </li>
+                )}
+              </ul>
+            ) : (
+              <p className="text-xs text-slate-400 italic">No results</p>
+            )}
+          </StepCard>
+        </div>
+      )}
+    </div>
+  )
+}

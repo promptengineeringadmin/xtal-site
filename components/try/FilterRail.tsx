@@ -59,11 +59,11 @@ export default function FilterRail({
   )
   const [showMore, setShowMore] = useState<Record<string, boolean>>({})
 
-  // Derive price range from results
+  // Derive price range from results (prices stored in cents, convert to dollars)
   const priceStats = useMemo(() => {
     const prices = results.flatMap((p) => {
-      if (Array.isArray(p.price)) return p.price
-      if (typeof p.price === "number") return [p.price]
+      if (Array.isArray(p.price)) return p.price.map(v => v / 100)
+      if (typeof p.price === "number") return [p.price / 100]
       return []
     })
     if (prices.length === 0) return { min: 0, max: 1000 }

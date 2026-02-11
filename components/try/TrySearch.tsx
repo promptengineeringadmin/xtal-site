@@ -182,8 +182,8 @@ function MobileFilterContent({
     return FACET_LABELS[prefix] || prefix.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")
   }
 
-  // Price stats from results
-  const prices = results.flatMap(p => Array.isArray(p.price) ? p.price : typeof p.price === "number" ? [p.price] : [])
+  // Price stats from results (prices stored in cents, convert to dollars)
+  const prices = results.flatMap(p => Array.isArray(p.price) ? p.price.map(v => v / 100) : typeof p.price === "number" ? [p.price / 100] : [])
   const priceMin = prices.length > 0 ? Math.floor(Math.min(...prices)) : 0
   const priceMax = prices.length > 0 ? Math.ceil(Math.max(...prices)) : 1000
 
