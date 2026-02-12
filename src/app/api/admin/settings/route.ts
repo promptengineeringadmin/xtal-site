@@ -3,6 +3,8 @@ import { adminFetch } from "@/lib/admin/api"
 import {
   getQueryEnhancement,
   saveQueryEnhancement,
+  getMerchRerankStrength,
+  saveMerchRerankStrength,
 } from "@/lib/admin/admin-settings"
 
 export async function GET(request: Request) {
@@ -22,9 +24,13 @@ export async function GET(request: Request) {
   }
 
   // Fallback: read from Redis
-  const queryEnhancementEnabled = await getQueryEnhancement()
+  const [queryEnhancementEnabled, merchRerankStrength] = await Promise.all([
+    getQueryEnhancement(),
+    getMerchRerankStrength(),
+  ])
   return NextResponse.json({
     query_enhancement_enabled: queryEnhancementEnabled,
+    merch_rerank_strength: merchRerankStrength,
     _source: "redis_fallback",
   })
 }
@@ -37,12 +43,15 @@ export async function PUT(request: Request) {
     const params = new URLSearchParams({ collection: collection ?? "" })
 
     // Always persist to Redis as local fallback
-    if (body.query_enhancement_enabled !== undefined) {
-      try {
+    try {
+      if (body.query_enhancement_enabled !== undefined) {
         await saveQueryEnhancement(body.query_enhancement_enabled)
-      } catch (e) {
-        console.error("Redis settings save error:", e)
       }
+      if (body.merch_rerank_strength !== undefined) {
+        await saveMerchRerankStrength(body.merch_rerank_strength)
+      }
+    } catch (e) {
+      console.error("Redis settings save error:", e)
     }
 
     // Try backend

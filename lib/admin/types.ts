@@ -57,6 +57,7 @@ export interface VendorSettings {
   vendor_id: string
   collection_name: string
   query_enhancement_enabled: boolean
+  merch_rerank_strength: number
   created_at: string
   updated_at: string
 }

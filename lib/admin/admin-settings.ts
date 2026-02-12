@@ -16,6 +16,7 @@ function getRedis(): Redis {
 // ─── Keys ───────────────────────────────────────────────────
 
 const KEY_QUERY_ENHANCEMENT = "admin:settings:query_enhancement"
+const KEY_MERCH_RERANK = "admin:settings:merch_rerank_strength"
 
 // ─── Query Enhancement ─────────────────────────────────────
 
@@ -35,4 +36,24 @@ export async function saveQueryEnhancement(
 ): Promise<void> {
   const kv = getRedis()
   await kv.set(KEY_QUERY_ENHANCEMENT, enabled)
+}
+
+// ─── Merch Re-rank Strength ────────────────────────────────
+
+export async function getMerchRerankStrength(): Promise<number> {
+  try {
+    const kv = getRedis()
+    const stored = await kv.get<number>(KEY_MERCH_RERANK)
+    if (stored !== null && stored !== undefined) return stored
+  } catch {
+    // Redis unavailable
+  }
+  return 0.25 // default
+}
+
+export async function saveMerchRerankStrength(
+  strength: number
+): Promise<void> {
+  const kv = getRedis()
+  await kv.set(KEY_MERCH_RERANK, strength)
 }

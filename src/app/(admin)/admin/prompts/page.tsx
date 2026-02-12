@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import PromptEditor from "@/components/admin/PromptEditor"
 import { useCollection } from "@/lib/admin/CollectionContext"
 import type { PromptDefaults } from "@/lib/admin/types"
@@ -15,8 +15,10 @@ export default function PromptsPage() {
   const [savingBrand, setSavingBrand] = useState(false)
   const [savingMarketing, setSavingMarketing] = useState(false)
   const [queryEnhancementEnabled, setQueryEnhancementEnabled] = useState(true)
+  const [merchRerank, setMerchRerank] = useState(0.25)
   const [settingsSaving, setSettingsSaving] = useState(false)
   const [backendWarning, setBackendWarning] = useState(false)
+  const rerankDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     setLoading(true)
@@ -54,6 +56,7 @@ export default function PromptsPage() {
         if (settingsRes.ok) {
           const data = await settingsRes.json()
           setQueryEnhancementEnabled(data.query_enhancement_enabled ?? true)
+          setMerchRerank(data.merch_rerank_strength ?? 0.25)
           if (data._source === "redis_fallback") {
             setBackendWarning(true)
           }
@@ -97,6 +100,33 @@ export default function PromptsPage() {
     } finally {
       setSavingMarketing(false)
     }
+  }
+
+  const saveMerchRerank = useCallback(async (value: number) => {
+    setSettingsSaving(true)
+    try {
+      const res = await fetch(`/api/admin/settings?collection=${encodeURIComponent(collection)}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ merch_rerank_strength: value }),
+      })
+      if (!res.ok) throw new Error(`Save failed: ${res.status}`)
+      const data = await res.json()
+      if (data._source === "redis_fallback") {
+        setBackendWarning(true)
+      }
+    } catch (err) {
+      console.error("Failed to save merch rerank strength:", err)
+    } finally {
+      setSettingsSaving(false)
+    }
+  }, [collection])
+
+  function handleMerchRerankChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const value = parseFloat(e.target.value)
+    setMerchRerank(value)
+    if (rerankDebounceRef.current) clearTimeout(rerankDebounceRef.current)
+    rerankDebounceRef.current = setTimeout(() => saveMerchRerank(value), 500)
   }
 
   async function toggleQueryEnhancement() {
@@ -205,6 +235,46 @@ export default function PromptsPage() {
           {!queryEnhancementEnabled && (
             <div className="mt-3 text-xs text-amber-600 bg-amber-50 rounded px-3 py-2">
               Query enhancement is off. Search queries will not be rewritten by AI.
+            </div>
+          )}
+        </div>
+
+        {/* Merch Re-sequencing Slider */}
+        <div className="glass-card p-6">
+          <div>
+            <h3 className="text-lg font-semibold text-xtal-navy">Merch Re-sequencing</h3>
+            <p className="text-sm text-slate-500 mt-1">
+              Controls how much the marketing prompt influences result ordering.
+              Higher values push marketing-aligned products higher in search results.
+            </p>
+          </div>
+          <div className="mt-4">
+            <div className="flex items-center gap-4">
+              <span className="text-xs font-medium text-slate-400 w-10">Weak</span>
+              <input
+                type="range"
+                min={0}
+                max={0.5}
+                step={0.05}
+                value={merchRerank}
+                onChange={handleMerchRerankChange}
+                disabled={settingsSaving}
+                className="flex-1 h-2 rounded-full appearance-none cursor-pointer
+                  bg-slate-200 accent-xtal-navy
+                  [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4
+                  [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-xtal-navy
+                  [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:cursor-pointer
+                  disabled:opacity-50"
+              />
+              <span className="text-xs font-medium text-slate-400 w-12">Strong</span>
+              <span className="text-sm font-mono text-xtal-navy bg-xtal-ice rounded px-2 py-0.5 min-w-[3rem] text-center">
+                {merchRerank.toFixed(2)}
+              </span>
+            </div>
+          </div>
+          {merchRerank === 0 && (
+            <div className="mt-3 text-xs text-slate-500 bg-slate-50 rounded px-3 py-2">
+              Marketing prompt has no influence on result ordering.
             </div>
           )}
         </div>
