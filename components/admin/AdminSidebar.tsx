@@ -19,7 +19,7 @@ const NAV_ITEMS = [
   { href: "/admin/prompts", label: "Prompts", icon: FileText },
   { href: "/admin/events", label: "Events", icon: Clock },
   { href: "/admin/grader", label: "Grader", icon: Gauge },
-  { href: "/admin/settings/synonyms", label: "Settings", icon: Settings },
+  { href: "/admin/settings", label: "Settings", icon: Settings },
 ]
 
 export default function AdminSidebar() {
