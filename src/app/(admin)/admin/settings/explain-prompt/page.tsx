@@ -30,8 +30,23 @@ export default function ExplainPromptPage() {
       setContent(data.content)
       setOriginal(data.content)
       setHistory(data.history || [])
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load prompt")
+    } catch {
+      // Main fetch failed — try loading just the default prompt
+      try {
+        const fallback = await fetch(
+          "/api/admin/settings/explain-prompt?default=true"
+        )
+        if (fallback.ok) {
+          const data = await fallback.json()
+          setContent(data.content)
+          setOriginal(data.content)
+          setError("Loaded default prompt (storage unavailable)")
+        } else {
+          setError("Failed to load prompt")
+        }
+      } catch {
+        setError("Failed to load prompt")
+      }
     } finally {
       setLoading(false)
     }

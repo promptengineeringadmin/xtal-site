@@ -16,6 +16,7 @@ export default function PromptsPage() {
   const [savingMarketing, setSavingMarketing] = useState(false)
   const [queryEnhancementEnabled, setQueryEnhancementEnabled] = useState(true)
   const [settingsSaving, setSettingsSaving] = useState(false)
+  const [backendWarning, setBackendWarning] = useState(false)
 
   useEffect(() => {
     setLoading(true)
@@ -29,21 +30,33 @@ export default function PromptsPage() {
           fetch(`/api/admin/settings${cp}`),
         ])
 
+        // Defaults always resolve (hardcoded fallback in route)
+        let loadedDefaults: PromptDefaults | null = null
+        if (defaultsRes.ok) {
+          loadedDefaults = await defaultsRes.json()
+          setDefaults(loadedDefaults)
+        }
+
         if (brandRes.ok) {
           const data = await brandRes.json()
           setBrandPrompt(data.brand_prompt ?? "")
+        } else if (loadedDefaults) {
+          setBrandPrompt(loadedDefaults.default_brand_prompt ?? "")
         }
+
         if (marketingRes.ok) {
           const data = await marketingRes.json()
           setMarketingPrompt(data.marketing_prompt ?? "")
+        } else if (loadedDefaults) {
+          setMarketingPrompt(loadedDefaults.default_marketing_prompt ?? "")
         }
-        if (defaultsRes.ok) {
-          const data = await defaultsRes.json()
-          setDefaults(data)
-        }
+
         if (settingsRes.ok) {
           const data = await settingsRes.json()
           setQueryEnhancementEnabled(data.query_enhancement_enabled ?? true)
+          if (data._source === "redis_fallback") {
+            setBackendWarning(true)
+          }
         }
       } catch (err) {
         setError(
@@ -97,6 +110,10 @@ export default function PromptsPage() {
         body: JSON.stringify({ query_enhancement_enabled: newValue }),
       })
       if (!res.ok) throw new Error(`Save failed: ${res.status}`)
+      const data = await res.json()
+      if (data._source === "redis_fallback") {
+        setBackendWarning(true)
+      }
     } catch (err) {
       console.error("Failed to save settings:", err)
       setQueryEnhancementEnabled(!newValue) // revert on error
@@ -135,6 +152,13 @@ export default function PromptsPage() {
       {error && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
           {error}
+        </div>
+      )}
+
+      {backendWarning && (
+        <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-700">
+          Backend unreachable — settings saved locally. Search backend may not reflect this change until it reconnects.
+          <button onClick={() => setBackendWarning(false)} className="ml-2 underline">dismiss</button>
         </div>
       )}
 

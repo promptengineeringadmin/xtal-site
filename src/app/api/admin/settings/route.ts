@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server"
 import { adminFetch } from "@/lib/admin/api"
+import {
+  getQueryEnhancement,
+  saveQueryEnhancement,
+} from "@/lib/admin/admin-settings"
 
 export async function GET(request: Request) {
   try {
@@ -8,12 +12,21 @@ export async function GET(request: Request) {
     const params = new URLSearchParams({ collection: collection ?? "" })
 
     const res = await adminFetch(`/api/vendor/settings?${params.toString()}`)
-    const data = await res.json()
-    return NextResponse.json(data, { status: res.status })
+    if (res.ok) {
+      const data = await res.json()
+      return NextResponse.json(data)
+    }
+    // Backend returned an error — fall back to Redis
   } catch (error) {
     console.error("Settings GET proxy error:", error)
-    return NextResponse.json({ error: "Failed to fetch settings" }, { status: 502 })
   }
+
+  // Fallback: read from Redis
+  const queryEnhancementEnabled = await getQueryEnhancement()
+  return NextResponse.json({
+    query_enhancement_enabled: queryEnhancementEnabled,
+    _source: "redis_fallback",
+  })
 }
 
 export async function PUT(request: Request) {
@@ -22,15 +35,38 @@ export async function PUT(request: Request) {
     const collection = searchParams.get("collection") || process.env.XTAL_COLLECTION
     const body = await request.json()
     const params = new URLSearchParams({ collection: collection ?? "" })
+
+    // Always persist to Redis as local fallback
+    if (body.query_enhancement_enabled !== undefined) {
+      try {
+        await saveQueryEnhancement(body.query_enhancement_enabled)
+      } catch (e) {
+        console.error("Redis settings save error:", e)
+      }
+    }
+
+    // Try backend
     const res = await adminFetch(`/api/vendor/settings?${params.toString()}`, {
       method: "PUT",
       body: JSON.stringify(body),
     })
 
-    const data = await res.json()
-    return NextResponse.json(data, { status: res.status })
+    if (res.ok) {
+      const data = await res.json()
+      return NextResponse.json(data)
+    }
+
+    // Backend failed but Redis succeeded — return success with warning
+    return NextResponse.json({
+      ...body,
+      _source: "redis_fallback",
+    })
   } catch (error) {
     console.error("Settings PUT proxy error:", error)
-    return NextResponse.json({ error: "Failed to update settings" }, { status: 502 })
+
+    // Backend unreachable — Redis save already happened above
+    return NextResponse.json({
+      _source: "redis_fallback",
+    })
   }
 }

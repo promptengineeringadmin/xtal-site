@@ -17,7 +17,15 @@ export async function GET(request: Request) {
     }
 
     const content = await getExplainPrompt()
-    const history = includeHistory ? await getExplainPromptHistory() : []
+
+    let history: Awaited<ReturnType<typeof getExplainPromptHistory>> = []
+    if (includeHistory) {
+      try {
+        history = await getExplainPromptHistory()
+      } catch {
+        // Redis unavailable for history — still return the prompt content
+      }
+    }
 
     return NextResponse.json({
       content,
