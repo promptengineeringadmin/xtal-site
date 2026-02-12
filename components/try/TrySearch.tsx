@@ -61,18 +61,6 @@ export default function TrySearch() {
         </div>
       )}
 
-      {/* Aspects — full width, directly below search bar */}
-      {aspects.length > 0 && (
-        <div className="mt-4 mb-2">
-          <AspectChips
-            aspects={aspects}
-            selectedAspects={selectedAspects}
-            onSelect={selectAspect}
-            onRemove={removeAspect}
-          />
-        </div>
-      )}
-
       {/* Main layout: optional filter rail + results */}
       <div
         className={`mt-6 ${
@@ -94,8 +82,20 @@ export default function TrySearch() {
           />
         )}
 
-        {/* Right column: applied filters + aspects + grid */}
+        {/* Right column: aspects + results info + grid */}
         <div>
+          {/* Aspect chips — centered in content column */}
+          {aspects.length > 0 && (
+            <div className="mb-4">
+              <AspectChips
+                aspects={aspects}
+                selectedAspects={selectedAspects}
+                onSelect={selectAspect}
+                onRemove={removeAspect}
+              />
+            </div>
+          )}
+
           {/* Results info */}
           {query && !isSearching && !isFiltering && results.length > 0 && (
             <div className="flex items-center gap-3 text-xs text-slate-400 mb-3">

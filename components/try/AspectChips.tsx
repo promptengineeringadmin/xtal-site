@@ -21,7 +21,11 @@ export default function AspectChips({
   if (allAspects.length === 0) return null
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-col items-center gap-2">
+      <span className="text-[11px] uppercase tracking-wider text-slate-400 font-medium">
+        Keep exploring
+      </span>
+      <div className="flex flex-wrap justify-center gap-2">
       {allAspects.map((aspect) => {
         const isSelected = selectedAspects.includes(aspect)
         return (
@@ -39,6 +43,7 @@ export default function AspectChips({
           </button>
         )
       })}
+      </div>
     </div>
   )
 }
