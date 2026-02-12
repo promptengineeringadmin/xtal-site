@@ -122,6 +122,8 @@ export function extractProductSamples(html: string): string[] {
       /class="[^"]*product[_-]?title[^"]*"[^>]*>([^<]{3,80})</gi,
       /class="[^"]*product[_-]?name[^"]*"[^>]*>([^<]{3,80})</gi,
       /class="[^"]*card[_-]?title[^"]*"[^>]*>([^<]{3,80})</gi,
+      // WooCommerce: <a href="/product/slug/">Product Title</a>
+      /href="[^"]*\/product\/[^"]*"[^>]*>([^<]{3,80})</gi,
     ]
     for (const pattern of titlePatterns) {
       for (const match of Array.from(html.matchAll(pattern))) {

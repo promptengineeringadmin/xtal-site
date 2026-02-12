@@ -111,10 +111,10 @@ export default function ScoreHero({ score, grade, storeName, storeUrl }: ScoreHe
           </span>
           <span className="text-lg text-white/60">
             {grade === "A" && "Excellent"}
-            {grade === "B" && "Good"}
-            {grade === "C" && "Needs Work"}
-            {grade === "D" && "Poor"}
-            {grade === "F" && "Failing"}
+            {grade === "B" && "Strong"}
+            {grade === "C" && "Average"}
+            {grade === "D" && "Below Average"}
+            {grade === "F" && "Needs Improvement"}
           </span>
         </div>
 

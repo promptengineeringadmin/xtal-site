@@ -27,10 +27,10 @@ export const DIMENSION_LABELS: Record<DimensionKey, string> = {
 // ─── Grading ────────────────────────────────────────────────
 
 export function scoreToGrade(score: number): Grade {
-  if (score >= 90) return "A"
-  if (score >= 80) return "B"
-  if (score >= 70) return "C"
-  if (score >= 60) return "D"
+  if (score >= 85) return "A"
+  if (score >= 70) return "B"
+  if (score >= 55) return "C"
+  if (score >= 40) return "D"
   return "F"
 }
 
@@ -64,8 +64,9 @@ export function estimateRevenueImpact(
   const avgOrderValue = 85
 
   let lostConversionPct: number
-  if (overallScore < 50) lostConversionPct = 0.30
-  else if (overallScore < 70) lostConversionPct = 0.15
+  if (overallScore < 40) lostConversionPct = 0.30
+  else if (overallScore < 55) lostConversionPct = 0.20
+  else if (overallScore < 70) lostConversionPct = 0.10
   else if (overallScore < 85) lostConversionPct = 0.05
   else lostConversionPct = 0.01
 

@@ -36,10 +36,10 @@ const GRADE_COLORS: Record<string, { bg: string; text: string }> = {
 
 const GRADE_DESCRIPTIONS: Record<string, string> = {
   A: "Excellent",
-  B: "Good",
-  C: "Needs Work",
-  D: "Poor",
-  F: "Failing",
+  B: "Strong",
+  C: "Average",
+  D: "Below Average",
+  F: "Needs Improvement",
 }
 
 const DIMENSION_COLORS = [

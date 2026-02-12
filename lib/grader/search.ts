@@ -1,5 +1,18 @@
 import type { Platform, QueryResult, SearchResult, TestQuery } from "./types"
 
+// ─── HTML entity decoding for scraped titles ────────────────
+
+function decodeEntities(text: string): string {
+  return text
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)))
+}
+
 // ─── Search execution via Playwright ────────────────────────
 // This module provides the search execution logic.
 // The actual Playwright browser launch happens in the API route
@@ -44,6 +57,44 @@ async function searchShopify(
   }
 }
 
+// ─── Extract search results section from full page HTML ──────
+// Avoids matching navigation/menu product links that appear sitewide.
+
+function extractSearchResultsSection(html: string): string | null {
+  // Look for common search results container patterns.
+  // We find an opening tag and grab a generous chunk after it.
+  const containerPatterns = [
+    // WooCommerce
+    /(<(?:div|section|main)[^>]*class="[^"]*woocommerce[^"]*"[^>]*>)/i,
+    // Generic search results containers
+    /(<(?:div|section|main)[^>]*(?:id|class)="[^"]*search[_-]?results?[^"]*"[^>]*>)/i,
+    /(<(?:div|section|main)[^>]*(?:id|class)="[^"]*results?[_-]?container[^"]*"[^>]*>)/i,
+    /(<(?:div|section|main)[^>]*(?:id|class)="[^"]*product[_-]?list[^"]*"[^>]*>)/i,
+    /(<(?:div|section|main)[^>]*(?:id|class)="[^"]*products[^"]*"[^>]*>)/i,
+    // BigCommerce
+    /(<(?:div|section|main)[^>]*(?:id|class)="[^"]*productGrid[^"]*"[^>]*>)/i,
+    // Magento
+    /(<(?:div|section|main)[^>]*class="[^"]*search[. ]results[^"]*"[^>]*>)/i,
+    // Generic main content
+    /(<main[^>]*>)/i,
+  ]
+
+  for (const pattern of containerPatterns) {
+    const match = html.match(pattern)
+    if (match && match.index !== undefined) {
+      // Take from the container start to 50KB after it (or end of doc)
+      const start = match.index
+      const section = html.slice(start, start + 50_000)
+      // Sanity check: only use if section has some product-like content
+      if (/product|item|result/i.test(section)) {
+        return section
+      }
+    }
+  }
+
+  return null
+}
+
 // ─── Execute search via URL fetch (generic fallback) ────────
 
 async function searchViaUrl(
@@ -65,26 +116,58 @@ async function searchViaUrl(
 
   const html = await res.text()
 
-  // Try to extract product titles from the search results HTML
+  // Try to extract product titles from the search results HTML.
+  // Strategy: first try to isolate the search results container,
+  // then apply high-confidence class-based patterns.
+  // Only fall back to URL-based patterns on the scoped HTML to avoid
+  // matching navigation/menu links that appear across the whole page.
+
   const results: SearchResult[] = []
 
-  // Common patterns for product titles in search results
-  const patterns = [
+  // Attempt to extract just the search results section of the page
+  const scopedHtml = extractSearchResultsSection(html) ?? html
+  const isScoped = scopedHtml !== html
+
+  // High-confidence patterns: class-based selectors specific to search results
+  const highConfidencePatterns = [
     /class="[^"]*product[_-]?title[^"]*"[^>]*>([^<]{3,100})</gi,
     /class="[^"]*product[_-]?name[^"]*"[^>]*>([^<]{3,100})</gi,
     /class="[^"]*card[_-]?title[^"]*"[^>]*>([^<]{3,100})</gi,
     /class="[^"]*search[_-]?result[_-]?title[^"]*"[^>]*>([^<]{3,100})</gi,
     /<h[2-4][^>]*class="[^"]*title[^"]*"[^>]*>([^<]{3,100})</gi,
+    // Elementor/WP: entry titles (class-based, reasonably specific)
+    /class="[^"]*entry[_-]?title[^"]*"[^>]*>\s*<a[^>]*>([^<]{3,100})</gi,
   ]
 
-  for (const pattern of patterns) {
-    for (const match of Array.from(html.matchAll(pattern))) {
-      const title = match[1].trim()
-      if (title && !results.some((r) => r.title === title)) {
+  // Low-confidence patterns: URL-based, match product links anywhere on page.
+  // Only safe to use on scoped HTML (search results section).
+  const lowConfidencePatterns = [
+    /href="[^"]*\/product\/[^"]*"[^>]*>([^<]{3,100})</gi,
+    /href="[^"]*\/products?\/[^"]*"[^>]*>([^<]{3,100})</gi,
+  ]
+
+  // First pass: high-confidence patterns on scoped HTML
+  for (const pattern of highConfidencePatterns) {
+    for (const match of Array.from(scopedHtml.matchAll(pattern))) {
+      const title = decodeEntities(match[1].trim())
+      if (title && title.length > 2 && !results.some((r) => r.title === title)) {
         results.push({ title })
       }
     }
     if (results.length >= 10) break
+  }
+
+  // Second pass: if no results yet, try low-confidence patterns on SCOPED html only
+  if (results.length === 0 && isScoped) {
+    for (const pattern of lowConfidencePatterns) {
+      for (const match of Array.from(scopedHtml.matchAll(pattern))) {
+        const title = decodeEntities(match[1].trim())
+        if (title && title.length > 2 && !results.some((r) => r.title === title)) {
+          results.push({ title })
+        }
+      }
+      if (results.length >= 10) break
+    }
   }
 
   // Try to extract result count
@@ -93,6 +176,10 @@ async function searchViaUrl(
     /(\d+)\s*results?\s*(?:found|for)/i,
     /showing\s*\d+\s*(?:–|-)\s*\d+\s*of\s*(\d+)/i,
     /(\d+)\s*products?\s*found/i,
+    // WooCommerce: "Showing all X results" or "Showing 1–12 of X results"
+    /showing\s+(?:all\s+)?(\d+)\s+results?/i,
+    // Generic: "X items" or "X products"
+    /(\d+)\s*(?:items?|products?)\s*$/im,
   ]
   for (const cp of countPatterns) {
     const m = html.match(cp)

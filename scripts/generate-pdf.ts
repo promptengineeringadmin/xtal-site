@@ -5,6 +5,7 @@
 
 import { renderToFile } from "@react-pdf/renderer"
 import { GraderPdfDocument } from "../lib/grader/pdf-document"
+import { scoreToGrade, estimateRevenueImpact } from "../lib/grader/scoring"
 import * as fs from "fs"
 import * as path from "path"
 
@@ -21,6 +22,15 @@ async function main() {
   // Add missing fields if this is a raw report from run-grader.ts
   if (!report.id) report.id = "test-" + Date.now()
   if (!report.emailCaptured) report.emailCaptured = false
+
+  // Recompute grades from scores (in case thresholds changed)
+  report.overallGrade = scoreToGrade(report.overallScore)
+  if (report.dimensions) {
+    for (const dim of report.dimensions) {
+      dim.grade = scoreToGrade(dim.score)
+    }
+  }
+  report.revenueImpact = estimateRevenueImpact(report.overallScore)
 
   const outputPath = process.argv[3] || path.join(
     path.dirname(reportPath),
