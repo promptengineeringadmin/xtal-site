@@ -98,10 +98,14 @@ export default function TrySearch() {
 
           {/* Results info */}
           {query && !isSearching && !isFiltering && results.length > 0 && (
-            <div className="flex items-center gap-3 text-xs text-slate-400 mb-3">
-              <span>{total} results</span>
-              <span>&middot;</span>
-              <span>{queryTime.toFixed(2)}s</span>
+            <div className="flex items-baseline justify-between mb-3">
+              <p className="text-sm text-slate-500">
+                Showing results for{" "}
+                <span className="font-semibold text-xtal-navy">&ldquo;{query}&rdquo;</span>
+              </p>
+              <span className="text-xs text-slate-400">
+                {total} results &middot; {queryTime.toFixed(2)}s
+              </span>
             </div>
           )}
 
