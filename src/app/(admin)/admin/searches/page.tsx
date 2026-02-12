@@ -29,8 +29,12 @@ export default function SearchesPage() {
       params.set("event_types", "search_request")
       params.set("collection", collection)
       params.set("limit", String(limit))
-      if (startDate) params.set("start_date", startDate)
-      if (endDate) params.set("end_date", endDate)
+      if (startDate) params.set("start_date", `${startDate}T00:00:00Z`)
+      if (endDate) {
+        const endBoundary = new Date(`${endDate}T23:59:59Z`)
+        const now = new Date()
+        params.set("end_date", (endBoundary > now ? now : endBoundary).toISOString())
+      }
 
       const res = await fetch(`/api/admin/metrics/events?${params.toString()}`)
       if (!res.ok) throw new Error(`Failed: ${res.status}`)

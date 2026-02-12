@@ -7,6 +7,7 @@ import ProductGrid from "./ProductGrid"
 import AspectChips from "./AspectChips"
 import FilterRail from "./FilterRail"
 import AppliedFilters from "./AppliedFilters"
+import { formatFacetValue } from "@/lib/facet-utils"
 import MobileFilterDrawer from "./MobileFilterDrawer"
 import PriceSlider from "./PriceSlider"
 import { ChevronDown, ChevronUp } from "lucide-react"
@@ -49,12 +50,24 @@ export default function TrySearch() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Search bar — full width above grid */}
-      <SearchBar onSearch={search} loading={loading} initialQuery={query} />
+      <SearchBar onSearch={search} loading={loading} initialQuery={query} hasSearched={!!query} />
 
       {/* Error */}
       {error && (
         <div className="mt-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg">
           {error}
+        </div>
+      )}
+
+      {/* Aspects — full width, directly below search bar */}
+      {aspects.length > 0 && (
+        <div className="mt-4 mb-2">
+          <AspectChips
+            aspects={aspects}
+            selectedAspects={selectedAspects}
+            onSelect={selectAspect}
+            onRemove={removeAspect}
+          />
         </div>
       )}
 
@@ -89,27 +102,6 @@ export default function TrySearch() {
               <span>{queryTime.toFixed(2)}s</span>
             </div>
           )}
-
-          {/* Applied filters above grid (dual position) */}
-          <div className="mb-3">
-            <AppliedFilters
-              facetFilters={activeFacetFilters}
-              priceRange={priceRange}
-              onRemoveFacet={applyFacetFilter}
-              onRemovePrice={() => applyPriceRange(null)}
-              onClearAll={clearAllFilters}
-            />
-          </div>
-
-          {/* Aspects */}
-          <div className="mb-4">
-            <AspectChips
-              aspects={aspects}
-              selectedAspects={selectedAspects}
-              onSelect={selectAspect}
-              onRemove={removeAspect}
-            />
-          </div>
 
           {/* Product grid */}
           <ProductGrid
@@ -267,7 +259,7 @@ function MobileFilterContent({
                         onChange={() => onFacetToggle(prefix, value)}
                         className="w-3.5 h-3.5 rounded border-slate-300 text-xtal-navy focus:ring-xtal-navy/30 focus:ring-offset-0"
                       />
-                      <span className="text-xs text-slate-600 flex-1">{value}</span>
+                      <span className="text-xs text-slate-600 flex-1">{formatFacetValue(value)}</span>
                       <span className="text-[10px] text-slate-400">{count}</span>
                     </label>
                   )

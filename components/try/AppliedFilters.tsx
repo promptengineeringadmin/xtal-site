@@ -2,6 +2,7 @@
 
 import { X } from "lucide-react"
 import type { PriceRange } from "@/lib/xtal-types"
+import { formatFacetValue } from "@/lib/facet-utils"
 
 const FACET_LABELS: Record<string, string> = {
   "product-subcategory": "Category",
@@ -41,7 +42,7 @@ export default function AppliedFilters({
   const facetChips: { prefix: string; value: string; label: string }[] = []
   for (const [prefix, values] of Object.entries(facetFilters)) {
     for (const value of values) {
-      facetChips.push({ prefix, value, label: `${humanizePrefix(prefix)}: ${value}` })
+      facetChips.push({ prefix, value, label: `${humanizePrefix(prefix)}: ${formatFacetValue(value)}` })
     }
   }
 

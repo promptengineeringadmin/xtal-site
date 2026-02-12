@@ -53,6 +53,14 @@ export interface PromptDefaults {
   default_marketing_prompt: string
 }
 
+export interface VendorSettings {
+  vendor_id: string
+  collection_name: string
+  query_enhancement_enabled: boolean
+  created_at: string
+  updated_at: string
+}
+
 export type EventType = MetricEvent["event_type"]
 
 export const EVENT_TYPE_LABELS: Record<EventType, string> = {

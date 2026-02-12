@@ -10,10 +10,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "XTAL_BACKEND_URL not configured" }, { status: 500 })
     }
 
+    // Extract geo headers from Vercel
+    const geoCountry = request.headers.get("x-vercel-ip-country") || undefined
+    const geoRegion = request.headers.get("x-vercel-ip-country-region") || undefined
+
+    const enrichedBody = {
+      ...body,
+      collection,
+      geo_country: geoCountry,
+      geo_region: geoRegion,
+    }
+
     const res = await fetch(`${backendUrl}/api/search`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...body, collection }),
+      body: JSON.stringify(enrichedBody),
     })
 
     const data = await res.json()

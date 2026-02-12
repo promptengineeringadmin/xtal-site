@@ -15,9 +15,10 @@ interface SearchBarProps {
   onSearch: (query: string) => void
   loading: boolean
   initialQuery?: string
+  hasSearched?: boolean
 }
 
-export default function SearchBar({ onSearch, loading, initialQuery = "" }: SearchBarProps) {
+export default function SearchBar({ onSearch, loading, initialQuery = "", hasSearched = false }: SearchBarProps) {
   const [value, setValue] = useState(initialQuery)
 
   function handleSubmit(e: React.FormEvent) {
@@ -61,19 +62,21 @@ export default function SearchBar({ onSearch, loading, initialQuery = "" }: Sear
         </button>
       </form>
 
-      <div className="mt-3 flex flex-wrap gap-2">
-        <span className="text-xs text-slate-400 py-1">Try:</span>
-        {SUGGESTIONS.map((s) => (
-          <button
-            key={s}
-            onClick={() => handleSuggestion(s)}
-            className="text-xs px-3 py-1 rounded-full border border-slate-200 text-slate-600
-                       hover:border-xtal-navy hover:text-xtal-navy transition-colors"
-          >
-            {s}
-          </button>
-        ))}
-      </div>
+      {!hasSearched && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          <span className="text-xs text-slate-400 py-1">Try:</span>
+          {SUGGESTIONS.map((s) => (
+            <button
+              key={s}
+              onClick={() => handleSuggestion(s)}
+              className="text-xs px-3 py-1 rounded-full border border-slate-200 text-slate-600
+                         hover:border-xtal-navy hover:text-xtal-navy transition-colors"
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

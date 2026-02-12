@@ -14,16 +14,19 @@ export default function PromptsPage() {
   const [error, setError] = useState<string | null>(null)
   const [savingBrand, setSavingBrand] = useState(false)
   const [savingMarketing, setSavingMarketing] = useState(false)
+  const [queryEnhancementEnabled, setQueryEnhancementEnabled] = useState(true)
+  const [settingsSaving, setSettingsSaving] = useState(false)
 
   useEffect(() => {
     setLoading(true)
     async function load() {
       try {
         const cp = `?collection=${encodeURIComponent(collection)}`
-        const [brandRes, marketingRes, defaultsRes] = await Promise.all([
+        const [brandRes, marketingRes, defaultsRes, settingsRes] = await Promise.all([
           fetch(`/api/admin/prompts/brand${cp}`),
           fetch(`/api/admin/prompts/marketing${cp}`),
           fetch(`/api/admin/prompts/defaults${cp}`),
+          fetch(`/api/admin/settings${cp}`),
         ])
 
         if (brandRes.ok) {
@@ -37,6 +40,10 @@ export default function PromptsPage() {
         if (defaultsRes.ok) {
           const data = await defaultsRes.json()
           setDefaults(data)
+        }
+        if (settingsRes.ok) {
+          const data = await settingsRes.json()
+          setQueryEnhancementEnabled(data.query_enhancement_enabled ?? true)
         }
       } catch (err) {
         setError(
@@ -76,6 +83,25 @@ export default function PromptsPage() {
       setMarketingPrompt(newPrompt)
     } finally {
       setSavingMarketing(false)
+    }
+  }
+
+  async function toggleQueryEnhancement() {
+    const newValue = !queryEnhancementEnabled
+    setQueryEnhancementEnabled(newValue)
+    setSettingsSaving(true)
+    try {
+      const res = await fetch(`/api/admin/settings?collection=${encodeURIComponent(collection)}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query_enhancement_enabled: newValue }),
+      })
+      if (!res.ok) throw new Error(`Save failed: ${res.status}`)
+    } catch (err) {
+      console.error("Failed to save settings:", err)
+      setQueryEnhancementEnabled(!newValue) // revert on error
+    } finally {
+      setSettingsSaving(false)
     }
   }
 
@@ -127,6 +153,37 @@ export default function PromptsPage() {
           onSave={saveMarketing}
           saving={savingMarketing}
         />
+
+        {/* Query Enhancement Toggle */}
+        <div className="glass-card p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-xtal-navy">Query Enhancement</h3>
+              <p className="text-sm text-slate-500 mt-1">
+                When enabled, search queries are rewritten by AI to improve relevance.
+                Disable to use exact user queries for more predictable results.
+              </p>
+            </div>
+            <button
+              onClick={toggleQueryEnhancement}
+              disabled={settingsSaving}
+              className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${
+                queryEnhancementEnabled ? "bg-xtal-navy" : "bg-slate-300"
+              } ${settingsSaving ? "opacity-50" : ""}`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  queryEnhancementEnabled ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+          </div>
+          {!queryEnhancementEnabled && (
+            <div className="mt-3 text-xs text-amber-600 bg-amber-50 rounded px-3 py-2">
+              Query enhancement is off. Search queries will not be rewritten by AI.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

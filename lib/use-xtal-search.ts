@@ -8,6 +8,7 @@ import type {
   AspectsResponse,
   PriceRange,
 } from "./xtal-types"
+import { normalizeFacets, expandFilters } from "./facet-utils"
 
 export function useXtalSearch() {
   const [query, setQuery] = useState("")
@@ -27,6 +28,24 @@ export function useXtalSearch() {
   // Facets (from computed_facets) — populated in M2
   const [computedFacets, setComputedFacets] = useState<Record<string, Record<string, number>> | null>(null)
   const [activeFacetFilters, setActiveFacetFilters] = useState<Record<string, string[]>>({})
+
+  // Expansion map: canonical facet value → original backend values (for synonym normalization)
+  const facetExpansionMap = useRef<Record<string, Record<string, string[]>>>({})
+
+  // Synonym groups loaded from /api/admin/synonyms on mount
+  const synonymGroups = useRef<string[][]>([])
+
+  /** Normalize raw facets from the backend and store the expansion map */
+  function setNormalizedFacets(raw: Record<string, Record<string, number>> | null) {
+    if (!raw) {
+      setComputedFacets(null)
+      facetExpansionMap.current = {}
+      return
+    }
+    const { facets, expansionMap } = normalizeFacets(raw, synonymGroups.current)
+    setComputedFacets(facets)
+    facetExpansionMap.current = expansionMap
+  }
 
   // Price
   const [priceRange, setPriceRange] = useState<PriceRange | null>(null)
@@ -106,7 +125,7 @@ export function useXtalSearch() {
       } else if (Object.keys(searchData.computed_facets).length === 0) {
         console.warn("Search response has empty computed_facets {} — products may lack {prefix}_{value} tags.")
       }
-      setComputedFacets(searchData.computed_facets || null)
+      setNormalizedFacets(searchData.computed_facets || null)
 
       setAspects(aspectsData.aspects || [])
     } catch (err) {
@@ -141,7 +160,9 @@ export function useXtalSearch() {
     const facetsToSend = overrides.facetFilters ?? activeFacetFilters
     const priceToSend = overrides.priceRange !== undefined ? overrides.priceRange : priceRange
 
-    const hasActiveFacets = Object.values(facetsToSend).some(v => v.length > 0)
+    // Expand canonical facet values back to originals for the backend
+    const expandedFacets = expandFilters(facetsToSend, facetExpansionMap.current)
+    const hasActiveFacets = Object.values(expandedFacets).some(v => v.length > 0)
 
     // Convert user-facing dollar price range back to cents for the backend
     const priceRangeInCents = priceToSend
@@ -159,7 +180,7 @@ export function useXtalSearch() {
           query,
           search_context: searchContext,
           selected_aspects: aspectsToSend.length > 0 ? aspectsToSend : undefined,
-          facet_filters: hasActiveFacets ? facetsToSend : undefined,
+          facet_filters: hasActiveFacets ? expandedFacets : undefined,
           price_range: priceRangeInCents,
         }),
         signal: controller.signal,
@@ -175,7 +196,7 @@ export function useXtalSearch() {
       setTotal(data.total || 0)
       setQueryTime(data.query_time || 0)
       setRelevanceScores(data.relevance_scores || {})
-      setComputedFacets(data.computed_facets || null)
+      setNormalizedFacets(data.computed_facets || null)
       // Do NOT update searchContext — keep the original
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return
@@ -264,13 +285,28 @@ export function useXtalSearch() {
     }
   }, [query])
 
-  // --- Auto-search from URL on mount ---
+  // --- Load synonym groups + auto-search from URL on mount ---
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const q = params.get("q")
-    if (q) {
-      search(q)
+    async function init() {
+      // Load synonyms (non-blocking — falls back to empty if unavailable)
+      try {
+        const res = await fetch("/api/admin/synonyms")
+        if (res.ok) {
+          const data = await res.json()
+          synonymGroups.current = data.groups || []
+        }
+      } catch {
+        // Synonyms unavailable — normalization proceeds without merging
+      }
+
+      // Auto-search from URL
+      const params = new URLSearchParams(window.location.search)
+      const q = params.get("q")
+      if (q) {
+        search(q)
+      }
     }
+    init()
   }, [search])
 
   return {

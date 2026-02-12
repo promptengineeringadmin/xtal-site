@@ -20,6 +20,8 @@ export interface SearchRequest {
   search_context?: SearchContext
   facet_filters?: Record<string, string[]>
   price_range?: PriceRange
+  geo_country?: string
+  geo_region?: string
 }
 
 export interface SearchResponse {

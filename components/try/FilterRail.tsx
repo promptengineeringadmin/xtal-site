@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import type { Product, PriceRange } from "@/lib/xtal-types"
+import { formatFacetValue } from "@/lib/facet-utils"
 import PriceSlider from "./PriceSlider"
 import AppliedFilters from "./AppliedFilters"
 
@@ -213,7 +214,7 @@ export default function FilterRail({
                                    focus:ring-xtal-navy/30 focus:ring-offset-0"
                       />
                       <span className="text-xs text-slate-600 flex-1 group-hover:text-slate-800 transition-colors">
-                        {value}
+                        {formatFacetValue(value)}
                       </span>
                       <span className="text-[10px] text-slate-400">{count}</span>
                     </label>
