@@ -38,8 +38,11 @@ export default function ProductGrid({
   if (!query) {
     return (
       <div className="text-center py-16">
-        <p className="text-slate-500 text-sm">Search for products to see AI-powered results</p>
-        <p className="text-slate-400 text-xs mt-1">Try natural language queries like &ldquo;comfortable headphones under $50&rdquo;</p>
+        <p className="text-slate-700 text-base font-medium">Describe what a customer is looking for</p>
+        <p className="text-slate-400 text-sm mt-2">
+          XTAL understands shopping intent. Try natural language like
+          &ldquo;lightweight jacket for spring hiking&rdquo;
+        </p>
       </div>
     )
   }

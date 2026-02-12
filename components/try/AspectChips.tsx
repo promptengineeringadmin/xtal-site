@@ -1,5 +1,7 @@
 "use client"
 
+import { Sparkles } from "lucide-react"
+
 interface AspectChipsProps {
   aspects: string[]
   selectedAspects: string[]
@@ -21,18 +23,20 @@ export default function AspectChips({
   if (allAspects.length === 0) return null
 
   return (
-    <div className="flex flex-col items-center gap-2">
-      <span className="text-[11px] uppercase tracking-wider text-slate-400 font-medium">
-        Keep exploring
+    <div className="flex flex-col gap-2">
+      <span className="text-[11px] uppercase tracking-wider text-slate-400 font-medium flex items-center gap-1.5">
+        <Sparkles size={12} className="text-xtal-navy/60" />
+        AI suggestions
       </span>
-      <div className="flex flex-wrap justify-center gap-2">
+      <div className="flex flex-wrap gap-2">
       {allAspects.map((aspect) => {
         const isSelected = selectedAspects.includes(aspect)
         return (
           <button
             key={aspect}
             onClick={() => (isSelected ? onRemove(aspect) : onSelect(aspect))}
-            className={`text-xs px-3 py-1.5 rounded-full transition-colors ${
+            className={`text-xs px-3 py-1.5 rounded-full transition-colors
+                       focus:outline-none focus:ring-2 focus:ring-xtal-navy/50 focus:ring-offset-1 ${
               isSelected
                 ? "bg-xtal-navy text-white"
                 : "border border-xtal-navy/30 text-xtal-navy hover:border-xtal-navy"

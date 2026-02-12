@@ -4,11 +4,11 @@ import { useState } from "react"
 import { Search } from "lucide-react"
 
 const SUGGESTIONS = [
-  "wireless headphones for travel",
-  "running shoes under $100",
-  "organic skincare for sensitive skin",
-  "birthday gift for mom",
-  "smart home devices",
+  "dress shirt for a wedding",
+  "comfortable everyday shoes",
+  "gift for dad under $75",
+  "lightweight layers for travel",
+  "bold statement accessories",
 ]
 
 interface SearchBarProps {
@@ -45,7 +45,7 @@ export default function SearchBar({ onSearch, loading, initialQuery = "", hasSea
             type="text"
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            placeholder="Search for anything... try natural language"
+            placeholder="Describe what a customer is looking for..."
             className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 bg-white text-sm
                        focus:outline-none focus:ring-2 focus:ring-xtal-navy/30 focus:border-xtal-navy
                        transition-colors"
@@ -64,7 +64,7 @@ export default function SearchBar({ onSearch, loading, initialQuery = "", hasSea
 
       {!hasSearched && (
         <div className="mt-3 flex flex-wrap gap-2">
-          <span className="text-xs text-slate-400 py-1">Try:</span>
+          <span className="text-xs text-slate-400 py-1">Example queries:</span>
           {SUGGESTIONS.map((s) => (
             <button
               key={s}

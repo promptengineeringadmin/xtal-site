@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useCallback, useEffect } from "react"
+import { useState, useRef, useCallback, useEffect, useMemo } from "react"
 import type {
   Product,
   SearchContext,
@@ -58,6 +58,9 @@ export function useXtalSearch() {
   // Relevance scores
   const [relevanceScores, setRelevanceScores] = useState<Record<string, number>>({})
 
+  // Sort
+  const [sortBy, setSortBy] = useState<"relevance" | "price-asc" | "price-desc">("relevance")
+
   // Abort controller for cancelling in-flight requests
   const abortRef = useRef<AbortController | null>(null)
 
@@ -87,6 +90,7 @@ export function useXtalSearch() {
     setActiveFacetFilters({})
     setPriceRange(null)
     setRelevanceScores({})
+    setSortBy("relevance")
     explainCache.current.clear()
 
     // Update URL
@@ -318,9 +322,20 @@ export function useXtalSearch() {
   const isSearching = loadingState.type === "searching"
   const isFiltering = loadingState.type === "filtering"
 
+  // Client-side sort for price; AI relevance = backend order
+  const sortedResults = useMemo(() => {
+    if (sortBy === "relevance") return results
+    return [...results].sort((a, b) => {
+      const priceA = Array.isArray(a.price) ? Math.min(...a.price) : (a.price ?? 0)
+      const priceB = Array.isArray(b.price) ? Math.min(...b.price) : (b.price ?? 0)
+      return sortBy === "price-asc" ? priceA - priceB : priceB - priceA
+    })
+  }, [results, sortBy])
+
   return {
     query,
     results,
+    sortedResults,
     total,
     loading,
     isSearching,
@@ -334,6 +349,8 @@ export function useXtalSearch() {
     activeFacetFilters,
     priceRange,
     relevanceScores,
+    sortBy,
+    setSortBy,
     search,
     selectAspect,
     removeAspect,

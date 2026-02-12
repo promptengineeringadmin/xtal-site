@@ -16,7 +16,7 @@ import type { PriceRange } from "@/lib/xtal-types"
 export default function TrySearch() {
   const {
     query,
-    results,
+    sortedResults,
     total,
     loading,
     isSearching,
@@ -29,6 +29,9 @@ export default function TrySearch() {
     activeFacetFilters,
     priceRange,
     relevanceScores,
+    sortBy,
+    setSortBy,
+    results,
     search,
     selectAspect,
     removeAspect,
@@ -37,6 +40,14 @@ export default function TrySearch() {
     clearAllFilters,
     explain,
   } = useXtalSearch()
+
+  // Build AI intent summary from aspects
+  const intentSummary = useMemo(() => {
+    if (!query || total === 0) return null
+    if (aspects.length === 0) return `Found ${total} results for "${query}"`
+    const preview = aspects.slice(0, 4).join(", ")
+    return `Found ${total} results for "${query}" including ${preview}, and more`
+  }, [query, total, aspects])
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
@@ -61,13 +72,53 @@ export default function TrySearch() {
         </div>
       )}
 
-      {/* Main layout: optional filter rail + results */}
+      {/* Aspects — aligned with content column, above the grid */}
+      {aspects.length > 0 && (
+        <div className={`mt-5 mb-3 ${hasFilterRail ? "md:grid md:grid-cols-[260px_1fr] md:gap-6" : ""}`}>
+          {hasFilterRail && <div className="hidden md:block" />}
+          <AspectChips
+            aspects={aspects}
+            selectedAspects={selectedAspects}
+            onSelect={selectAspect}
+            onRemove={removeAspect}
+          />
+        </div>
+      )}
+
+      {/* Results info — intent summary + sort */}
+      {query && !isSearching && !isFiltering && sortedResults.length > 0 && (
+        <div className={`mb-3 ${hasFilterRail ? "md:grid md:grid-cols-[260px_1fr] md:gap-6" : ""}`}>
+          {hasFilterRail && <div className="hidden md:block" />}
+          <div className="flex items-baseline justify-between gap-4">
+            <p className="text-sm text-slate-500">
+              {intentSummary}
+            </p>
+            <div className="flex items-baseline gap-3 shrink-0">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                className="text-xs text-slate-600 bg-transparent border border-slate-200 rounded px-2 py-1
+                           focus:outline-none focus:ring-2 focus:ring-xtal-navy/30 focus:border-xtal-navy
+                           cursor-pointer"
+              >
+                <option value="relevance">AI Relevance</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+              </select>
+              <span className="text-xs text-slate-400">
+                {queryTime.toFixed(2)}s
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Main grid: filter rail + product grid — top-aligned */}
       <div
-        className={`mt-6 ${
+        className={`mt-2 ${
           hasFilterRail ? "md:grid md:grid-cols-[260px_1fr] md:gap-6" : ""
         }`}
       >
-        {/* Left rail — desktop only, only when facets are available */}
         {hasFilterRail && (
           <FilterRail
             computedFacets={computedFacets}
@@ -82,43 +133,14 @@ export default function TrySearch() {
           />
         )}
 
-        {/* Right column: aspects + results info + grid */}
-        <div>
-          {/* Aspect chips — centered in content column */}
-          {aspects.length > 0 && (
-            <div className="mb-4">
-              <AspectChips
-                aspects={aspects}
-                selectedAspects={selectedAspects}
-                onSelect={selectAspect}
-                onRemove={removeAspect}
-              />
-            </div>
-          )}
-
-          {/* Results info */}
-          {query && !isSearching && !isFiltering && results.length > 0 && (
-            <div className="flex items-baseline justify-between mb-3">
-              <p className="text-sm text-slate-500">
-                Showing results for{" "}
-                <span className="font-semibold text-xtal-navy">&ldquo;{query}&rdquo;</span>
-              </p>
-              <span className="text-xs text-slate-400">
-                {total} results &middot; {queryTime.toFixed(2)}s
-              </span>
-            </div>
-          )}
-
-          {/* Product grid */}
-          <ProductGrid
-            results={results}
-            relevanceScores={relevanceScores}
-            isSearching={isSearching}
-            isFiltering={isFiltering}
-            query={query}
-            onExplain={explain}
-          />
-        </div>
+        <ProductGrid
+          results={sortedResults}
+          relevanceScores={relevanceScores}
+          isSearching={isSearching}
+          isFiltering={isFiltering}
+          query={query}
+          onExplain={explain}
+        />
       </div>
 
       {/* Mobile filter drawer — only when facets are available */}

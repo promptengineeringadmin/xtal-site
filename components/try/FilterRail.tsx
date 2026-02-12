@@ -104,12 +104,9 @@ export default function FilterRail({
                        scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-            Filters
-          </span>
-          <span className="text-xs text-slate-400">{total} results</span>
-        </div>
+        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          Filters
+        </span>
         {hasAnyActive && (
           <button
             onClick={onClearAll}
