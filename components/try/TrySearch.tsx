@@ -19,6 +19,8 @@ export default function TrySearch() {
     results,
     total,
     loading,
+    isSearching,
+    isFiltering,
     error,
     queryTime,
     aspects,
@@ -95,7 +97,7 @@ export default function TrySearch() {
         {/* Right column: applied filters + aspects + grid */}
         <div>
           {/* Results info */}
-          {query && !loading && results.length > 0 && (
+          {query && !isSearching && !isFiltering && results.length > 0 && (
             <div className="flex items-center gap-3 text-xs text-slate-400 mb-3">
               <span>{total} results</span>
               <span>&middot;</span>
@@ -107,7 +109,8 @@ export default function TrySearch() {
           <ProductGrid
             results={results}
             relevanceScores={relevanceScores}
-            loading={loading}
+            isSearching={isSearching}
+            isFiltering={isFiltering}
             query={query}
             onExplain={explain}
           />

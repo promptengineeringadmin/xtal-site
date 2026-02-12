@@ -10,11 +10,16 @@ import type {
 } from "./xtal-types"
 import { normalizeFacets, expandFilters } from "./facet-utils"
 
+type LoadingState =
+  | { type: "idle" }
+  | { type: "searching" }
+  | { type: "filtering" }
+
 export function useXtalSearch() {
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<Product[]>([])
   const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(false)
+  const [loadingState, setLoadingState] = useState<LoadingState>({ type: "idle" })
   const [error, setError] = useState<string | null>(null)
   const [queryTime, setQueryTime] = useState(0)
 
@@ -74,7 +79,7 @@ export function useXtalSearch() {
     setResults([])
     setTotal(0)
     setError(null)
-    setLoading(true)
+    setLoadingState({ type: "searching" })
     setSearchContext(null)
     setAspects([])
     setSelectedAspects([])
@@ -134,7 +139,7 @@ export function useXtalSearch() {
       setError("Search failed. Please try again.")
     } finally {
       if (!controller.signal.aborted) {
-        setLoading(false)
+        setLoadingState({ type: "idle" })
       }
     }
   }, [])
@@ -153,7 +158,7 @@ export function useXtalSearch() {
     const controller = new AbortController()
     abortRef.current = controller
 
-    setLoading(true)
+    setLoadingState({ type: "filtering" })
     setError(null)
 
     const aspectsToSend = overrides.selectedAspects ?? selectedAspects
@@ -204,7 +209,7 @@ export function useXtalSearch() {
       setError("Filter failed. Please try again.")
     } finally {
       if (!controller.signal.aborted) {
-        setLoading(false)
+        setLoadingState({ type: "idle" })
       }
     }
   }, [query, searchContext, selectedAspects, activeFacetFilters, priceRange])
@@ -309,11 +314,17 @@ export function useXtalSearch() {
     init()
   }, [search])
 
+  const loading = loadingState.type !== "idle"
+  const isSearching = loadingState.type === "searching"
+  const isFiltering = loadingState.type === "filtering"
+
   return {
     query,
     results,
     total,
     loading,
+    isSearching,
+    isFiltering,
     error,
     queryTime,
     searchContext,

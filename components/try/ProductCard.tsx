@@ -102,9 +102,9 @@ export default function ProductCard({ product, score, query, onExplain }: Produc
         {explainOpen && (
           <div className="mt-2 p-2 bg-slate-50 rounded text-xs text-slate-600 leading-relaxed">
             {explainLoading ? (
-              <div className="animate-pulse space-y-1">
-                <div className="h-3 bg-slate-200 rounded w-full" />
-                <div className="h-3 bg-slate-200 rounded w-3/4" />
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 border-2 border-slate-300 border-t-xtal-navy rounded-full animate-spin" />
+                <span className="text-slate-500">Analyzing relevance&hellip;</span>
               </div>
             ) : (
               explanation
