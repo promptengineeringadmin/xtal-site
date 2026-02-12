@@ -199,6 +199,7 @@ export default function PromptsPage() {
           defaultPrompt={defaults?.default_brand_prompt ?? ""}
           onSave={saveBrand}
           saving={savingBrand}
+          placeholder="Describe this store's brand identity, voice, and values. Used during product ingestion to shape how product descriptions are embedded for search."
         />
         <PromptEditor
           title="Marketing Prompt"
@@ -248,9 +249,9 @@ export default function PromptsPage() {
               Higher values push marketing-aligned products higher in search results.
             </p>
           </div>
-          <div className="mt-4">
-            <div className="flex items-center gap-4">
-              <span className="text-xs font-medium text-slate-400 w-10">Weak</span>
+          <div className="mt-4 max-w-md">
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-medium text-slate-400 shrink-0">Weak</span>
               <input
                 type="range"
                 min={0}
@@ -266,7 +267,7 @@ export default function PromptsPage() {
                   [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:cursor-pointer
                   disabled:opacity-50"
               />
-              <span className="text-xs font-medium text-slate-400 w-12">Strong</span>
+              <span className="text-xs font-medium text-slate-400 shrink-0">Strong</span>
               <span className="text-sm font-mono text-xtal-navy bg-xtal-ice rounded px-2 py-0.5 min-w-[3rem] text-center">
                 {merchRerank.toFixed(2)}
               </span>

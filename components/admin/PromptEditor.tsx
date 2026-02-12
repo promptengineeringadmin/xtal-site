@@ -9,6 +9,7 @@ interface PromptEditorProps {
   defaultPrompt: string
   onSave: (newPrompt: string) => Promise<void>
   saving?: boolean
+  placeholder?: string
 }
 
 export default function PromptEditor({
@@ -17,6 +18,7 @@ export default function PromptEditor({
   defaultPrompt,
   onSave,
   saving = false,
+  placeholder,
 }: PromptEditorProps) {
   const [value, setValue] = useState(prompt)
   const [confirmRestore, setConfirmRestore] = useState(false)
@@ -85,7 +87,8 @@ export default function PromptEditor({
           value={value}
           onChange={(e) => setValue(e.target.value)}
           rows={12}
-          className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-mono text-slate-700 leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-xtal-navy/20 focus:border-xtal-navy/40 transition-colors"
+          placeholder={placeholder}
+          className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-mono text-slate-700 leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-xtal-navy/20 focus:border-xtal-navy/40 transition-colors placeholder:text-slate-400 placeholder:font-sans placeholder:not-italic"
           spellCheck={false}
         />
 
