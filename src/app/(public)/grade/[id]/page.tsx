@@ -1,11 +1,7 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import Navbar from "@/components/Navbar"
-import ScoreHero from "@/components/grader/ScoreHero"
-import DimensionGrid from "@/components/grader/DimensionGrid"
-import RevenueImpact from "@/components/grader/RevenueImpact"
-import RecommendationList from "@/components/grader/RecommendationList"
-import ShareBar from "@/components/grader/ShareBar"
+import ReportLayout from "@/components/grader/report/ReportLayout"
 import type { GraderReport } from "@/lib/grader/types"
 
 async function getReport(id: string): Promise<GraderReport | null> {
@@ -70,58 +66,23 @@ export default async function SharedReportPage({
   }
 
   return (
-    <main className="min-h-screen bg-[#FCFDFF]">
+    <main className="min-h-screen bg-[#F8FAFC]">
       <Navbar />
-
       <div className="pt-16">
-        <ScoreHero
-          score={report.overallScore}
-          grade={report.overallGrade}
-          storeName={report.storeName}
-          storeUrl={report.storeUrl}
-        />
+        <ReportLayout report={report} />
+      </div>
 
-        <div className="max-w-4xl mx-auto px-6 py-12 space-y-10">
-          <p className="text-lg text-slate-600 text-center">
-            {report.summary}
-          </p>
-
-          <div>
-            <h3 className="text-xl font-bold text-xtal-navy mb-6">
-              Search Health Breakdown
-            </h3>
-            <DimensionGrid
-              dimensions={report.dimensions}
-              showDetail={true}
-            />
-          </div>
-
-          <RevenueImpact
-            impact={report.revenueImpact}
-            overallScore={report.overallScore}
-          />
-
-          <ShareBar
-            reportId={report.id}
-            storeName={report.storeName}
-            score={report.overallScore}
-          />
-
-          <RecommendationList recommendations={report.recommendations} />
-
-          {/* CTA */}
-          <div className="text-center pt-8 border-t border-slate-100">
-            <p className="text-sm text-slate-500 mb-4">
-              Want to see how your search could perform?
-            </p>
-            <a
-              href="/grade"
-              className="inline-block px-8 py-4 bg-xtal-navy text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg shadow-blue-900/20"
-            >
-              Grade Your Store
-            </a>
-          </div>
-        </div>
+      {/* CTA — hidden in print */}
+      <div className="text-center py-12 print:hidden">
+        <p className="text-sm text-slate-500 mb-4">
+          Want to see how your search could perform?
+        </p>
+        <a
+          href="/grade"
+          className="inline-block px-8 py-4 bg-[#0F172A] text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg shadow-blue-900/20"
+        >
+          Grade Your Store
+        </a>
       </div>
     </main>
   )

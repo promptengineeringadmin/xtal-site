@@ -6,12 +6,7 @@ import type { GraderReport, TestQuery, QueryResult, Platform } from "@/lib/grade
 
 import UrlInput from "./UrlInput"
 import GradingProgress, { type GradingStep } from "./GradingProgress"
-import ScoreHero from "./ScoreHero"
-import DimensionGrid from "./DimensionGrid"
-import RevenueImpact from "./RevenueImpact"
-import EmailGate from "./EmailGate"
-import RecommendationList from "./RecommendationList"
-import ShareBar from "./ShareBar"
+import ReportLayout from "./report/ReportLayout"
 
 type PageState =
   | { step: "input" }
@@ -195,72 +190,24 @@ export default function GraderPage() {
 
   // Teaser or unlocked report
   const report = state.report
-  const isUnlocked = state.step === "unlocked"
 
   return (
     <div>
-      {/* Score Hero */}
-      <ScoreHero
-        score={report.overallScore}
-        grade={report.overallGrade}
-        storeName={report.storeName}
-        storeUrl={report.storeUrl}
+      <ReportLayout
+        report={report}
+        isTeaser={state.step === "teaser"}
+        onUnlock={() => setState({ step: "unlocked", report })}
+        animate={true}
       />
 
-      <div className="max-w-4xl mx-auto px-6 py-12 space-y-10">
-        {/* Summary */}
-        <p className="text-lg text-slate-600 text-center">
-          {report.summary}
-        </p>
-
-        {/* Dimension grades (always visible) */}
-        <div>
-          <h3 className="text-xl font-bold text-xtal-navy mb-6">
-            Search Health Breakdown
-          </h3>
-          <DimensionGrid
-            dimensions={report.dimensions}
-            showDetail={isUnlocked}
-          />
-        </div>
-
-        {/* Revenue impact (always visible) */}
-        <RevenueImpact
-          impact={report.revenueImpact}
-          overallScore={report.overallScore}
-        />
-
-        {/* Email gate or full report */}
-        {!isUnlocked ? (
-          <EmailGate
-            reportId={report.id}
-            storeName={report.storeName}
-            score={report.overallScore}
-            onUnlock={() => setState({ step: "unlocked", report })}
-          />
-        ) : (
-          <>
-            {/* Share bar */}
-            <ShareBar
-              reportId={report.id}
-              storeName={report.storeName}
-              score={report.overallScore}
-            />
-
-            {/* Recommendations */}
-            <RecommendationList recommendations={report.recommendations} />
-          </>
-        )}
-
-        {/* Grade another store */}
-        <div className="text-center pt-8 border-t border-slate-100">
-          <button
-            onClick={() => setState({ step: "input" })}
-            className="px-6 py-3 text-sm font-medium text-slate-500 hover:text-xtal-navy transition-colors"
-          >
-            Grade another store &rarr;
-          </button>
-        </div>
+      {/* Grade another store */}
+      <div className="text-center py-8 print:hidden">
+        <button
+          onClick={() => setState({ step: "input" })}
+          className="px-6 py-3 text-sm font-medium text-slate-500 hover:text-[#0F172A] transition-colors"
+        >
+          Grade another store &rarr;
+        </button>
       </div>
     </div>
   )

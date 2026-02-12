@@ -80,3 +80,20 @@ export function estimateRevenueImpact(
     improvementPotential: `${Math.round(lostConversionPct * 100)}%`,
   }
 }
+
+// ─── Revenue Per Visit (RPV) Loss ───────────────────────────
+
+export function computeRpvLoss(overallScore: number): number {
+  const searchUsageRate = 0.30
+  const searchConversionRate = 0.04
+  const avgOrderValue = 85
+
+  let lostConversionPct: number
+  if (overallScore < 40) lostConversionPct = 0.30
+  else if (overallScore < 55) lostConversionPct = 0.20
+  else if (overallScore < 70) lostConversionPct = 0.10
+  else if (overallScore < 85) lostConversionPct = 0.05
+  else lostConversionPct = 0.01
+
+  return searchUsageRate * searchConversionRate * lostConversionPct * avgOrderValue
+}
