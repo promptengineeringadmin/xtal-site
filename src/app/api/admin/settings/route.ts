@@ -21,21 +21,11 @@ export async function PUT(request: Request) {
     const { searchParams } = new URL(request.url)
     const collection = searchParams.get("collection") || process.env.XTAL_COLLECTION
     const body = await request.json()
-
-    const payload = { ...body, collection }
-
-    let res = await adminFetch("/api/vendor/settings", {
+    const params = new URLSearchParams({ collection: collection ?? "" })
+    const res = await adminFetch(`/api/vendor/settings?${params.toString()}`, {
       method: "PUT",
-      body: JSON.stringify(payload),
+      body: JSON.stringify(body),
     })
-
-    // If PUT returns 404, fallback to POST (resource doesn't exist yet)
-    if (res.status === 404) {
-      res = await adminFetch("/api/vendor/settings", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      })
-    }
 
     const data = await res.json()
     return NextResponse.json(data, { status: res.status })
