@@ -49,6 +49,29 @@ export default function TrySearch({ collection, suggestions }: { collection?: st
   const hasFilterRail = computedFacets && Object.keys(computedFacets).length > 0
   const showFilters = filtersOpen && hasFilterRail
 
+  // Build a quick summary of what's actually in the results (vendors, types, sample titles)
+  const resultsSummary = useMemo(() => {
+    if (sortedResults.length === 0) return ""
+    const vendors = [...new Set(sortedResults.map((p) => p.vendor).filter(Boolean))]
+    const types = [...new Set(sortedResults.map((p) => p.product_type).filter(Boolean))]
+    // Interleave vendors and types for variety, cap at 4 items
+    const items: string[] = []
+    let vi = 0, ti = 0
+    while (items.length < 4 && (vi < vendors.length || ti < types.length)) {
+      if (vi < vendors.length) items.push(vendors[vi++])
+      if (items.length < 4 && ti < types.length) items.push(types[ti++])
+    }
+    if (items.length === 0) {
+      // Fallback: sample a few product titles
+      const step = Math.max(1, Math.floor(sortedResults.length / 3))
+      for (let i = 0; i < sortedResults.length && items.length < 3; i += step) {
+        const t = sortedResults[i].title || sortedResults[i].name
+        if (t) items.push(t.length > 30 ? t.slice(0, 28) + "…" : t)
+      }
+    }
+    return items.join(", ")
+  }, [sortedResults])
+
   // Count active filters for the FAB badge
   const activeFilterCount = useMemo(() => {
     let count = Object.values(activeFacetFilters).reduce((sum, v) => sum + v.length, 0)
@@ -114,9 +137,9 @@ export default function TrySearch({ collection, suggestions }: { collection?: st
               <span className="font-medium text-slate-700">
                 {total} results for &ldquo;{query}&rdquo;
               </span>
-              {aspects.length > 0 && (
+              {resultsSummary && (
                 <span key={query} className="animate-wipe-tail text-slate-400">
-                  {" "}including {aspects.slice(0, 4).join(", ")}{aspects.length > 4 ? ", and more" : ""}
+                  {" "}&mdash; {resultsSummary}{total > sortedResults.length ? ", and more" : ""}
                 </span>
               )}
             </p>
