@@ -100,7 +100,12 @@ export default function ActivityPage() {
     }
   }, [autoRefresh, fetchEvents])
 
-  const itemCount = timeline.length
+  // In "searches" view, hide orphan aspect events — only show pipeline cards
+  const visibleTimeline =
+    segment === "searches"
+      ? timeline.filter((item) => item.kind === "search")
+      : timeline
+  const itemCount = visibleTimeline.length
 
   return (
     <div>
@@ -195,7 +200,7 @@ export default function ActivityPage() {
             {itemCount} event{itemCount !== 1 ? "s" : ""}
           </p>
           <div className="space-y-3">
-            {timeline.map((item, i) => {
+            {visibleTimeline.map((item, i) => {
               if (item.kind === "search") {
                 const aspectData = item.activity.aspectEvent?.event_data as
                   | { aspects_generated?: string[] }
