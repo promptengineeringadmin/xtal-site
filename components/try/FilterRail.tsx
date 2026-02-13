@@ -74,7 +74,10 @@ export default function FilterRail({
     }
   }, [results])
 
-  if (!computedFacets || Object.keys(computedFacets).length === 0) {
+  const hasActiveFilters = Object.values(activeFacetFilters).some((v) => v.length > 0) ||
+    (priceRange != null && (priceRange.min !== null || priceRange.max !== null))
+
+  if ((!computedFacets || Object.keys(computedFacets).length === 0) && !hasActiveFilters) {
     return null
   }
 
@@ -94,7 +97,7 @@ export default function FilterRail({
     return expandedSections.has(key)
   }
 
-  const facetEntries = Object.entries(computedFacets)
+  const facetEntries = Object.entries(computedFacets || {})
   const hasAnyActive =
     Object.values(activeFacetFilters).some((v) => v.length > 0) ||
     (priceRange && (priceRange.min !== null || priceRange.max !== null))
