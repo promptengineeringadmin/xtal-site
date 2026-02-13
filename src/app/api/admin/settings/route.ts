@@ -5,6 +5,10 @@ import {
   saveQueryEnhancement,
   getMerchRerankStrength,
   saveMerchRerankStrength,
+  getBm25Weight,
+  saveBm25Weight,
+  getKeywordRerankStrength,
+  saveKeywordRerankStrength,
 } from "@/lib/admin/admin-settings"
 
 export async function GET(request: Request) {
@@ -24,13 +28,17 @@ export async function GET(request: Request) {
   }
 
   // Fallback: read from Redis
-  const [queryEnhancementEnabled, merchRerankStrength] = await Promise.all([
+  const [queryEnhancementEnabled, merchRerankStrength, bm25Weight, keywordRerankStrength] = await Promise.all([
     getQueryEnhancement(),
     getMerchRerankStrength(),
+    getBm25Weight(),
+    getKeywordRerankStrength(),
   ])
   return NextResponse.json({
     query_enhancement_enabled: queryEnhancementEnabled,
     merch_rerank_strength: merchRerankStrength,
+    bm25_weight: bm25Weight,
+    keyword_rerank_strength: keywordRerankStrength,
     _source: "redis_fallback",
   })
 }
@@ -49,6 +57,12 @@ export async function PUT(request: Request) {
       }
       if (body.merch_rerank_strength !== undefined) {
         await saveMerchRerankStrength(body.merch_rerank_strength)
+      }
+      if (body.bm25_weight !== undefined) {
+        await saveBm25Weight(body.bm25_weight)
+      }
+      if (body.keyword_rerank_strength !== undefined) {
+        await saveKeywordRerankStrength(body.keyword_rerank_strength)
       }
     } catch (e) {
       console.error("Redis settings save error:", e)
