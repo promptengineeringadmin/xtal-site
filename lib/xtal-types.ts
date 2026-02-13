@@ -5,6 +5,7 @@ export interface SearchContext {
   augmented_query: string
   extracted_price_lte: number | null
   extracted_price_gte: number | null
+  product_keyword?: string | null
 }
 
 export interface PriceRange {
