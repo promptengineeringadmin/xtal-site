@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 import PromptEditor from "@/components/admin/PromptEditor"
+import SubPageHeader from "@/components/admin/SubPageHeader"
 import { useCollection } from "@/lib/admin/CollectionContext"
 import type { PromptDefaults } from "@/lib/admin/types"
 
@@ -179,12 +180,12 @@ export default function SearchTuningPage() {
   if (loading) {
     return (
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 mb-2">
-          Search Tuning
-        </h1>
-        <p className="text-sm text-slate-500 mb-6">
-          Control how searches are interpreted and results are ranked.
-        </p>
+        <SubPageHeader
+          backHref="/admin/settings"
+          backLabel="Settings"
+          title="Search Tuning"
+          description="Control how searches are interpreted and results are ranked."
+        />
         <div className="space-y-6">
           {[1, 2, 3].map((i) => (
             <div
@@ -202,13 +203,12 @@ export default function SearchTuningPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Search Tuning</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Control how customer searches are interpreted, which products are
-          prioritized, and how merchandising influences results.
-        </p>
-      </div>
+      <SubPageHeader
+        backHref="/admin/settings"
+        backLabel="Settings"
+        title="Search Tuning"
+        description="Control how customer searches are interpreted, which products are prioritized, and how merchandising influences results."
+      />
 
       {error && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { Save, RotateCcw, Loader2, Clock, CheckCircle } from "lucide-react"
+import SubPageHeader from "@/components/admin/SubPageHeader"
 
 interface HistoryEntry {
   content: string
@@ -117,15 +118,12 @@ export default function ExplainPromptPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">
-          &ldquo;Why This Result&rdquo; Prompt
-        </h1>
-        <p className="text-sm text-slate-500 mt-1">
-          System prompt sent to the LLM when generating per-result explanations
-          on the /try page. Controls tone, rules, and constraints.
-        </p>
-      </div>
+      <SubPageHeader
+        backHref="/admin/settings"
+        backLabel="Settings"
+        title={"\u201CWhy This Result\u201D Prompt"}
+        description="System prompt sent to the LLM when generating per-result explanations on the /try page. Controls tone, rules, and constraints."
+      />
 
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">

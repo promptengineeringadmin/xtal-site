@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { Plus, Trash2, X, Save, Loader2 } from "lucide-react"
+import SubPageHeader from "@/components/admin/SubPageHeader"
 import { formatFacetValue } from "@/lib/facet-utils"
 
 export default function SynonymsPage() {
@@ -95,20 +96,17 @@ export default function SynonymsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">
-            Facet Synonyms
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Merge duplicate facet values so they appear as one filter. The first
-            value is the canonical name shown to users.
-          </p>
-        </div>
+      <div className="flex items-start justify-between gap-4">
+        <SubPageHeader
+          backHref="/admin/settings"
+          backLabel="Settings"
+          title="Facet Synonyms"
+          description="Merge duplicate facet values so they appear as one filter. The first value is the canonical name shown to users."
+        />
         <button
           onClick={handleSave}
           disabled={!dirty || saving}
-          className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+          className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors shrink-0 ${
             dirty
               ? "bg-xtal-navy text-white hover:bg-xtal-navy/90"
               : "bg-slate-100 text-slate-400 cursor-not-allowed"

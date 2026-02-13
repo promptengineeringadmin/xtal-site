@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import PromptEditor from "@/components/admin/PromptEditor"
+import SubPageHeader from "@/components/admin/SubPageHeader"
 import { useCollection } from "@/lib/admin/CollectionContext"
 import type { PromptDefaults } from "@/lib/admin/types"
 
@@ -95,12 +96,12 @@ export default function BrandIdentityPage() {
   if (loading) {
     return (
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 mb-2">
-          Brand Identity
-        </h1>
-        <p className="text-sm text-slate-500 mb-6">
-          Define your store&rsquo;s brand voice and product philosophy.
-        </p>
+        <SubPageHeader
+          backHref="/admin/settings"
+          backLabel="Settings"
+          title="Brand Identity"
+          description="Define your store's brand voice and product philosophy."
+        />
         <div className="bg-white rounded-xl border border-slate-200 p-6 animate-pulse">
           <div className="h-5 bg-slate-100 rounded w-40 mb-4" />
           <div className="h-48 bg-slate-100 rounded" />
@@ -111,14 +112,12 @@ export default function BrandIdentityPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Brand Identity</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Describes your store&rsquo;s brand identity and values. Used during
-          product ingestion to shape how product descriptions are embedded for
-          search.
-        </p>
-      </div>
+      <SubPageHeader
+        backHref="/admin/settings"
+        backLabel="Settings"
+        title="Brand Identity"
+        description="Describes your store's brand identity and values. Used during product ingestion to shape how product descriptions are embedded for search."
+      />
 
       {error && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">

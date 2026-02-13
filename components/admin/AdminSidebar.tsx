@@ -5,8 +5,7 @@ import { usePathname } from "next/navigation"
 import {
   BarChart3,
   Boxes,
-  Search,
-  Clock,
+  Activity,
   Gauge,
   Settings,
   ChevronDown,
@@ -15,9 +14,8 @@ import { useCollection } from "@/lib/admin/CollectionContext"
 
 const NAV_ITEMS = [
   { href: "/admin/dashboard", label: "Dashboard", icon: BarChart3 },
-  { href: "/admin/searches", label: "Searches", icon: Search },
+  { href: "/admin/activity", label: "Activity", icon: Activity },
   { href: "/admin/demos", label: "Demos", icon: Boxes },
-  { href: "/admin/events", label: "Events", icon: Clock },
   { href: "/admin/grader", label: "Grader", icon: Gauge },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ]
