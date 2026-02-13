@@ -40,6 +40,7 @@ export default function TrySearch({ collection }: { collection?: string } = {}) 
     applyPriceRange,
     clearAllFilters,
     explain,
+    reportIrrelevant,
   } = useXtalSearch(collection)
 
   const [filtersOpen, setFiltersOpen] = useState(false)
@@ -168,6 +169,7 @@ export default function TrySearch({ collection }: { collection?: string } = {}) 
           isFiltering={isFiltering}
           query={query}
           onExplain={explain}
+          onReportIrrelevant={reportIrrelevant}
           wideLayout={!showFilters}
         />
       </div>

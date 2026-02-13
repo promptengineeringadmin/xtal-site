@@ -295,6 +295,26 @@ export function useXtalSearch(collection?: string) {
     }
   }, [query, collection])
 
+  // --- Report irrelevant (fire-and-forget + remove from results) ---
+  const reportIrrelevant = useCallback((productId: string, score?: number) => {
+    // Remove from results immediately
+    setResults((prev) => prev.filter((p) => p.id !== productId))
+    setTotal((prev) => Math.max(0, prev - 1))
+
+    // Fire-and-forget feedback POST
+    fetch("/api/xtal/feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query,
+        product_id: productId,
+        score,
+        action: "irrelevant",
+        ...(collection && { collection }),
+      }),
+    }).catch((err) => console.error("Feedback submission error:", err))
+  }, [query, collection])
+
   // --- Load synonym groups + auto-search from URL on mount ---
   useEffect(() => {
     async function init() {
@@ -359,5 +379,6 @@ export function useXtalSearch(collection?: string) {
     applyPriceRange,
     clearAllFilters,
     explain,
+    reportIrrelevant,
   }
 }

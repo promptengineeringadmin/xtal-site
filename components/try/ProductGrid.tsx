@@ -12,6 +12,7 @@ interface ProductGridProps {
   isFiltering: boolean
   query: string
   onExplain: (productId: string, score?: number) => Promise<string>
+  onReportIrrelevant?: (productId: string, score?: number) => void
   wideLayout?: boolean
 }
 
@@ -22,6 +23,7 @@ export default function ProductGrid({
   isFiltering,
   query,
   onExplain,
+  onReportIrrelevant,
   wideLayout = false,
 }: ProductGridProps) {
   if (isSearching && results.length === 0) {
@@ -60,6 +62,7 @@ export default function ProductGrid({
             score={relevanceScores[product.id]}
             query={query}
             onExplain={onExplain}
+            onReportIrrelevant={onReportIrrelevant}
           />
         ))}
       </div>

@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { Star, HelpCircle, X } from "lucide-react"
+import { useState, useRef } from "react"
+import { HelpCircle, X, ThumbsDown } from "lucide-react"
 import type { Product } from "@/lib/xtal-types"
 
 interface ProductCardProps {
@@ -9,6 +9,7 @@ interface ProductCardProps {
   score?: number
   query: string
   onExplain: (productId: string, score?: number) => Promise<string>
+  onReportIrrelevant?: (productId: string, score?: number) => void
 }
 
 function formatPrice(price: number | number[]): string {
@@ -29,10 +30,12 @@ function getAccentStyle(score?: number) {
   return "border-t-2 border-amber-200"
 }
 
-export default function ProductCard({ product, score, query, onExplain }: ProductCardProps) {
+export default function ProductCard({ product, score, query, onExplain, onReportIrrelevant }: ProductCardProps) {
   const [explainOpen, setExplainOpen] = useState(false)
   const [explanation, setExplanation] = useState<string | null>(null)
   const [explainLoading, setExplainLoading] = useState(false)
+  const [dismissed, setDismissed] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
 
   const imageUrl = product.image_url || product.featured_image || product.images?.[0]?.src
 
@@ -50,9 +53,17 @@ export default function ProductCard({ product, score, query, onExplain }: Produc
     }
   }
 
+  function handleReportIrrelevant() {
+    setDismissed(true)
+    setTimeout(() => {
+      onReportIrrelevant?.(product.id, score)
+    }, 300)
+  }
+
   return (
     <div
-      className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col ${getAccentStyle(score)}`}
+      ref={cardRef}
+      className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col ${getAccentStyle(score)} ${dismissed ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}
     >
       {/* Image */}
       <div className="aspect-square bg-slate-50 relative overflow-hidden">
@@ -107,7 +118,18 @@ export default function ProductCard({ product, score, query, onExplain }: Produc
                 <span className="text-slate-500">Analyzing relevance&hellip;</span>
               </div>
             ) : (
-              explanation
+              <>
+                {explanation}
+                {onReportIrrelevant && (
+                  <button
+                    onClick={handleReportIrrelevant}
+                    className="flex items-center gap-1 mt-2 text-[10px] text-slate-400 hover:text-red-500 transition-colors"
+                  >
+                    <ThumbsDown size={10} />
+                    Not relevant
+                  </button>
+                )}
+              </>
             )}
           </div>
         )}
