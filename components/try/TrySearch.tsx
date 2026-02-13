@@ -14,7 +14,7 @@ import { ChevronDown, ChevronUp } from "lucide-react"
 import { formatFacetValue } from "@/lib/facet-utils"
 import type { PriceRange } from "@/lib/xtal-types"
 
-export default function TrySearch({ collection }: { collection?: string } = {}) {
+export default function TrySearch({ collection, suggestions }: { collection?: string; suggestions?: string[] } = {}) {
   const {
     query,
     sortedResults,
@@ -59,7 +59,7 @@ export default function TrySearch({ collection }: { collection?: string } = {}) 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Search bar — full width above grid */}
-      <SearchBar onSearch={search} loading={loading} initialQuery={query} hasSearched={!!query} />
+      <SearchBar onSearch={search} loading={loading} initialQuery={query} hasSearched={!!query} suggestions={suggestions} />
 
       {/* Error */}
       {error && (

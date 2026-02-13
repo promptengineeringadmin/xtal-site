@@ -2,6 +2,7 @@ export interface CollectionConfig {
   id: string
   label: string
   description: string
+  suggestions?: string[]
 }
 
 export const COLLECTIONS: CollectionConfig[] = [
@@ -19,6 +20,11 @@ export const COLLECTIONS: CollectionConfig[] = [
     id: "willow",
     label: "Willow Home Goods",
     description: "xtalsearch.com/willow",
+  },
+  {
+    id: "bestbuy",
+    label: "Best Buy",
+    description: "xtalsearch.com/bestbuy",
   },
 ]
 

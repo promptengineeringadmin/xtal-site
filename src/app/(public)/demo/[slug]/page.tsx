@@ -29,7 +29,7 @@ export default async function DemoPage({ params }: Props) {
     <>
       <Navbar />
       <main className="pt-20 min-h-screen bg-[#FCFDFF]">
-        <TrySearch collection={slug} />
+        <TrySearch collection={slug} suggestions={demo.suggestions} />
       </main>
     </>
   )

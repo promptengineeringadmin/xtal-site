@@ -3,6 +3,7 @@ import {
   getAllCollections,
   addDemoCollection,
   removeDemoCollection,
+  updateDemoCollection,
 } from "@/lib/admin/demo-collections"
 
 export async function GET() {
@@ -30,6 +31,28 @@ export async function POST(request: Request) {
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : "Unknown error"
     const status = msg.includes("already exists") || msg.includes("built-in") ? 409 : 500
+    return NextResponse.json({ error: msg }, { status })
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const body = await request.json()
+    const { id, suggestions } = body
+    if (!id) {
+      return NextResponse.json({ error: "id is required" }, { status: 400 })
+    }
+    if (!Array.isArray(suggestions)) {
+      return NextResponse.json(
+        { error: "suggestions must be an array" },
+        { status: 400 }
+      )
+    }
+    await updateDemoCollection(id, { suggestions })
+    return NextResponse.json({ ok: true })
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : "Unknown error"
+    const status = msg.includes("not found") ? 404 : 500
     return NextResponse.json({ error: msg }, { status })
   }
 }

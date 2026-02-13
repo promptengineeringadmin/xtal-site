@@ -26,9 +26,17 @@ const HARDCODED_IDS = new Set(COLLECTIONS.map((c) => c.id))
 
 export async function getAllCollections(): Promise<CollectionConfig[]> {
   const dynamic = await getDynamicCollections()
-  // Merge: hardcoded first, then dynamic (deduped)
+
+  // Merge hardcoded suggestions onto built-in collections
+  const merged: CollectionConfig[] = await Promise.all(
+    COLLECTIONS.map(async (c) => {
+      const suggestions = await getHardcodedSuggestions(c.id)
+      return suggestions ? { ...c, suggestions } : c
+    })
+  )
+
+  // Append dynamic (deduped)
   const seen = new Set(COLLECTIONS.map((c) => c.id))
-  const merged = [...COLLECTIONS]
   for (const c of dynamic) {
     if (!seen.has(c.id)) {
       merged.push(c)
@@ -80,6 +88,43 @@ export async function removeDemoCollection(id: string): Promise<void> {
     throw new Error(`Collection '${id}' not found`)
   }
   await kv.set(KEY, filtered)
+}
+
+// ─── Update a collection (dynamic or hardcoded suggestions) ─
+
+const SUGGESTIONS_KEY_PREFIX = "demo:suggestions:"
+
+export async function updateDemoCollection(
+  id: string,
+  updates: Partial<Omit<CollectionConfig, "id">>
+): Promise<void> {
+  const kv = getRedis()
+
+  // For hardcoded collections, only allow updating suggestions via separate KV key
+  if (HARDCODED_IDS.has(id)) {
+    if (updates.suggestions) {
+      await kv.set(`${SUGGESTIONS_KEY_PREFIX}${id}`, updates.suggestions)
+    }
+    return
+  }
+
+  const current = (await kv.get<CollectionConfig[]>(KEY)) ?? []
+  const idx = current.findIndex((c) => c.id === id)
+  if (idx === -1) throw new Error(`Collection '${id}' not found`)
+  current[idx] = { ...current[idx], ...updates }
+  await kv.set(KEY, current)
+}
+
+// ─── Get suggestions for a hardcoded collection ─────────────
+
+async function getHardcodedSuggestions(id: string): Promise<string[] | undefined> {
+  try {
+    const kv = getRedis()
+    const suggestions = await kv.get<string[]>(`${SUGGESTIONS_KEY_PREFIX}${id}`)
+    return suggestions ?? undefined
+  } catch {
+    return undefined
+  }
 }
 
 // ─── Check if a collection ID is valid ─────────────────────

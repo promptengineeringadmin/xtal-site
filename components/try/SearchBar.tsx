@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Search } from "lucide-react"
 
-const SUGGESTIONS = [
+const DEFAULT_SUGGESTIONS = [
   "cozy gift for someone who is always cold",
   "hosting a dinner party this weekend",
   "make my bathroom feel like a spa",
@@ -16,9 +16,10 @@ interface SearchBarProps {
   loading: boolean
   initialQuery?: string
   hasSearched?: boolean
+  suggestions?: string[]
 }
 
-export default function SearchBar({ onSearch, loading, initialQuery = "", hasSearched = false }: SearchBarProps) {
+export default function SearchBar({ onSearch, loading, initialQuery = "", hasSearched = false, suggestions }: SearchBarProps) {
   const [value, setValue] = useState(initialQuery)
 
   function handleSubmit(e: React.FormEvent) {
@@ -65,7 +66,7 @@ export default function SearchBar({ onSearch, loading, initialQuery = "", hasSea
       {!hasSearched && (
         <div className="mt-3 flex flex-wrap gap-2">
           <span className="text-xs text-slate-400 py-1">Example queries:</span>
-          {SUGGESTIONS.map((s) => (
+          {(suggestions ?? DEFAULT_SUGGESTIONS).map((s) => (
             <button
               key={s}
               onClick={() => handleSuggestion(s)}

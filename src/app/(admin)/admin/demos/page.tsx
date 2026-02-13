@@ -11,6 +11,10 @@ import {
   X,
   CheckCircle2,
   AlertCircle,
+  Sparkles,
+  Pencil,
+  Save,
+  RotateCcw,
 } from "lucide-react"
 import { useCollection } from "@/lib/admin/CollectionContext"
 import { COLLECTIONS, type CollectionConfig } from "@/lib/admin/collections"
@@ -115,6 +119,7 @@ export default function DemosPage() {
             isBuiltIn={HARDCODED_IDS.has(c.id)}
             isDeleting={deleting === c.id}
             onDelete={() => handleDelete(c.id)}
+            onUpdate={refreshCollections}
           />
         ))}
       </div>
@@ -129,12 +134,78 @@ function DemoCard({
   isBuiltIn,
   isDeleting,
   onDelete,
+  onUpdate,
 }: {
   collection: CollectionConfig
   isBuiltIn: boolean
   isDeleting: boolean
   onDelete: () => void
+  onUpdate: () => Promise<void>
 }) {
+  const [generating, setGenerating] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [editValues, setEditValues] = useState<string[]>([])
+  const [error, setError] = useState<string | null>(null)
+
+  const hasSuggestions = collection.suggestions && collection.suggestions.length > 0
+
+  const handleGenerate = async () => {
+    setGenerating(true)
+    setError(null)
+    try {
+      const res = await fetch("/api/admin/demos/suggestions/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ collection: collection.id }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Generation failed")
+      }
+      const data = await res.json()
+      const queries = (data.suggestions || []).map((s: { query: string }) => s.query)
+      if (queries.length === 0) {
+        throw new Error("No suitable suggestions found for this catalog")
+      }
+      setEditValues(queries)
+      setEditing(true)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Generation failed")
+    } finally {
+      setGenerating(false)
+    }
+  }
+
+  const handleSave = async () => {
+    const filtered = editValues.filter((v) => v.trim())
+    if (filtered.length === 0) return
+    setSaving(true)
+    setError(null)
+    try {
+      const res = await fetch("/api/admin/collections", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: collection.id, suggestions: filtered }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Save failed")
+      }
+      setEditing(false)
+      await onUpdate()
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Save failed")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleEdit = () => {
+    setEditValues([...(collection.suggestions || [])])
+    setEditing(true)
+  }
+
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-5 hover:border-xtal-navy/30 hover:shadow-sm transition-all">
       <div className="flex items-start justify-between mb-3">
@@ -142,15 +213,99 @@ function DemoCard({
           <Boxes className="w-5 h-5 text-xtal-navy" />
           <h3 className="font-semibold text-slate-900">{collection.label}</h3>
         </div>
-        {isBuiltIn && (
-          <span className="text-[10px] font-medium uppercase tracking-wider bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">
-            Built-in
-          </span>
-        )}
+        <div className="flex items-center gap-1.5">
+          {hasSuggestions && (
+            <span className="text-[10px] font-medium bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full">
+              {collection.suggestions!.length} queries
+            </span>
+          )}
+          {isBuiltIn && (
+            <span className="text-[10px] font-medium uppercase tracking-wider bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">
+              Built-in
+            </span>
+          )}
+        </div>
       </div>
 
       <p className="text-xs text-slate-400 mb-1 font-mono">{collection.id}</p>
-      <p className="text-sm text-slate-500 mb-4">{collection.description}</p>
+      <p className="text-sm text-slate-500 mb-3">{collection.description}</p>
+
+      {/* Suggestions editor */}
+      {editing && (
+        <div className="mb-3 space-y-2">
+          <label className="text-xs font-medium text-slate-600">
+            Example search queries
+          </label>
+          {editValues.map((val, i) => (
+            <input
+              key={i}
+              type="text"
+              value={val}
+              onChange={(e) => {
+                const updated = [...editValues]
+                updated[i] = e.target.value
+                setEditValues(updated)
+              }}
+              className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-xtal-navy/50 transition-colors"
+              placeholder={`Query ${i + 1}`}
+            />
+          ))}
+          <div className="flex items-center gap-2 pt-1">
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-xtal-navy text-white hover:bg-xtal-navy/90 transition-colors disabled:opacity-50"
+            >
+              {saving ? <Loader2 size={10} className="animate-spin" /> : <Save size={10} />}
+              Save
+            </button>
+            <button
+              onClick={() => setEditing(false)}
+              className="px-3 py-1.5 text-xs font-medium rounded-lg text-slate-500 hover:text-slate-700 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleGenerate}
+              disabled={generating}
+              className="ml-auto flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg text-slate-500 hover:text-slate-700 transition-colors disabled:opacity-50"
+              title="Re-generate suggestions"
+            >
+              {generating ? <Loader2 size={10} className="animate-spin" /> : <RotateCcw size={10} />}
+              Re-generate
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Show current suggestions when not editing */}
+      {!editing && hasSuggestions && (
+        <div className="mb-3">
+          <div className="flex flex-wrap gap-1">
+            {collection.suggestions!.slice(0, 3).map((s) => (
+              <span
+                key={s}
+                className="text-[10px] px-2 py-0.5 rounded-full bg-slate-50 text-slate-500 truncate max-w-[180px]"
+                title={s}
+              >
+                {s}
+              </span>
+            ))}
+            {collection.suggestions!.length > 3 && (
+              <span className="text-[10px] px-2 py-0.5 text-slate-400">
+                +{collection.suggestions!.length - 3} more
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {error && (
+        <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 flex items-start gap-1.5">
+          <AlertCircle size={12} className="mt-0.5 shrink-0" />
+          {error}
+        </div>
+      )}
 
       <div className="flex items-center gap-2">
         <a
@@ -162,6 +317,34 @@ function DemoCard({
           <ExternalLink size={12} />
           View demo
         </a>
+
+        {!editing && (
+          <>
+            {hasSuggestions ? (
+              <button
+                onClick={handleEdit}
+                className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-700 transition-colors"
+              >
+                <Pencil size={10} />
+                Edit queries
+              </button>
+            ) : (
+              <button
+                onClick={handleGenerate}
+                disabled={generating}
+                className="flex items-center gap-1 text-xs font-medium text-violet-600 hover:text-violet-700 transition-colors disabled:opacity-50"
+              >
+                {generating ? (
+                  <Loader2 size={10} className="animate-spin" />
+                ) : (
+                  <Sparkles size={10} />
+                )}
+                {generating ? "Generating..." : "Generate queries"}
+              </button>
+            )}
+          </>
+        )}
+
         {!isBuiltIn && (
           <button
             onClick={onDelete}
