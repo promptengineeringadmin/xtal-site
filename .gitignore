@@ -45,6 +45,9 @@ next-env.d.ts
 # Grader test output
 grader-output/
 
+# Large data files
+data/
+
 # Windows
 desktop.ini
 
