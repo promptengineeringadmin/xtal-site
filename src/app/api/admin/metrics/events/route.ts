@@ -8,10 +8,13 @@ export async function GET(request: Request) {
 
     const params = new URLSearchParams()
 
-    // event_types can appear multiple times — forward each occurrence
+    // event_types may arrive comma-separated — split into repeated params
+    // so FastAPI can parse them as list[EventType]
     const eventTypes = searchParams.getAll("event_types")
     for (const et of eventTypes) {
-      params.append("event_types", et)
+      for (const single of et.split(",")) {
+        params.append("event_types", single.trim())
+      }
     }
 
     const startDate = searchParams.get("start_date")
