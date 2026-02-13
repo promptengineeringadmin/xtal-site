@@ -2,15 +2,16 @@
 
 import { useState, useMemo } from "react"
 import { useXtalSearch } from "@/lib/use-xtal-search"
+import { SlidersHorizontal } from "lucide-react"
 import SearchBar from "./SearchBar"
 import ProductGrid from "./ProductGrid"
 import AspectChips from "./AspectChips"
 import FilterRail from "./FilterRail"
-import AppliedFilters from "./AppliedFilters"
-import { formatFacetValue } from "@/lib/facet-utils"
 import MobileFilterDrawer from "./MobileFilterDrawer"
+import AppliedFilters from "./AppliedFilters"
 import PriceSlider from "./PriceSlider"
 import { ChevronDown, ChevronUp } from "lucide-react"
+import { formatFacetValue } from "@/lib/facet-utils"
 import type { PriceRange } from "@/lib/xtal-types"
 
 export default function TrySearch() {
@@ -41,17 +42,11 @@ export default function TrySearch() {
     explain,
   } = useXtalSearch()
 
-  // Build AI intent summary from aspects
-  const intentSummary = useMemo(() => {
-    if (!query || total === 0) return null
-    if (aspects.length === 0) return `Found ${total} results for "${query}"`
-    const preview = aspects.slice(0, 4).join(", ")
-    return `Found ${total} results for "${query}" including ${preview}, and more`
-  }, [query, total, aspects])
-
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
   const hasFilterRail = computedFacets && Object.keys(computedFacets).length > 0
+  const showFilters = filtersOpen && hasFilterRail
 
   // Count active filters for the FAB badge
   const activeFilterCount = useMemo(() => {
@@ -72,10 +67,9 @@ export default function TrySearch() {
         </div>
       )}
 
-      {/* Aspects — aligned with content column, above the grid */}
+      {/* Aspect chips — flush under search bar, no label, no grid offset */}
       {aspects.length > 0 && (
-        <div className={`mt-5 mb-3 ${hasFilterRail ? "md:grid md:grid-cols-[260px_1fr] md:gap-6" : ""}`}>
-          {hasFilterRail && <div className="hidden md:block" />}
+        <div className="mt-3">
           <AspectChips
             aspects={aspects}
             selectedAspects={selectedAspects}
@@ -85,13 +79,45 @@ export default function TrySearch() {
         </div>
       )}
 
-      {/* Results info — intent summary + sort */}
+      {/* Info bar: filter toggle + results count + sort — grid-aligned */}
       {query && !isSearching && !isFiltering && sortedResults.length > 0 && (
-        <div className={`mb-3 ${hasFilterRail ? "md:grid md:grid-cols-[260px_1fr] md:gap-6" : ""}`}>
-          {hasFilterRail && <div className="hidden md:block" />}
+        <div
+          className={`mt-5 mb-2 grid ${
+            showFilters
+              ? "grid-cols-[260px_1fr] gap-10"
+              : hasFilterRail
+                ? "grid-cols-[auto_1fr] gap-4"
+                : ""
+          }`}
+        >
+          {/* Left: toggle icon + Filters label */}
+          {hasFilterRail && (
+            <div className="hidden md:flex items-center gap-2">
+              <button
+                onClick={() => setFiltersOpen(!filtersOpen)}
+                title={filtersOpen ? "Hide filters" : "Show filters"}
+                className="flex items-center justify-center w-7 h-7 rounded-md border border-slate-200
+                           text-slate-500 hover:border-xtal-navy hover:text-xtal-navy transition-colors"
+              >
+                <SlidersHorizontal size={14} />
+              </button>
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                Filters
+              </span>
+            </div>
+          )}
+
+          {/* Right: results count + sort */}
           <div className="flex items-baseline justify-between gap-4">
-            <p className="text-sm text-slate-500">
-              {intentSummary}
+            <p className="text-[13px] whitespace-nowrap overflow-hidden">
+              <span className="font-medium text-slate-700">
+                {total} results for &ldquo;{query}&rdquo;
+              </span>
+              {aspects.length > 0 && (
+                <span key={query} className="animate-wipe-tail text-slate-400">
+                  {" "}including {aspects.slice(0, 4).join(", ")}{aspects.length > 4 ? ", and more" : ""}
+                </span>
+              )}
             </p>
             <div className="flex items-baseline gap-3 shrink-0">
               <select
@@ -113,24 +139,26 @@ export default function TrySearch() {
         </div>
       )}
 
-      {/* Main grid: filter rail + product grid — top-aligned */}
+      {/* Main grid: filter rail + product grid */}
       <div
         className={`mt-2 ${
-          hasFilterRail ? "md:grid md:grid-cols-[260px_1fr] md:gap-6" : ""
+          showFilters ? "md:grid md:grid-cols-[260px_1fr] md:gap-10" : ""
         }`}
       >
         {hasFilterRail && (
-          <FilterRail
-            computedFacets={computedFacets}
-            activeFacetFilters={activeFacetFilters}
-            priceRange={priceRange}
-            results={results}
-            total={total}
-            onFacetToggle={applyFacetFilter}
-            onPriceChange={(range) => applyPriceRange(range)}
-            onPriceRemove={() => applyPriceRange(null)}
-            onClearAll={clearAllFilters}
-          />
+          <div className={showFilters ? "" : "hidden"}>
+            <FilterRail
+              computedFacets={computedFacets!}
+              activeFacetFilters={activeFacetFilters}
+              priceRange={priceRange}
+              results={results}
+              total={total}
+              onFacetToggle={applyFacetFilter}
+              onPriceChange={(range) => applyPriceRange(range)}
+              onPriceRemove={() => applyPriceRange(null)}
+              onClearAll={clearAllFilters}
+            />
+          </div>
         )}
 
         <ProductGrid
@@ -140,6 +168,7 @@ export default function TrySearch() {
           isFiltering={isFiltering}
           query={query}
           onExplain={explain}
+          wideLayout={!showFilters}
         />
       </div>
 

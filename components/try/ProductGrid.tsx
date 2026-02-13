@@ -12,6 +12,7 @@ interface ProductGridProps {
   isFiltering: boolean
   query: string
   onExplain: (productId: string, score?: number) => Promise<string>
+  wideLayout?: boolean
 }
 
 export default function ProductGrid({
@@ -21,6 +22,7 @@ export default function ProductGrid({
   isFiltering,
   query,
   onExplain,
+  wideLayout = false,
 }: ProductGridProps) {
   if (isSearching && results.length === 0) {
     return <SearchLoadingSpinner />
@@ -50,7 +52,7 @@ export default function ProductGrid({
   return (
     <div className="relative">
       {isFiltering && <FilterLoadingOverlay />}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 ${wideLayout ? "xl:grid-cols-5" : ""} gap-5`}>
         {results.map((product) => (
           <ProductCard
             key={product.id}

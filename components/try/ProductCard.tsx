@@ -52,7 +52,7 @@ export default function ProductCard({ product, score, query, onExplain }: Produc
 
   return (
     <div
-      className={`bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col ${getAccentStyle(score)}`}
+      className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col ${getAccentStyle(score)}`}
     >
       {/* Image */}
       <div className="aspect-square bg-slate-50 relative overflow-hidden">
@@ -84,19 +84,19 @@ export default function ProductCard({ product, score, query, onExplain }: Produc
           {product.title}
         </h3>
 
-        {/* Price */}
-        <p className="text-sm font-semibold text-xtal-navy mt-auto pt-2">
-          {formatPrice(product.price)}
-        </p>
-
-        {/* Explain button */}
-        <button
-          onClick={handleExplain}
-          className="mt-2 flex items-center gap-1 text-[11px] text-slate-400 hover:text-xtal-navy transition-colors"
-        >
-          {explainOpen ? <X size={12} /> : <HelpCircle size={12} />}
-          {explainOpen ? "Close" : "Why this result?"}
-        </button>
+        {/* Price + Explain */}
+        <div className="flex items-center justify-between mt-auto pt-2">
+          <p className="text-sm font-semibold text-xtal-navy">
+            {formatPrice(product.price)}
+          </p>
+          <button
+            onClick={handleExplain}
+            title="Why this result?"
+            className="p-1 rounded-md text-slate-400 hover:text-xtal-navy hover:bg-slate-50 transition-colors"
+          >
+            {explainOpen ? <X size={16} /> : <HelpCircle size={16} />}
+          </button>
+        </div>
 
         {/* Explain panel */}
         {explainOpen && (

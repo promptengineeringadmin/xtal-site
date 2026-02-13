@@ -102,23 +102,18 @@ export default function FilterRail({
   return (
     <aside className="hidden md:block sticky top-20 h-fit max-h-[calc(100vh-6rem)] overflow-y-auto pr-2
                        scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-          Filters
-        </span>
-        {hasAnyActive && (
-          <button
-            onClick={onClearAll}
-            className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
-          >
-            Clear all
-          </button>
-        )}
-      </div>
-
-      {/* Applied filters */}
+      {/* Applied filters + Clear all */}
       <div className="mb-3">
+        {hasAnyActive && (
+          <div className="flex items-center justify-end mb-2">
+            <button
+              onClick={onClearAll}
+              className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              Clear all
+            </button>
+          </div>
+        )}
         <AppliedFilters
           facetFilters={activeFacetFilters}
           priceRange={priceRange}

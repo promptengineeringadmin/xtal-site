@@ -52,6 +52,25 @@ html {
   animation: slideUp 0.3s ease-out;
 }
 
+/* Results tail wipe animation — right-to-left gradient fade */
+@keyframes wipeTailOut {
+  0%   { -webkit-mask-position: 0% 0; mask-position: 0% 0; }
+  100% { -webkit-mask-position: 200% 0; mask-position: 200% 0; }
+}
+
+.animate-wipe-tail {
+  -webkit-mask-image: linear-gradient(to right, black 50%, transparent);
+  mask-image: linear-gradient(to right, black 50%, transparent);
+  -webkit-mask-size: 200% 100%;
+  mask-size: 200% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: 0% 0;
+  mask-position: 0% 0;
+  animation: wipeTailOut 7s ease-in forwards;
+  animation-delay: 2s;
+}
+
 /* Print styles for report PDF output */
 @media print {
   nav,
