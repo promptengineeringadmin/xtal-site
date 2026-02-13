@@ -4,11 +4,11 @@ import { useState } from "react"
 import { Search } from "lucide-react"
 
 const SUGGESTIONS = [
-  "dress shirt for a wedding",
-  "comfortable everyday shoes",
-  "gift for dad under $75",
-  "lightweight layers for travel",
-  "bold statement accessories",
+  "cozy gift for someone who is always cold",
+  "hosting a dinner party this weekend",
+  "make my bathroom feel like a spa",
+  "dainty jewelry for everyday wear",
+  "setting up a home cocktail bar",
 ]
 
 interface SearchBarProps {
