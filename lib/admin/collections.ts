@@ -15,6 +15,11 @@ export const COLLECTIONS: CollectionConfig[] = [
     label: "Peenak Store",
     description: "demo.xtalsearch.com",
   },
+  {
+    id: "willow",
+    label: "Willow Home Goods",
+    description: "xtalsearch.com/willow",
+  },
 ]
 
 export const DEFAULT_COLLECTION = "xtaldemo"

@@ -15,7 +15,7 @@ type LoadingState =
   | { type: "searching" }
   | { type: "filtering" }
 
-export function useXtalSearch() {
+export function useXtalSearch(collection?: string) {
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<Product[]>([])
   const [total, setTotal] = useState(0)
@@ -104,13 +104,13 @@ export function useXtalSearch() {
         fetch("/api/xtal/search", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query: trimmed }),
+          body: JSON.stringify({ query: trimmed, ...(collection && { collection }) }),
           signal: controller.signal,
         }),
         fetch("/api/xtal/aspects", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query: trimmed }),
+          body: JSON.stringify({ query: trimmed, ...(collection && { collection }) }),
           signal: controller.signal,
         }),
       ])
@@ -146,7 +146,7 @@ export function useXtalSearch() {
         setLoadingState({ type: "idle" })
       }
     }
-  }, [])
+  }, [collection])
 
   // --- Filter-in-place (shared helper) ---
   const filterInPlace = useCallback(async (
@@ -191,6 +191,7 @@ export function useXtalSearch() {
           selected_aspects: aspectsToSend.length > 0 ? aspectsToSend : undefined,
           facet_filters: hasActiveFacets ? expandedFacets : undefined,
           price_range: priceRangeInCents,
+          ...(collection && { collection }),
         }),
         signal: controller.signal,
       })
@@ -216,7 +217,7 @@ export function useXtalSearch() {
         setLoadingState({ type: "idle" })
       }
     }
-  }, [query, searchContext, selectedAspects, activeFacetFilters, priceRange])
+  }, [query, searchContext, selectedAspects, activeFacetFilters, priceRange, collection])
 
   // --- Aspect selection ---
   const selectAspect = useCallback(async (aspect: string) => {
@@ -277,7 +278,7 @@ export function useXtalSearch() {
       const res = await fetch("/api/xtal/explain", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query, product_id: productId, score }),
+        body: JSON.stringify({ query, product_id: productId, score, ...(collection && { collection }) }),
       })
       if (!res.ok) {
         const errBody = await res.text()
@@ -292,7 +293,7 @@ export function useXtalSearch() {
       console.error("Explain fetch error:", err)
       return "Failed to load explanation."
     }
-  }, [query])
+  }, [query, collection])
 
   // --- Load synonym groups + auto-search from URL on mount ---
   useEffect(() => {

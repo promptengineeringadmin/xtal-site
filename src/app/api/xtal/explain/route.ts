@@ -5,7 +5,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json()
     const backendUrl = process.env.XTAL_BACKEND_URL
-    const collection = process.env.XTAL_COLLECTION
+    const collection = body.collection || process.env.XTAL_COLLECTION
 
     if (!backendUrl) {
       return NextResponse.json({ error: "XTAL_BACKEND_URL not configured" }, { status: 500 })

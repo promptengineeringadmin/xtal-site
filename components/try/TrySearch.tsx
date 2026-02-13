@@ -14,7 +14,7 @@ import { ChevronDown, ChevronUp } from "lucide-react"
 import { formatFacetValue } from "@/lib/facet-utils"
 import type { PriceRange } from "@/lib/xtal-types"
 
-export default function TrySearch() {
+export default function TrySearch({ collection }: { collection?: string } = {}) {
   const {
     query,
     sortedResults,
@@ -40,7 +40,7 @@ export default function TrySearch() {
     applyPriceRange,
     clearAllFilters,
     explain,
-  } = useXtalSearch()
+  } = useXtalSearch(collection)
 
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
