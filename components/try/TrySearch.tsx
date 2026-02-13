@@ -46,14 +46,16 @@ export default function TrySearch({ collection, suggestions }: { collection?: st
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
-  const hasFilterRail = computedFacets && Object.keys(computedFacets).length > 0
+  const hasActiveFilters = Object.values(activeFacetFilters).some(v => v.length > 0) ||
+    (priceRange != null && (priceRange.min !== null || priceRange.max !== null))
+  const hasFilterRail = (computedFacets && Object.keys(computedFacets).length > 0) || hasActiveFilters
   const showFilters = filtersOpen && hasFilterRail
 
   // Build a quick summary of what's actually in the results (vendors, types, sample titles)
   const resultsSummary = useMemo(() => {
     if (sortedResults.length === 0) return ""
-    const vendors = [...new Set(sortedResults.map((p) => p.vendor).filter(Boolean))]
-    const types = [...new Set(sortedResults.map((p) => p.product_type).filter(Boolean))]
+    const vendors = Array.from(new Set(sortedResults.map((p) => p.vendor).filter(Boolean)))
+    const types = Array.from(new Set(sortedResults.map((p) => p.product_type).filter(Boolean)))
     // Interleave vendors and types for variety, cap at 4 items
     const items: string[] = []
     let vi = 0, ti = 0
@@ -104,7 +106,7 @@ export default function TrySearch({ collection, suggestions }: { collection?: st
       )}
 
       {/* Info bar: filter toggle + results count + sort — grid-aligned */}
-      {query && !isSearching && !isFiltering && sortedResults.length > 0 && (
+      {query && !isSearching && !isFiltering && (sortedResults.length > 0 || hasActiveFilters) && (
         <div
           className={`mt-5 mb-2 grid ${
             showFilters
@@ -172,7 +174,7 @@ export default function TrySearch({ collection, suggestions }: { collection?: st
         {hasFilterRail && (
           <div className={showFilters ? "" : "hidden"}>
             <FilterRail
-              computedFacets={computedFacets!}
+              computedFacets={computedFacets}
               activeFacetFilters={activeFacetFilters}
               priceRange={priceRange}
               results={results}
@@ -207,7 +209,7 @@ export default function TrySearch({ collection, suggestions }: { collection?: st
           activeFilterCount={activeFilterCount}
         >
           <MobileFilterContent
-            computedFacets={computedFacets!}
+            computedFacets={computedFacets}
             activeFacetFilters={activeFacetFilters}
             priceRange={priceRange}
             results={results}
