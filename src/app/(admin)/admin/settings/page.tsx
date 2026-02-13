@@ -1,22 +1,36 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, BookType, MessageSquareText } from "lucide-react"
+import { ArrowRight, Store, Sparkles, MessageSquareText, BookType } from "lucide-react"
 
 const SETTINGS_PAGES = [
   {
-    href: "/admin/settings/synonyms",
-    label: "Facet Synonyms",
+    href: "/admin/settings/brand",
+    label: "Brand Identity",
     description:
-      "Merge duplicate facet values so they appear as one filter in search results.",
-    icon: BookType,
+      "Define your store's brand voice and product philosophy. Shapes how your catalog is understood and searched.",
+    icon: Store,
+  },
+  {
+    href: "/admin/settings/search",
+    label: "Search Tuning",
+    description:
+      "Control how customer searches are interpreted, which products are prioritized, and how merchandising influences results.",
+    icon: Sparkles,
   },
   {
     href: "/admin/settings/explain-prompt",
-    label: "\"Why This Result\" Prompt",
+    label: "Result Explanations",
     description:
-      "View and edit the system prompt used to generate per-result explanations on /try.",
+      "Customize the AI prompt that generates \u201cWhy this result?\u201d explanations on each product card.",
     icon: MessageSquareText,
+  },
+  {
+    href: "/admin/settings/synonyms",
+    label: "Filter Management",
+    description:
+      "Merge duplicate facet values so customers see clean, organized filters.",
+    icon: BookType,
   },
 ]
 
@@ -26,7 +40,7 @@ export default function SettingsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
         <p className="text-sm text-slate-500 mt-1">
-          Configure search behavior and prompt settings.
+          Configure search behavior, prompts, and display settings.
         </p>
       </div>
 
