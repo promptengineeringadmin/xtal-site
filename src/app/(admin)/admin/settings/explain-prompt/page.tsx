@@ -67,6 +67,13 @@ export default function ExplainPromptPage() {
       })
       if (!res.ok) throw new Error("Save failed")
 
+      const data = await res.json()
+
+      if (data.warning) {
+        setError(data.warning)
+        return
+      }
+
       setOriginal(content)
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)

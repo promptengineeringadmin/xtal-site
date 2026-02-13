@@ -53,9 +53,17 @@ export async function PUT(request: Request) {
       )
     }
 
-    await saveExplainPrompt(content)
-
-    return NextResponse.json({ success: true })
+    try {
+      await saveExplainPrompt(content)
+      return NextResponse.json({ success: true })
+    } catch (redisErr) {
+      console.error("Explain prompt Redis save failed:", redisErr)
+      return NextResponse.json({
+        success: false,
+        warning: "Failed to persist prompt — storage is unreachable",
+        error: redisErr instanceof Error ? redisErr.message : "Unknown error",
+      })
+    }
   } catch (error) {
     console.error("Explain prompt PUT error:", error)
     return NextResponse.json(

@@ -16,6 +16,7 @@ export async function POST(request: Request) {
       vertical,
       platform,
       queryResults,
+      searchProvider,
     } = body as {
       runId: string
       storeUrl: string
@@ -24,6 +25,7 @@ export async function POST(request: Request) {
       vertical: string
       platform: Platform
       queryResults: QueryResult[]
+      searchProvider?: string
     }
 
     if (!queryResults?.length) {
@@ -62,6 +64,7 @@ export async function POST(request: Request) {
       revenueImpact,
       recommendations: evaluation.recommendations,
       summary: evaluation.summary,
+      searchProvider: searchProvider ?? "unknown",
     }
 
     // Update run log
@@ -77,7 +80,7 @@ export async function POST(request: Request) {
 
         run.steps.evaluate = {
           input: {
-            storeInfo: { url: storeUrl, name: storeName, platform, storeType, vertical, searchUrl: null },
+            storeInfo: { url: storeUrl, name: storeName, platform, storeType, vertical, searchUrl: null, searchProvider: (searchProvider ?? "unknown") as import("@/lib/grader/types").SearchProvider },
             queryResultsSummary,
           },
           promptUsed: evaluation.promptUsed,
