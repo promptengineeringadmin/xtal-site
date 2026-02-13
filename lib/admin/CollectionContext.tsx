@@ -2,6 +2,7 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useState,
   useEffect,
@@ -19,13 +20,30 @@ interface CollectionContextValue {
   collectionConfig: CollectionConfig
   setCollection: (id: string) => void
   collections: CollectionConfig[]
+  refreshCollections: () => Promise<void>
 }
 
 const CollectionContext = createContext<CollectionContextValue | null>(null)
 
 export function CollectionProvider({ children }: { children: ReactNode }) {
   const [collection, setCollectionState] = useState(DEFAULT_COLLECTION)
+  const [collections, setCollections] = useState<CollectionConfig[]>(COLLECTIONS)
   const [hydrated, setHydrated] = useState(false)
+
+  // Fetch dynamic collections from Redis (merged with hardcoded)
+  const refreshCollections = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/collections")
+      if (res.ok) {
+        const data = await res.json()
+        if (data.collections) {
+          setCollections(data.collections)
+        }
+      }
+    } catch {
+      // Silently fall back to hardcoded collections
+    }
+  }, [])
 
   useEffect(() => {
     const stored = sessionStorage.getItem(COLLECTION_STORAGE_KEY)
@@ -33,17 +51,18 @@ export function CollectionProvider({ children }: { children: ReactNode }) {
       setCollectionState(stored)
     }
     setHydrated(true)
-  }, [])
+    refreshCollections()
+  }, [refreshCollections])
 
   function setCollection(id: string) {
-    if (COLLECTIONS.some((c) => c.id === id)) {
+    if (collections.some((c) => c.id === id)) {
       setCollectionState(id)
       sessionStorage.setItem(COLLECTION_STORAGE_KEY, id)
     }
   }
 
   const collectionConfig =
-    COLLECTIONS.find((c) => c.id === collection) ?? COLLECTIONS[0]
+    collections.find((c) => c.id === collection) ?? collections[0]
 
   if (!hydrated) return null
 
@@ -53,7 +72,8 @@ export function CollectionProvider({ children }: { children: ReactNode }) {
         collection,
         collectionConfig,
         setCollection,
-        collections: COLLECTIONS,
+        collections,
+        refreshCollections,
       }}
     >
       {children}

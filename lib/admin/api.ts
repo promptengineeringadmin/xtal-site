@@ -47,12 +47,19 @@ export async function adminFetch(
 
   const token = await getCognitoToken()
 
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${token}`,
+    ...(init.headers as Record<string, string> | undefined),
+  }
+
+  // Only set Content-Type for non-FormData bodies.
+  // FormData sets its own Content-Type with multipart boundary.
+  if (!(init.body instanceof FormData)) {
+    headers["Content-Type"] = "application/json"
+  }
+
   return fetch(`${BACKEND_URL}${path}`, {
     ...init,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-      ...(init.headers as Record<string, string> | undefined),
-    },
+    headers,
   })
 }
