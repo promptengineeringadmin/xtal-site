@@ -13,19 +13,27 @@ function getRedis(): Redis {
   return redis
 }
 
-// ─── Keys ───────────────────────────────────────────────────
+// ─── Keys (scoped by collection) ─────────────────────────────
 
-const KEY_QUERY_ENHANCEMENT = "admin:settings:query_enhancement"
-const KEY_MERCH_RERANK = "admin:settings:merch_rerank_strength"
-const KEY_BM25_WEIGHT = "admin:settings:bm25_weight"
-const KEY_KEYWORD_RERANK = "admin:settings:keyword_rerank_strength"
+function queryEnhancementKey(collection: string) {
+  return `admin:settings:${collection}:query_enhancement`
+}
+function merchRerankKey(collection: string) {
+  return `admin:settings:${collection}:merch_rerank_strength`
+}
+function bm25WeightKey(collection: string) {
+  return `admin:settings:${collection}:bm25_weight`
+}
+function keywordRerankKey(collection: string) {
+  return `admin:settings:${collection}:keyword_rerank_strength`
+}
 
 // ─── Query Enhancement ─────────────────────────────────────
 
-export async function getQueryEnhancement(): Promise<boolean> {
+export async function getQueryEnhancement(collection: string): Promise<boolean> {
   try {
     const kv = getRedis()
-    const stored = await kv.get<boolean>(KEY_QUERY_ENHANCEMENT)
+    const stored = await kv.get<boolean>(queryEnhancementKey(collection))
     if (stored !== null && stored !== undefined) return stored
   } catch {
     // Redis unavailable
@@ -34,18 +42,19 @@ export async function getQueryEnhancement(): Promise<boolean> {
 }
 
 export async function saveQueryEnhancement(
+  collection: string,
   enabled: boolean
 ): Promise<void> {
   const kv = getRedis()
-  await kv.set(KEY_QUERY_ENHANCEMENT, enabled)
+  await kv.set(queryEnhancementKey(collection), enabled)
 }
 
 // ─── Merch Re-rank Strength ────────────────────────────────
 
-export async function getMerchRerankStrength(): Promise<number> {
+export async function getMerchRerankStrength(collection: string): Promise<number> {
   try {
     const kv = getRedis()
-    const stored = await kv.get<number>(KEY_MERCH_RERANK)
+    const stored = await kv.get<number>(merchRerankKey(collection))
     if (stored !== null && stored !== undefined) return stored
   } catch {
     // Redis unavailable
@@ -54,18 +63,19 @@ export async function getMerchRerankStrength(): Promise<number> {
 }
 
 export async function saveMerchRerankStrength(
+  collection: string,
   strength: number
 ): Promise<void> {
   const kv = getRedis()
-  await kv.set(KEY_MERCH_RERANK, strength)
+  await kv.set(merchRerankKey(collection), strength)
 }
 
 // ─── BM25 Weight ─────────────────────────────────────────
 
-export async function getBm25Weight(): Promise<number> {
+export async function getBm25Weight(collection: string): Promise<number> {
   try {
     const kv = getRedis()
-    const stored = await kv.get<number>(KEY_BM25_WEIGHT)
+    const stored = await kv.get<number>(bm25WeightKey(collection))
     if (stored !== null && stored !== undefined) return stored
   } catch {
     // Redis unavailable
@@ -73,17 +83,17 @@ export async function getBm25Weight(): Promise<number> {
   return 1.0 // default
 }
 
-export async function saveBm25Weight(weight: number): Promise<void> {
+export async function saveBm25Weight(collection: string, weight: number): Promise<void> {
   const kv = getRedis()
-  await kv.set(KEY_BM25_WEIGHT, weight)
+  await kv.set(bm25WeightKey(collection), weight)
 }
 
 // ─── Keyword Re-rank Strength ────────────────────────────
 
-export async function getKeywordRerankStrength(): Promise<number> {
+export async function getKeywordRerankStrength(collection: string): Promise<number> {
   try {
     const kv = getRedis()
-    const stored = await kv.get<number>(KEY_KEYWORD_RERANK)
+    const stored = await kv.get<number>(keywordRerankKey(collection))
     if (stored !== null && stored !== undefined) return stored
   } catch {
     // Redis unavailable
@@ -92,8 +102,9 @@ export async function getKeywordRerankStrength(): Promise<number> {
 }
 
 export async function saveKeywordRerankStrength(
+  collection: string,
   strength: number
 ): Promise<void> {
   const kv = getRedis()
-  await kv.set(KEY_KEYWORD_RERANK, strength)
+  await kv.set(keywordRerankKey(collection), strength)
 }

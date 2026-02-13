@@ -83,14 +83,16 @@ export async function PUT(request: Request) {
 
   // 2. Best-effort sync to backend
   try {
-    const payload = { brand_prompt, collection }
-    let res = await adminFetch("/api/vendor/brand-prompt", {
+    const params = new URLSearchParams({ collection })
+    const backendUrl = `/api/vendor/brand-prompt?${params.toString()}`
+    const payload = { brand_prompt }
+    let res = await adminFetch(backendUrl, {
       method: "PUT",
       body: JSON.stringify(payload),
     })
 
     if (res.status === 404) {
-      res = await adminFetch("/api/vendor/brand-prompt", {
+      res = await adminFetch(backendUrl, {
         method: "POST",
         body: JSON.stringify(payload),
       })

@@ -12,9 +12,10 @@ import {
 } from "@/lib/admin/admin-settings"
 
 export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const collection = searchParams.get("collection") || process.env.XTAL_COLLECTION
+
   try {
-    const { searchParams } = new URL(request.url)
-    const collection = searchParams.get("collection") || process.env.XTAL_COLLECTION
     const params = new URLSearchParams({ collection: collection ?? "" })
 
     const res = await adminFetch(`/api/vendor/settings?${params.toString()}`)
@@ -27,12 +28,13 @@ export async function GET(request: Request) {
     console.error("Settings GET proxy error:", error)
   }
 
-  // Fallback: read from Redis
+  // Fallback: read from Redis (scoped by collection)
+  const fallbackCollection = collection ?? "default"
   const [queryEnhancementEnabled, merchRerankStrength, bm25Weight, keywordRerankStrength] = await Promise.all([
-    getQueryEnhancement(),
-    getMerchRerankStrength(),
-    getBm25Weight(),
-    getKeywordRerankStrength(),
+    getQueryEnhancement(fallbackCollection),
+    getMerchRerankStrength(fallbackCollection),
+    getBm25Weight(fallbackCollection),
+    getKeywordRerankStrength(fallbackCollection),
   ])
   return NextResponse.json({
     query_enhancement_enabled: queryEnhancementEnabled,
@@ -50,19 +52,20 @@ export async function PUT(request: Request) {
     const body = await request.json()
     const params = new URLSearchParams({ collection: collection ?? "" })
 
-    // Always persist to Redis as local fallback
+    // Always persist to Redis as local fallback (scoped by collection)
+    const fallbackCollection = collection ?? process.env.XTAL_COLLECTION ?? "default"
     try {
       if (body.query_enhancement_enabled !== undefined) {
-        await saveQueryEnhancement(body.query_enhancement_enabled)
+        await saveQueryEnhancement(fallbackCollection, body.query_enhancement_enabled)
       }
       if (body.merch_rerank_strength !== undefined) {
-        await saveMerchRerankStrength(body.merch_rerank_strength)
+        await saveMerchRerankStrength(fallbackCollection, body.merch_rerank_strength)
       }
       if (body.bm25_weight !== undefined) {
-        await saveBm25Weight(body.bm25_weight)
+        await saveBm25Weight(fallbackCollection, body.bm25_weight)
       }
       if (body.keyword_rerank_strength !== undefined) {
-        await saveKeywordRerankStrength(body.keyword_rerank_strength)
+        await saveKeywordRerankStrength(fallbackCollection, body.keyword_rerank_strength)
       }
     } catch (e) {
       console.error("Redis settings save error:", e)
