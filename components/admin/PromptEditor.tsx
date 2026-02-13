@@ -1,7 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Save, RotateCcw } from "lucide-react"
+import { Save, RotateCcw, Clock } from "lucide-react"
+
+interface HistoryEntry {
+  content: string
+  timestamp: string
+}
 
 interface PromptEditorProps {
   title: string
@@ -10,6 +15,8 @@ interface PromptEditorProps {
   onSave: (newPrompt: string) => Promise<void>
   saving?: boolean
   placeholder?: string
+  history?: HistoryEntry[]
+  onHistoryRestore?: (content: string) => void
 }
 
 export default function PromptEditor({
@@ -19,9 +26,12 @@ export default function PromptEditor({
   onSave,
   saving = false,
   placeholder,
+  history,
+  onHistoryRestore,
 }: PromptEditorProps) {
   const [value, setValue] = useState(prompt)
   const [confirmRestore, setConfirmRestore] = useState(false)
+  const [showHistory, setShowHistory] = useState(false)
   const [feedback, setFeedback] = useState<{
     type: "success" | "error"
     message: string
@@ -61,25 +71,80 @@ export default function PromptEditor({
   }
 
   const handleRestoreBlur = () => {
-    // Reset confirm state if user clicks away
     setTimeout(() => setConfirmRestore(false), 200)
   }
+
+  const handleHistoryRestore = (entry: HistoryEntry) => {
+    setValue(entry.content)
+    setShowHistory(false)
+    if (onHistoryRestore) onHistoryRestore(entry.content)
+  }
+
+  const hasHistory = history && history.length > 0
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
         <h3 className="text-sm font-semibold text-slate-800">{title}</h3>
-        {feedback && (
-          <span
-            className={`text-xs font-medium ${
-              feedback.type === "success" ? "text-green-600" : "text-red-600"
-            }`}
-          >
-            {feedback.message}
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {feedback && (
+            <span
+              className={`text-xs font-medium ${
+                feedback.type === "success" ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {feedback.message}
+            </span>
+          )}
+          {hasHistory && (
+            <button
+              onClick={() => setShowHistory(!showHistory)}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
+                showHistory
+                  ? "bg-xtal-navy text-white border-xtal-navy"
+                  : "border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5" />
+              History
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* History panel */}
+      {showHistory && hasHistory && (
+        <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/50">
+          <h4 className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-3">
+            Version History
+          </h4>
+          <div className="space-y-2 max-h-64 overflow-y-auto">
+            {history!.map((entry, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-100"
+              >
+                <div className="min-w-0 flex-1">
+                  <span className="text-xs text-slate-500">
+                    {new Date(entry.timestamp).toLocaleString()}
+                  </span>
+                  <p className="text-xs text-slate-400 truncate max-w-[500px]">
+                    {entry.content.slice(0, 120)}
+                    {entry.content.length > 120 ? "..." : ""}
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleHistoryRestore(entry)}
+                  className="ml-3 text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors shrink-0"
+                >
+                  Restore
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Textarea */}
       <div className="p-5">
