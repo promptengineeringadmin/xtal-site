@@ -209,7 +209,7 @@ export default function TrySearch({ collection, suggestions }: { collection?: st
           activeFilterCount={activeFilterCount}
         >
           <MobileFilterContent
-            computedFacets={computedFacets}
+            computedFacets={computedFacets ?? {}}
             activeFacetFilters={activeFacetFilters}
             priceRange={priceRange}
             results={results}
@@ -235,7 +235,7 @@ function MobileFilterContent({
   onPriceRemove,
   onClearAll,
 }: {
-  computedFacets: Record<string, Record<string, number>>
+  computedFacets: Record<string, Record<string, number>> | null
   activeFacetFilters: Record<string, string[]>
   priceRange: PriceRange | null
   results: { price: number | number[] }[]
@@ -244,8 +244,9 @@ function MobileFilterContent({
   onPriceRemove: () => void
   onClearAll: () => void
 }) {
+  const safeFacets = computedFacets || {}
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set(["price", ...Object.keys(computedFacets).slice(0, 2)])
+    new Set(["price", ...Object.keys(safeFacets).slice(0, 2)])
   )
   const [showMore, setShowMore] = useState<Record<string, boolean>>({})
 
@@ -312,7 +313,7 @@ function MobileFilterContent({
       </div>
 
       {/* Facet sections */}
-      {Object.entries(computedFacets).map(([prefix, values]) => {
+      {Object.entries(safeFacets).map(([prefix, values]) => {
         const expanded = isExpanded(prefix)
         const activeValues = activeFacetFilters[prefix] || []
         const sortedEntries = Object.entries(values).sort((a, b) => b[1] - a[1])
