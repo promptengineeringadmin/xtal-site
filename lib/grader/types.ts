@@ -8,6 +8,7 @@ export interface StoreInfo {
   vertical: string
   searchUrl: string | null
   productSamples: string[]
+  searchProvider: SearchProvider
 }
 
 export type Platform =
@@ -17,6 +18,21 @@ export type Platform =
   | "magento"
   | "squarespace"
   | "custom"
+
+export type SearchProvider =
+  | "algolia"
+  | "searchspring"
+  | "klevu"
+  | "bloomreach"
+  | "nosto"
+  | "constructor"
+  | "doofinder"
+  | "searchanise"
+  | "boost-commerce"
+  | "xtal"
+  | "shopify-native"
+  | "woocommerce-native"
+  | "unknown"
 
 export interface TestQuery {
   text: string
@@ -112,6 +128,7 @@ export interface GraderReport {
   summary: string
   createdAt: string
   emailCaptured: boolean
+  searchProvider?: SearchProvider
 }
 
 // ─── Run Log (admin) ────────────────────────────────────────

@@ -52,6 +52,7 @@ async function main() {
     console.log(`  Platform: ${detection.platform}`)
     console.log(`  Store: ${detection.name}`)
     console.log(`  Search URL: ${detection.searchUrl || "(not found)"}`)
+    console.log(`  Search Provider: ${detection.searchProvider}`)
     console.log(`  Product samples: ${detection.productSamples.length}`)
 
     fs.writeFileSync(
@@ -188,6 +189,7 @@ async function main() {
     console.log(`${"═".repeat(60)}`)
     console.log(`  Overall Score: ${overallScore}/100 (${overallGrade})`)
     console.log(`  Platform: ${detection.platform}`)
+    console.log(`  Search Provider: ${detection.searchProvider}`)
     console.log(`  Duration: ${duration}s`)
     console.log(`\n  Dimensions:`)
     evaluation.dimensions.forEach((d) => {

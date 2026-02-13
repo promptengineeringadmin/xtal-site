@@ -104,6 +104,7 @@ export async function POST(request: Request) {
       searchUrl: storeInfo.searchUrl,
       queries: analysis.queries,
       productSamples: detection.productSamples,
+      searchProvider: detection.searchProvider,
     })
   } catch (error) {
     console.error("Grader analyze error:", error)

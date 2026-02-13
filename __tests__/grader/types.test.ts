@@ -86,6 +86,7 @@ describe("Grader Types (compile-time validation)", () => {
         vertical: "fashion",
         searchUrl: "/search?q=",
         productSamples: ["Product A", "Product B"],
+        searchProvider: "shopify-native",
       }
       expect(store.url).toBe("https://example.com")
       expect(store.platform).toBe("shopify")
@@ -101,6 +102,7 @@ describe("Grader Types (compile-time validation)", () => {
         vertical: "electronics",
         searchUrl: null,
         productSamples: [],
+        searchProvider: "unknown",
       }
       expect(store.searchUrl).toBeNull()
     })
@@ -393,6 +395,7 @@ describe("Grader Types (compile-time validation)", () => {
             storeType: "DTC",
             vertical: "fashion",
             searchUrl: "/search?q=",
+            searchProvider: "shopify-native",
           },
           queryResultsSummary: "5 queries tested...",
         },

@@ -74,6 +74,7 @@ export default function BatchGraderForm() {
             vertical: analyzeData.vertical,
             platform: analyzeData.platform,
             queryResults: searchData.queryResults,
+            searchProvider: analyzeData.searchProvider,
           }),
         })
         if (!evalRes.ok) throw new Error("Evaluate failed")

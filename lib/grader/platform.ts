@@ -1,10 +1,11 @@
-import type { Platform, StoreInfo } from "./types"
+import type { Platform, SearchProvider, StoreInfo } from "./types"
 
 interface PlatformDetectionResult {
   platform: Platform
   name: string
   searchUrl: string | null
   productSamples: string[]
+  searchProvider: SearchProvider
 }
 
 // ─── Platform signatures ────────────────────────────────────
@@ -40,6 +41,60 @@ const SEARCH_PATHS: Partial<Record<Platform, string>> = {
   woocommerce: "/?s=",
   magento: "/catalogsearch/result/?q=",
   squarespace: "/search?q=",
+}
+
+// ─── Search provider signatures ─────────────────────────────
+
+const SEARCH_PROVIDER_SIGNALS: { provider: SearchProvider; patterns: RegExp[] }[] = [
+  {
+    provider: "algolia",
+    patterns: [/algoliasearch/i, /algolia\.net/i, /instantsearch/i, /algoliaAgent/i],
+  },
+  {
+    provider: "searchspring",
+    patterns: [/searchspring/i, /cdn\.searchspring\.net/i],
+  },
+  {
+    provider: "klevu",
+    patterns: [/klevu/i, /js\.klevu\.com/i],
+  },
+  {
+    provider: "bloomreach",
+    patterns: [/bloomreach/i, /br-trk/i, /brtrk\.com/i, /suggest\.dxpapi\.com/i],
+  },
+  {
+    provider: "nosto",
+    patterns: [/connect\.nosto\.com/i, /nostojs/i],
+  },
+  {
+    provider: "constructor",
+    patterns: [/constructor\.io/i, /cnstrc\.com/i],
+  },
+  {
+    provider: "doofinder",
+    patterns: [/doofinder/i, /cdn\.doofinder\.com/i],
+  },
+  {
+    provider: "searchanise",
+    patterns: [/searchanise/i, /smart-search-instant/i],
+  },
+  {
+    provider: "boost-commerce",
+    patterns: [/boost-commerce/i, /bc-sf-filter/i, /boostcommerce/i],
+  },
+  {
+    provider: "xtal",
+    patterns: [/xtalsearch/i, /xtal-search/i],
+  },
+]
+
+export function detectSearchProvider(html: string, platform: Platform): SearchProvider {
+  for (const { provider, patterns } of SEARCH_PROVIDER_SIGNALS) {
+    if (patterns.some((p) => p.test(html))) return provider
+  }
+  if (platform === "shopify") return "shopify-native"
+  if (platform === "woocommerce") return "woocommerce-native"
+  return "unknown"
 }
 
 // ─── Detect platform from HTML ──────────────────────────────
@@ -188,6 +243,7 @@ export async function detectStore(url: string): Promise<PlatformDetectionResult>
 
   const html = await res.text()
   const platform = detectPlatform(html)
+  const searchProvider = detectSearchProvider(html, platform)
   const name = extractStoreName(html, normalizedUrl)
   let productSamples = extractProductSamples(html)
 
@@ -205,7 +261,7 @@ export async function detectStore(url: string): Promise<PlatformDetectionResult>
     }
   }
 
-  return { platform, name, searchUrl, productSamples }
+  return { platform, name, searchUrl, productSamples, searchProvider }
 }
 
 // ─── Build full StoreInfo (called after LLM analysis) ───────
@@ -223,5 +279,6 @@ export function buildStoreInfo(
     vertical: llmAnalysis.vertical,
     searchUrl: detection.searchUrl,
     productSamples: detection.productSamples,
+    searchProvider: detection.searchProvider,
   }
 }

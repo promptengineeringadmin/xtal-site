@@ -3,6 +3,21 @@
 import { useEffect, useState } from "react"
 import type { Grade } from "@/lib/grader/types"
 
+const SEARCH_PROVIDER_LABELS: Record<string, string> = {
+  algolia: "Algolia",
+  searchspring: "Searchspring",
+  klevu: "Klevu",
+  bloomreach: "Bloomreach",
+  nosto: "Nosto",
+  constructor: "Constructor.io",
+  doofinder: "Doofinder",
+  searchanise: "Searchanise",
+  "boost-commerce": "Boost Commerce",
+  xtal: "XTAL Search",
+  "shopify-native": "Shopify Native",
+  "woocommerce-native": "WooCommerce Native",
+}
+
 interface ReportHeroProps {
   report: {
     storeName: string
@@ -13,6 +28,7 @@ interface ReportHeroProps {
     createdAt: string
     platform: string
     vertical: string
+    searchProvider?: string
   }
   animate?: boolean
 }
@@ -167,7 +183,7 @@ export default function ReportHero({ report, animate = false }: ReportHeroProps)
                 {report.summary}
               </p>
 
-              {/* Platform and Vertical pills */}
+              {/* Platform, Vertical, and Search Provider pills */}
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white">
                   {report.platform}
@@ -175,6 +191,11 @@ export default function ReportHero({ report, animate = false }: ReportHeroProps)
                 <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white">
                   {report.vertical}
                 </span>
+                {report.searchProvider && report.searchProvider !== "unknown" && (
+                  <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white">
+                    Search: {SEARCH_PROVIDER_LABELS[report.searchProvider] ?? report.searchProvider}
+                  </span>
+                )}
               </div>
             </div>
           </div>

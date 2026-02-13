@@ -49,6 +49,7 @@ export default function GraderPage() {
         vertical: string
         searchUrl: string | null
         queries: TestQuery[]
+        searchProvider?: string
       }
 
       setState({
@@ -95,6 +96,7 @@ export default function GraderPage() {
           vertical: analyzeData.vertical,
           platform: analyzeData.platform,
           queryResults: searchData.queryResults,
+          searchProvider: analyzeData.searchProvider,
         }),
       })
 
