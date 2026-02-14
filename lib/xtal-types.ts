@@ -57,6 +57,37 @@ export interface ExplainResponse {
   source: "llm" | "cache" | "fallback"
 }
 
+// Weight optimization types (backend: app/models/optimization.py)
+
+export interface SearchConfig {
+  query_enhancement_enabled: boolean
+  merch_rerank_strength: number
+  bm25_weight: number
+  keyword_rerank_strength: number
+  hypothesis: string
+}
+
+export interface SampleComparison {
+  query: string
+  current_top_5: string[]
+  recommended_top_5: string[]
+}
+
+export interface OptimizationResult {
+  current_config: SearchConfig
+  recommended_config: SearchConfig
+  sample_comparisons: SampleComparison[]
+  reasoning: string
+  queries_tested: number
+  configs_tested: number
+  optimization_time: number
+}
+
+export interface OptimizationRequest {
+  optimization_target?: "accuracy" | "ctr" | "aov" | "rpv"
+  num_queries?: number
+}
+
 export interface Product {
   id: string
   title: string

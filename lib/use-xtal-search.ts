@@ -117,8 +117,13 @@ export function useXtalSearch(collection?: string) {
 
       if (controller.signal.aborted) return
 
+      if (!searchRes.ok) {
+        setError("Search failed. Please try again.")
+        return
+      }
+
       const searchData: SearchResponse = await searchRes.json()
-      const aspectsData: AspectsResponse = await aspectsRes.json()
+      const aspectsData: AspectsResponse = aspectsRes.ok ? await aspectsRes.json() : { aspects: [] }
 
       if (controller.signal.aborted) return
 
@@ -197,6 +202,11 @@ export function useXtalSearch(collection?: string) {
       })
 
       if (controller.signal.aborted) return
+
+      if (!res.ok) {
+        setError("Filter failed. Please try again.")
+        return
+      }
 
       const data: SearchResponse = await res.json()
 

@@ -5,6 +5,7 @@ import PromptEditor from "@/components/admin/PromptEditor"
 import SubPageHeader from "@/components/admin/SubPageHeader"
 import { useCollection } from "@/lib/admin/CollectionContext"
 import type { PromptDefaults } from "@/lib/admin/types"
+import type { OptimizationResult } from "@/lib/xtal-types"
 
 interface HistoryEntry {
   content: string
@@ -25,6 +26,10 @@ export default function SearchTuningPage() {
   const [keywordRerank, setKeywordRerank] = useState(0.3)
   const [settingsSaving, setSettingsSaving] = useState(false)
   const [warning, setWarning] = useState<string | null>(null)
+  const [optimizing, setOptimizing] = useState(false)
+  const [optimizationResult, setOptimizationResult] =
+    useState<OptimizationResult | null>(null)
+  const [optimizeError, setOptimizeError] = useState<string | null>(null)
   const rerankDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const bm25DebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const keywordDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -244,6 +249,64 @@ export default function SearchTuningPage() {
     } catch (err) {
       console.error("Failed to save settings:", err)
       setQueryEnhancementEnabled(!newValue) // revert on error
+    } finally {
+      setSettingsSaving(false)
+    }
+  }
+
+  async function runOptimization() {
+    setOptimizing(true)
+    setOptimizeError(null)
+    setOptimizationResult(null)
+    try {
+      const cp = `?collection=${encodeURIComponent(collection)}`
+      const res = await fetch(`/api/admin/settings/optimize${cp}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ optimization_target: "accuracy", num_queries: 12 }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ error: `Error ${res.status}` }))
+        throw new Error(data.error || `Optimization failed (${res.status})`)
+      }
+      const result: OptimizationResult = await res.json()
+      setOptimizationResult(result)
+    } catch (err) {
+      setOptimizeError(
+        err instanceof Error ? err.message : "Optimization failed"
+      )
+    } finally {
+      setOptimizing(false)
+    }
+  }
+
+  async function applyRecommendation() {
+    if (!optimizationResult) return
+    const rec = optimizationResult.recommended_config
+    setSettingsSaving(true)
+    try {
+      const res = await fetch(
+        `/api/admin/settings?collection=${encodeURIComponent(collection)}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query_enhancement_enabled: rec.query_enhancement_enabled,
+            merch_rerank_strength: rec.merch_rerank_strength,
+            bm25_weight: rec.bm25_weight,
+            keyword_rerank_strength: rec.keyword_rerank_strength,
+          }),
+        }
+      )
+      if (!res.ok) throw new Error(`Save failed: ${res.status}`)
+      // Update local state to match recommendation
+      setQueryEnhancementEnabled(rec.query_enhancement_enabled)
+      setMerchRerank(rec.merch_rerank_strength)
+      setBm25Weight(rec.bm25_weight)
+      setKeywordRerank(rec.keyword_rerank_strength)
+      setOptimizationResult(null)
+    } catch (err) {
+      console.error("Failed to apply recommendation:", err)
     } finally {
       setSettingsSaving(false)
     }
@@ -509,6 +572,243 @@ export default function SearchTuningPage() {
               <div className="mt-3 text-xs text-amber-600 bg-amber-50 rounded px-3 py-2">
                 Query enhancement is off. Search queries will not be rewritten
                 by AI.
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Auto-Optimize Section */}
+        <div>
+          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
+            Auto-Optimize
+          </h2>
+
+          <div className="glass-card p-6">
+            <div>
+              <h3 className="text-lg font-semibold text-xtal-navy">
+                Optimize for My Store
+              </h3>
+              <p className="text-sm text-slate-500 mt-1">
+                Automatically tests different weight combinations against your
+                catalog and recent searches, then recommends the best settings.
+              </p>
+            </div>
+
+            <div className="mt-4">
+              <button
+                onClick={runOptimization}
+                disabled={optimizing || settingsSaving}
+                className="px-4 py-2 bg-xtal-navy text-white rounded-lg text-sm font-medium
+                  hover:bg-xtal-navy/90 disabled:opacity-50 disabled:cursor-not-allowed
+                  transition-colors"
+              >
+                {optimizing ? (
+                  <span className="flex items-center gap-2">
+                    <svg
+                      className="animate-spin h-4 w-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      />
+                    </svg>
+                    Analyzing your catalog...
+                  </span>
+                ) : (
+                  "Optimize Settings"
+                )}
+              </button>
+              {optimizing && (
+                <p className="mt-2 text-xs text-slate-400">
+                  This takes about 20-30 seconds. Testing multiple search
+                  configurations against your catalog.
+                </p>
+              )}
+            </div>
+
+            {optimizeError && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                {optimizeError}
+              </div>
+            )}
+
+            {optimizationResult && (
+              <div className="mt-6 space-y-4">
+                {/* Config comparison */}
+                <div className="border border-slate-200 rounded-lg overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-slate-50">
+                        <th className="text-left px-4 py-2 font-medium text-slate-500">
+                          Setting
+                        </th>
+                        <th className="text-center px-4 py-2 font-medium text-slate-500">
+                          Current
+                        </th>
+                        <th className="text-center px-4 py-2 font-medium text-xtal-navy">
+                          Recommended
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      <tr>
+                        <td className="px-4 py-2 text-slate-600">
+                          AI Query Rewriting
+                        </td>
+                        <td className="px-4 py-2 text-center">
+                          {optimizationResult.current_config
+                            .query_enhancement_enabled
+                            ? "On"
+                            : "Off"}
+                        </td>
+                        <td className="px-4 py-2 text-center font-medium">
+                          {optimizationResult.recommended_config
+                            .query_enhancement_enabled
+                            ? "On"
+                            : "Off"}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-2 text-slate-600">
+                          Marketing Influence
+                        </td>
+                        <td className="px-4 py-2 text-center font-mono">
+                          {optimizationResult.current_config.merch_rerank_strength.toFixed(
+                            2
+                          )}
+                        </td>
+                        <td className="px-4 py-2 text-center font-mono font-medium">
+                          {optimizationResult.recommended_config.merch_rerank_strength.toFixed(
+                            2
+                          )}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-2 text-slate-600">
+                          Keyword Match Priority
+                        </td>
+                        <td className="px-4 py-2 text-center font-mono">
+                          {optimizationResult.current_config.bm25_weight.toFixed(
+                            1
+                          )}
+                        </td>
+                        <td className="px-4 py-2 text-center font-mono font-medium">
+                          {optimizationResult.recommended_config.bm25_weight.toFixed(
+                            1
+                          )}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-2 text-slate-600">
+                          Product Type Boost
+                        </td>
+                        <td className="px-4 py-2 text-center font-mono">
+                          {optimizationResult.current_config.keyword_rerank_strength.toFixed(
+                            1
+                          )}
+                        </td>
+                        <td className="px-4 py-2 text-center font-mono font-medium">
+                          {optimizationResult.recommended_config.keyword_rerank_strength.toFixed(
+                            1
+                          )}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Reasoning */}
+                <div className="bg-xtal-ice/50 rounded-lg p-4">
+                  <h4 className="text-sm font-semibold text-xtal-navy mb-1">
+                    Why this recommendation
+                  </h4>
+                  <p className="text-sm text-slate-600 whitespace-pre-line">
+                    {optimizationResult.reasoning}
+                  </p>
+                </div>
+
+                {/* Sample comparisons */}
+                {optimizationResult.sample_comparisons.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold text-slate-500 mb-2">
+                      Sample before / after
+                    </h4>
+                    <div className="space-y-3">
+                      {optimizationResult.sample_comparisons.map((comp, i) => (
+                        <div
+                          key={i}
+                          className="border border-slate-200 rounded-lg p-3"
+                        >
+                          <p className="text-sm font-medium text-xtal-navy mb-2">
+                            &ldquo;{comp.query}&rdquo;
+                          </p>
+                          <div className="grid grid-cols-2 gap-3 text-xs">
+                            <div>
+                              <p className="font-medium text-slate-400 mb-1">
+                                Current
+                              </p>
+                              <ol className="list-decimal list-inside space-y-0.5 text-slate-600">
+                                {comp.current_top_5.map((t, j) => (
+                                  <li key={j} className="truncate">
+                                    {t}
+                                  </li>
+                                ))}
+                              </ol>
+                            </div>
+                            <div>
+                              <p className="font-medium text-xtal-navy mb-1">
+                                Recommended
+                              </p>
+                              <ol className="list-decimal list-inside space-y-0.5 text-slate-600">
+                                {comp.recommended_top_5.map((t, j) => (
+                                  <li key={j} className="truncate">
+                                    {t}
+                                  </li>
+                                ))}
+                              </ol>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Meta */}
+                <p className="text-xs text-slate-400">
+                  Tested {optimizationResult.configs_tested} configurations
+                  across {optimizationResult.queries_tested} queries in{" "}
+                  {optimizationResult.optimization_time.toFixed(1)}s
+                </p>
+
+                {/* Actions */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={applyRecommendation}
+                    disabled={settingsSaving}
+                    className="px-4 py-2 bg-xtal-navy text-white rounded-lg text-sm font-medium
+                      hover:bg-xtal-navy/90 disabled:opacity-50 transition-colors"
+                  >
+                    Apply Recommended Settings
+                  </button>
+                  <button
+                    onClick={() => setOptimizationResult(null)}
+                    className="px-4 py-2 text-slate-500 hover:text-slate-700 text-sm transition-colors"
+                  >
+                    Dismiss
+                  </button>
+                </div>
               </div>
             )}
           </div>
