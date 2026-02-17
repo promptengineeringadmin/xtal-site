@@ -3,50 +3,51 @@
 import { useState, useEffect, useCallback } from "react"
 import {
   Search,
-  Package,
-  DollarSign,
-  Sparkles,
-  Settings,
-  Timer,
+  Users,
+  MousePointerClick,
+  TrendingUp,
+  ShoppingCart,
+  Target,
 } from "lucide-react"
 import StatCard from "@/components/admin/StatCard"
 import TimeRangeSelector from "@/components/admin/TimeRangeSelector"
+import VolumeChart from "@/components/admin/VolumeChart"
+import TopQueriesTable from "@/components/admin/TopQueriesTable"
+import TopProductsTable from "@/components/admin/TopProductsTable"
 import { useCollection } from "@/lib/admin/CollectionContext"
-import type { MetricsSummary } from "@/lib/admin/types"
-
-const COST_PER_SEARCH = 0.1
+import type { AnalyticsDashboard } from "@/lib/admin/types"
 
 export default function DashboardPage() {
   const { collection } = useCollection()
   const [days, setDays] = useState(30)
-  const [metrics, setMetrics] = useState<MetricsSummary | null>(null)
+  const [data, setData] = useState<AnalyticsDashboard | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchMetrics = useCallback(async () => {
+  const fetchDashboard = useCallback(async () => {
+    if (!collection) return
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch(`/api/admin/metrics/summary?days=${days}&collection=${encodeURIComponent(collection)}`)
-      if (!res.ok) throw new Error(`Failed to fetch metrics: ${res.status}`)
-      const data = await res.json()
-      setMetrics(data)
+      const res = await fetch(
+        `/api/admin/analytics/dashboard?days=${days}&collection=${encodeURIComponent(collection)}`
+      )
+      if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`)
+      const json: AnalyticsDashboard = await res.json()
+      setData(json)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load metrics")
+      setError(err instanceof Error ? err.message : "Failed to load analytics")
     } finally {
       setLoading(false)
     }
   }, [days, collection])
 
   useEffect(() => {
-    fetchMetrics()
-  }, [fetchMetrics])
+    fetchDashboard()
+  }, [fetchDashboard])
 
-  const totalSearches = metrics?.total_search_requests ?? 0
-  const totalProducts = metrics?.total_products ?? 0
-  const costPerSearch = COST_PER_SEARCH
-  const aspectGens = metrics?.total_aspect_generations ?? 0
-  const configUpdates = metrics?.configuration_updates?.total_config_updates ?? 0
+  const s = data?.summary
+  const hasData = s && s.total_searches > 0
 
   return (
     <div>
@@ -61,49 +62,70 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Empty state */}
+      {!loading && !error && !hasData && (
+        <div className="mb-6 p-8 bg-slate-50 border border-slate-200 rounded-xl text-center">
+          <Search className="mx-auto mb-3 text-slate-300" size={40} />
+          <p className="text-slate-500 text-sm">
+            No search data yet. Once customers start using XTAL Search, analytics will appear here.
+          </p>
+        </div>
+      )}
+
+      {/* Summary stat cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         <StatCard
           label="Total Searches"
-          value={totalSearches.toLocaleString()}
+          value={s?.total_searches?.toLocaleString() ?? "0"}
           icon={Search}
           loading={loading}
         />
         <StatCard
-          label="Total Products"
-          value={totalProducts.toLocaleString()}
-          icon={Package}
+          label="Unique Sessions"
+          value={s?.unique_sessions?.toLocaleString() ?? "0"}
+          icon={Users}
           loading={loading}
         />
         <StatCard
-          label="Cost / Search"
-          value={`$${costPerSearch.toFixed(2)}`}
-          icon={DollarSign}
+          label="Click-Through Rate"
+          value={s ? `${(s.click_through_rate * 100).toFixed(1)}%` : "0%"}
+          icon={MousePointerClick}
           loading={loading}
         />
         <StatCard
-          label="Aspect Generations"
-          value={aspectGens.toLocaleString()}
-          icon={Sparkles}
+          label="Avg Click Position"
+          value={s?.avg_click_position?.toFixed(1) ?? "0"}
+          icon={Target}
           loading={loading}
         />
         <StatCard
-          label="Config Updates"
-          value={configUpdates.toLocaleString()}
-          icon={Settings}
+          label="Add to Cart"
+          value={s?.add_to_cart_from_search?.toLocaleString() ?? "0"}
+          icon={ShoppingCart}
           loading={loading}
         />
         <StatCard
-          label="Period"
-          value={`${days} days`}
-          icon={Timer}
+          label="Search Conversion"
+          value={s ? `${(s.search_conversion_rate * 100).toFixed(2)}%` : "0%"}
+          icon={TrendingUp}
           loading={loading}
         />
       </div>
 
-      {metrics && (
+      {/* Volume chart */}
+      <div className="mb-6">
+        <VolumeChart data={data?.daily_volume ?? []} loading={loading} />
+      </div>
+
+      {/* Tables side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <TopQueriesTable data={data?.top_queries ?? []} loading={loading} />
+        <TopProductsTable data={data?.top_products ?? []} loading={loading} />
+      </div>
+
+      {data && !loading && (
         <div className="mt-6 text-xs text-slate-400">
-          Data from {new Date(metrics.period_start).toLocaleDateString()} to{" "}
-          {new Date(metrics.period_end).toLocaleDateString()}
+          Showing last {days} days
         </div>
       )}
     </div>
