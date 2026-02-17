@@ -86,7 +86,7 @@ export default function ProductCard({ product, score, query, onExplain, onReport
         {/* Vendor */}
         {product.vendor && (
           <span className="text-[10px] uppercase tracking-wider text-slate-400 font-medium">
-            {product.vendor}
+            {product.vendor.replace(/<[^>]*>/g, '').substring(0, 60)}
           </span>
         )}
 
