@@ -1,0 +1,1442 @@
+{
+  "timestamp": "2026-02-16T20:54:38.164Z",
+  "url": "https://www.xtalsearch.com/willow",
+  "browserPath": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+  "searches": [
+    {
+      "query": "wire shelf with burlap",
+      "responseTimeMs": 5556,
+      "resultCount": 40,
+      "products": [
+        {
+          "title": "RECT METAL WALL SHELF",
+          "price": "$19.93",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/84704.jpg"
+        },
+        {
+          "title": "RECT METAL GRAY WIRE HOUSE",
+          "price": "$10.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/81170.2.jpg"
+        },
+        {
+          "title": "RECT WOOD/METAL SHELF",
+          "price": "$46.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/85021.jpg"
+        },
+        {
+          "title": "RD 3-TIER BLACK ZIG-WIRE DISP",
+          "price": "$49.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/824359.jpg"
+        },
+        {
+          "title": "RECT METAL/WOOD SHELF",
+          "price": "$495.00",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/84087.jpg"
+        }
+      ],
+      "aspects": [
+        "24\" width",
+        "12\" depth",
+        "4-tier design",
+        "Black powder-coated finish",
+        "18\" height",
+        "Under $25",
+        "$25–$50",
+        "$50–$100",
+        "$100–$200",
+        "$200"
+      ],
+      "facets": {},
+      "consoleErrors": [],
+      "issues": [
+        "P2: slow response (5.6s)",
+        "P2: raw SKU title \"RECT METAL WALL SHELF\"",
+        "P2: raw SKU title \"RECT METAL GRAY WIRE HOUSE\"",
+        "P2: raw SKU title \"RD 3-TIER BLACK ZIG-WIRE DISP\""
+      ],
+      "screenshotFile": "search-01.png"
+    },
+    {
+      "query": "oval tin planter",
+      "responseTimeMs": 4526,
+      "resultCount": 40,
+      "products": [
+        {
+          "title": "RD TIN PLANTER",
+          "price": "$1.67",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/85103.4.5.jpg"
+        },
+        {
+          "title": "OV TIN PLANTER",
+          "price": "$4.25",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/82910.jpg"
+        },
+        {
+          "title": "OV TIN PLANTER",
+          "price": "$7.25",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/84149L.jpg"
+        },
+        {
+          "title": "OV TIN PLANTER SH",
+          "price": "$6.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/84987.jpg"
+        },
+        {
+          "title": "RD TIN PLANTER SH-3 ASST",
+          "price": "$1.97",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/84061.4.5.jpg"
+        }
+      ],
+      "aspects": [
+        "12\" diameter",
+        "8\" height",
+        "copper patina finish",
+        "hand-painted floral motif",
+        "Under $25",
+        "$25–$50",
+        "$50–$100",
+        "$100–$200",
+        "$200"
+      ],
+      "facets": {},
+      "consoleErrors": [],
+      "issues": [
+        "P2: raw SKU title \"RD TIN PLANTER\"",
+        "P2: raw SKU title \"OV TIN PLANTER\"",
+        "P2: raw SKU title \"OV TIN PLANTER\"",
+        "P2: raw SKU title \"OV TIN PLANTER SH\"",
+        "P2: raw SKU title \"RD TIN PLANTER SH-3 ASST\""
+      ],
+      "screenshotFile": "search-02.png"
+    },
+    {
+      "query": "rectangular wood tray",
+      "responseTimeMs": 3282,
+      "resultCount": 40,
+      "products": [
+        {
+          "title": "RECT WOOD TRAY",
+          "price": "$8.45",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/83173.17.jpg"
+        },
+        {
+          "title": "RECT WOOD TRAY IH",
+          "price": "$8.50",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/83882WW.2.jpg"
+        },
+        {
+          "title": "RECT WOOD TRAY IH",
+          "price": "$7.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/83882WW.1.jpg"
+        },
+        {
+          "title": "OV WILLOW TRAY SH",
+          "price": "$16.85",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/83930.18.jpg"
+        },
+        {
+          "title": "S/3 RECT WOOD TRAYS",
+          "price": "$36.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/85581.jpg"
+        }
+      ],
+      "aspects": [
+        "Maple wood",
+        "Hand-rubbed oil finish",
+        "12\" x 8\" dimensions",
+        "Natural grain pattern",
+        "Made in Italy",
+        "Under $25",
+        "$25–$50",
+        "$50–$100",
+        "$100–$200",
+        "$200"
+      ],
+      "facets": {},
+      "consoleErrors": [],
+      "issues": [
+        "P2: raw SKU title \"RECT WOOD TRAY\"",
+        "P2: raw SKU title \"RECT WOOD TRAY IH\"",
+        "P2: raw SKU title \"RECT WOOD TRAY IH\"",
+        "P2: raw SKU title \"OV WILLOW TRAY SH\""
+      ],
+      "screenshotFile": "search-03.png"
+    },
+    {
+      "query": "gift basket packaging supplies",
+      "responseTimeMs": 5005,
+      "resultCount": 40,
+      "products": [
+        {
+          "title": "RED & SILVER CRINKLE-CUT SHRED",
+          "price": "$327.80",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/1CCSB40.RS.jpg"
+        },
+        {
+          "title": "12PC EVD GIFT BOX - SM",
+          "price": "$80.47",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/21K02200.DSD.jpg"
+        },
+        {
+          "title": "GOLDEN ROD CRINKLE-CUT",
+          "price": "$189.90",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/1CC40.GR.jpg"
+        },
+        {
+          "title": "WHITE & SILVER CRINKLE-CUT",
+          "price": "$327.80",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/1CCWB40.WHT.SIL.jpg"
+        },
+        {
+          "title": "S/3 SQ PPRBRD BOXES W/ LID",
+          "price": "$5.97",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/83020DEC.jpg"
+        }
+      ],
+      "aspects": [
+        "12-inch wicker basket",
+        "Gold foil ribbon, 3 mm width",
+        "Eco-friendly kraft paper, 70 lb",
+        "Holiday-themed cellophane wrap, red & green",
+        "Custom monogram label, embossed",
+        "Under $25",
+        "$25–$50",
+        "$50–$100",
+        "$100–$200",
+        "$200"
+      ],
+      "facets": {},
+      "consoleErrors": [],
+      "issues": [
+        "P2: slow response (5.0s)",
+        "P2: raw SKU title \"12PC EVD GIFT BOX - SM\"",
+        "P2: raw SKU title \"GOLDEN ROD CRINKLE-CUT\""
+      ],
+      "screenshotFile": "search-04.png"
+    },
+    {
+      "query": "shredded fill white",
+      "responseTimeMs": 4169,
+      "resultCount": 40,
+      "products": [
+        {
+          "title": "WHITE/OPAL MONO FINE CUT",
+          "price": "$107.80",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/1FCMB10.WHT.OP.jpg"
+        },
+        {
+          "title": "WHITE/SILVER MONO FINE CUT (50",
+          "price": "$399.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/1FCMB50.WHT.SIL.jpg"
+        },
+        {
+          "title": "WHITE/SILVER MONO FINE CUT",
+          "price": "$87.90",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/1FCMB10.WHT.SIL.jpg"
+        },
+        {
+          "title": "CHRISTMAS BLEND VERYFINE CUT",
+          "price": "$229.05",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/1FC50.XMAS.jpg"
+        },
+        {
+          "title": "CHRISTMAS BLEND VERYFINE",
+          "price": "$48.90",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/1FC10.XMAS.jpg"
+        }
+      ],
+      "aspects": [
+        "300 gsm",
+        "Down alternative",
+        "Hypoallergenic",
+        "Eco‑friendly recycled polyester",
+        "Premium goose down",
+        "Under $25",
+        "$25–$50",
+        "$50–$100",
+        "$100–$200",
+        "$200"
+      ],
+      "facets": {},
+      "consoleErrors": [],
+      "issues": [
+        "P2: raw SKU title \"CHRISTMAS BLEND VERYFINE CUT\"",
+        "P2: raw SKU title \"CHRISTMAS BLEND VERYFINE\""
+      ],
+      "screenshotFile": "search-05.png"
+    },
+    {
+      "query": "spring planters for retail display",
+      "responseTimeMs": 4627,
+      "resultCount": 40,
+      "products": [
+        {
+          "title": "RD METAL CHICK-FEET PLANTER",
+          "price": "$3.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/84560L.jpg"
+        },
+        {
+          "title": "METAL PLANTER DISPLAY RACK",
+          "price": "$7.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/7306.12.jpg"
+        },
+        {
+          "title": "METAL PLANTER DISPLAY RACK",
+          "price": "$12.80",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/7305.16.jpg"
+        },
+        {
+          "title": "RD STEEL PLANTER",
+          "price": "$2.07",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/3301ORA.jpg"
+        },
+        {
+          "title": "LIME GREEN VERYFINE CUT",
+          "price": "$48.90",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/1FC10.LIME.jpg"
+        }
+      ],
+      "aspects": [
+        "12-inch diameter",
+        "Terracotta finish",
+        "Fiberglass material",
+        "Mid-century modern style",
+        "Sage green color",
+        "Under $25",
+        "$25–$50",
+        "$50–$100",
+        "$100–$200",
+        "$200"
+      ],
+      "facets": {},
+      "consoleErrors": [],
+      "issues": [
+        "P2: raw SKU title \"RD METAL CHICK-FEET PLANTER\"",
+        "P2: raw SKU title \"METAL PLANTER DISPLAY RACK\"",
+        "P2: raw SKU title \"METAL PLANTER DISPLAY RACK\"",
+        "P2: raw SKU title \"RD STEEL PLANTER\"",
+        "P2: raw SKU title \"LIME GREEN VERYFINE CUT\""
+      ],
+      "screenshotFile": "search-06.png"
+    },
+    {
+      "query": "seagrass baskets",
+      "responseTimeMs": 3061,
+      "resultCount": 40,
+      "products": [
+        {
+          "title": "S/2 RD SEAGRASS STORAGE SH",
+          "price": "$39.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/31507.1.2.jpg"
+        },
+        {
+          "title": "RD SEAGRASS BASKET",
+          "price": "$3.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/82268.4BRN.jpg"
+        },
+        {
+          "title": "OV WILLOW/SEAGRASS OH",
+          "price": "$13.97",
+          "vendor": ". This oval willow and seagrass basket combines natural materials for a stylish and durable storage solution. Its sturdy build and attractive design make it suitable for any setting. This Oval Willow/Seagrass Basket blends the natural textures of willow and seagrass, creating a sturdy and environmentally friendly storage option. Its oval shape and practical size are perfect for household organization or as a natural decor element</p>\"",
+          "hasImage": false,
+          "imageUrl": ""
+        },
+        {
+          "title": "S/3 RD SEAGRASS STORAGE SH",
+          "price": "$84.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/31505.1.3NAT.jpg"
+        },
+        {
+          "title": "S/3 OV SEAGRASS STORAGE IH",
+          "price": "$26.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/31501.1.3NAT.jpg"
+        }
+      ],
+      "aspects": [
+        "12\" diameter",
+        "18\" height",
+        "Handcrafted in Philippines",
+        "Natural ivory color",
+        "With leather strap handles",
+        "Under $25",
+        "$25–$50",
+        "$50–$100",
+        "$100–$200",
+        "$200"
+      ],
+      "facets": {},
+      "consoleErrors": [],
+      "issues": [
+        "P2: raw SKU title \"RD SEAGRASS BASKET\"",
+        "P2: missing image for \"OV WILLOW/SEAGRASS OH\""
+      ],
+      "screenshotFile": "search-07.png"
+    },
+    {
+      "query": "fall harvest decorations",
+      "responseTimeMs": 4500,
+      "resultCount": 40,
+      "products": [
+        {
+          "title": "VINE CORNUCOPIA",
+          "price": "$15.70",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/5260.1.jpg"
+        },
+        {
+          "title": "48PC WOOD FLOWER PICK DISPLAY",
+          "price": "$40.80",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/13K12088.jpg"
+        },
+        {
+          "title": "BOUQUET FALL LOOSE 24-2",
+          "price": "$12.55",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/04451.084.0.jpg"
+        },
+        {
+          "title": "6PC/BAG PANA PUMPKIN-ORANGE",
+          "price": "$3.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/8.25003.jpg"
+        },
+        {
+          "title": "BOUQUET FALL MIX TRIO 24-1",
+          "price": "$6.55",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/04357.000.0.jpg"
+        }
+      ],
+      "aspects": [
+        "Pumpkin orange",
+        "Rustic reclaimed wood",
+        "Handwoven burlap",
+        "Ceramic gourds",
+        "LED fairy lights",
+        "Under $25",
+        "$25–$50",
+        "$50–$100",
+        "$100–$200",
+        "$200"
+      ],
+      "facets": {},
+      "consoleErrors": [],
+      "issues": [
+        "P2: raw SKU title \"VINE CORNUCOPIA\"",
+        "P2: raw SKU title \"48PC WOOD FLOWER PICK DISPLAY\"",
+        "P2: raw SKU title \"BOUQUET FALL LOOSE 24-2\"",
+        "P2: raw SKU title \"BOUQUET FALL MIX TRIO 24-1\""
+      ],
+      "screenshotFile": "search-08.png"
+    },
+    {
+      "query": "christmas packaging",
+      "responseTimeMs": 3217,
+      "resultCount": 40,
+      "products": [
+        {
+          "title": "PEPPERMINT PAPERBOARD BOX",
+          "price": "$4.67",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/82583.jpg"
+        },
+        {
+          "title": "SQ PAPERBOARD TUB IH-SANTA",
+          "price": "$5.20",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/83555SAN.jpg"
+        },
+        {
+          "title": "SQ PAPERBOARD TUB IH",
+          "price": "$3.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/83555JOY.jpg"
+        },
+        {
+          "title": "RECT PAPERBOARD TRAY IH",
+          "price": "$4.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/81050JOY.jpg"
+        },
+        {
+          "title": "RED POLKA DOT OVERWRAP",
+          "price": "$17.80",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/1P4100.PDR.jpg"
+        }
+      ],
+      "aspects": [
+        "Gold foil embossing",
+        "Red & green striped pattern",
+        "Eco-friendly recycled paper",
+        "Limited edition 2024",
+        "12 oz capacity",
+        "Under $25",
+        "$25–$50",
+        "$50–$100",
+        "$100–$200",
+        "$200"
+      ],
+      "facets": {},
+      "consoleErrors": [],
+      "issues": [
+        "P2: raw SKU title \"PEPPERMINT PAPERBOARD BOX\"",
+        "P2: raw SKU title \"SQ PAPERBOARD TUB IH-SANTA\"",
+        "P2: raw SKU title \"SQ PAPERBOARD TUB IH\"",
+        "P2: raw SKU title \"RECT PAPERBOARD TRAY IH\"",
+        "P2: raw SKU title \"RED POLKA DOT OVERWRAP\""
+      ],
+      "screenshotFile": "search-09.png"
+    },
+    {
+      "query": "gifts for someone who loves gardening",
+      "responseTimeMs": 2969,
+      "resultCount": 40,
+      "products": [
+        {
+          "title": "RD TIN PLANTER",
+          "price": "$3.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/85102.6.5.jpg"
+        },
+        {
+          "title": "RD FELT SANTA SLEEVE W/GLASS",
+          "price": "$3.30",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/85562.SAN.jpg"
+        },
+        {
+          "title": "RD TIN PLANTER SH",
+          "price": "$1.57",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/82114.4.5.jpg"
+        },
+        {
+          "title": "SWEATER COVER W/GLASS-TREE",
+          "price": "$4.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/85563.TREE.jpg"
+        },
+        {
+          "title": "RD GALVANIZED TIN W/CHALKBOARD",
+          "price": "$9.40",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/816836.15.jpg"
+        }
+      ],
+      "aspects": [
+        "Heirloom \"Brandywine\" tomato seeds",
+        "12-inch stainless steel trowel",
+        "8-inch glazed ceramic planter",
+        "20L organic compost bag",
+        "Solar-powered LED garden lights (4-pack)",
+        "Under $25",
+        "$25–$50",
+        "$50–$100",
+        "$100–$200",
+        "$200"
+      ],
+      "facets": {},
+      "consoleErrors": [],
+      "issues": [
+        "P2: raw SKU title \"RD TIN PLANTER\"",
+        "P2: raw SKU title \"RD TIN PLANTER SH\""
+      ],
+      "screenshotFile": "search-10.png"
+    },
+    {
+      "query": "hosting a dinner party this weekend",
+      "responseTimeMs": 2792,
+      "resultCount": 40,
+      "products": [
+        {
+          "title": "RD CERAMIC TEA LITE HOLDER-RED",
+          "price": "$2.77",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/8247.8.jpg"
+        },
+        {
+          "title": "FELT HEART PICKS - 5 ASST",
+          "price": "$0.67",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/18K12002.jpg"
+        },
+        {
+          "title": "RD PORCELAIN PLATE",
+          "price": "$4.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/84588.jpg"
+        },
+        {
+          "title": "CERAMIC OWL PITCHER-3 ASST",
+          "price": "$2.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/11K12041.jpg"
+        },
+        {
+          "title": "SQ WOOD DINING TABLE",
+          "price": "$225.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/9271.jpg"
+        }
+      ],
+      "aspects": [
+        "Serves 10 guests",
+        "12‑piece dinnerware set (porcelain)",
+        "8 oz soy candle – vanilla & amber scent",
+        "2018 Napa Valley Cabernet Sauvignon (750 ml)",
+        "Marble cheese board 18 × 12 in, polished edge",
+        "Under $25",
+        "$25–$50",
+        "$50–$100",
+        "$100–$200",
+        "$200"
+      ],
+      "facets": {},
+      "consoleErrors": [],
+      "issues": [
+        "P2: raw SKU title \"RD CERAMIC TEA LITE HOLDER-RED\"",
+        "P2: raw SKU title \"FELT HEART PICKS - 5 ASST\"",
+        "P2: raw SKU title \"RD PORCELAIN PLATE\"",
+        "P2: raw SKU title \"CERAMIC OWL PITCHER-3 ASST\"",
+        "P2: raw SKU title \"SQ WOOD DINING TABLE\""
+      ],
+      "screenshotFile": "search-11.png"
+    },
+    {
+      "query": "bulk planters for retail store",
+      "responseTimeMs": 4436,
+      "resultCount": 40,
+      "products": [
+        {
+          "title": "RD TIN PLANTER SH-3 ASST",
+          "price": "$1.97",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/84061.4.5.jpg"
+        },
+        {
+          "title": "RD CERAMIC PLANTER",
+          "price": "$7.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/82725.jpg"
+        },
+        {
+          "title": "BOUQUET SPRING TRENDY 24-3",
+          "price": "$17.80",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/04411.000.0.jpg"
+        },
+        {
+          "title": "S/3 SQ METAL PLANTERS",
+          "price": "$59.97",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/85059.1.3.jpg"
+        },
+        {
+          "title": "RD METAL CHICK-FEET PLANTER",
+          "price": "$3.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/84560L.jpg"
+        }
+      ],
+      "aspects": [
+        "12-inch diameter",
+        "terra cotta finish",
+        "metal ribbed frame",
+        "stackable design",
+        "1500 lb load capacity",
+        "Under $25",
+        "$25–$50",
+        "$50–$100",
+        "$100–$200",
+        "$200"
+      ],
+      "facets": {},
+      "consoleErrors": [],
+      "issues": [
+        "P2: raw SKU title \"RD TIN PLANTER SH-3 ASST\"",
+        "P2: raw SKU title \"RD CERAMIC PLANTER\"",
+        "P2: raw SKU title \"BOUQUET SPRING TRENDY 24-3\"",
+        "P2: raw SKU title \"RD METAL CHICK-FEET PLANTER\""
+      ],
+      "screenshotFile": "search-12.png"
+    },
+    {
+      "query": "wholesale display shelving",
+      "responseTimeMs": 2722,
+      "resultCount": 40,
+      "products": [
+        {
+          "title": "S/3 GLASS W/HOLDER-6 AST %",
+          "price": "$2.97",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/15K01037.jpg"
+        },
+        {
+          "title": "RECT 4-TIER WOOD/METAL DISPLAY",
+          "price": "$154.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/85575.jpg"
+        },
+        {
+          "title": "RABBIT MOSS BASKET",
+          "price": "$7.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/85592S.jpg"
+        },
+        {
+          "title": "RECT WOOD/METAL DISPLAY",
+          "price": "$215.00",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/85577.jpg"
+        },
+        {
+          "title": "RD MOSS EGG",
+          "price": "$7.75",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/85587L.jpg"
+        }
+      ],
+      "aspects": [
+        "12 ft length",
+        "24 in depth",
+        "18 gauge steel",
+        "Powder-coated black finish",
+        "500 lb load capacity",
+        "Under $25",
+        "$25–$50",
+        "$50–$100",
+        "$100–$200",
+        "$200"
+      ],
+      "facets": {},
+      "consoleErrors": [],
+      "issues": [
+        "P2: raw SKU title \"RABBIT MOSS BASKET\"",
+        "P2: raw SKU title \"RD MOSS EGG\""
+      ],
+      "screenshotFile": "search-13.png"
+    },
+    {
+      "query": "fireplace accessories and decor",
+      "responseTimeMs": 3816,
+      "resultCount": 40,
+      "products": [
+        {
+          "title": "RD METAL LOG HOLDER",
+          "price": "$34.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/85458.jpg"
+        },
+        {
+          "title": "SWEATER COVER W/GLASS-SNOWMAN",
+          "price": "$4.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/85563.SNO.jpg"
+        },
+        {
+          "title": "RECT RATTAN LOG BASKET",
+          "price": "$94.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/9076.jpg"
+        },
+        {
+          "title": "SWEATER COVER W/GLASS-DEER",
+          "price": "$4.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/85563.DEER.jpg"
+        },
+        {
+          "title": "RECT RED SOLID WOOD TRAY",
+          "price": "$7.10",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/83173.15RED.jpg"
+        }
+      ],
+      "aspects": [
+        "cast iron",
+        "handblown glass",
+        "marble",
+        "antique brass",
+        "LED illuminated",
+        "Under $25",
+        "$25–$50",
+        "$50–$100",
+        "$100–$200",
+        "$200"
+      ],
+      "facets": {},
+      "consoleErrors": [],
+      "issues": [
+        "P2: raw SKU title \"RD METAL LOG HOLDER\"",
+        "P2: raw SKU title \"RECT RATTAN LOG BASKET\"",
+        "P2: raw SKU title \"RECT RED SOLID WOOD TRAY\""
+      ],
+      "screenshotFile": "search-14.png"
+    },
+    {
+      "query": "rustic farmhouse decor",
+      "responseTimeMs": 2775,
+      "resultCount": 40,
+      "products": [
+        {
+          "title": "RECT WOOD WALL DECOR-FARM MKT",
+          "price": "$19.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/85113.jpg"
+        },
+        {
+          "title": "SQ WOOD LANTERN",
+          "price": "$34.97",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/83753.4.jpg"
+        },
+        {
+          "title": "BIRCH DECOR-CHEER",
+          "price": "$5.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/84642.jpg"
+        },
+        {
+          "title": "SQ WOOD LANTERN",
+          "price": "$27.97",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/83753.3.jpg"
+        },
+        {
+          "title": "RECT METAL CHALKBOARD SIGN",
+          "price": "$5.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/84038.jpg"
+        }
+      ],
+      "aspects": [
+        "reclaimed pine wood",
+        "distressed white finish",
+        "shiplap wall panels",
+        "antique iron hardware",
+        "Under $25",
+        "$25–$50",
+        "$50–$100",
+        "$100–$200",
+        "$200"
+      ],
+      "facets": {},
+      "consoleErrors": [],
+      "issues": [
+        "P2: raw SKU title \"RECT WOOD WALL DECOR-FARM MKT\"",
+        "P2: raw SKU title \"SQ WOOD LANTERN\"",
+        "P2: raw SKU title \"BIRCH DECOR-CHEER\"",
+        "P2: raw SKU title \"SQ WOOD LANTERN\"",
+        "P2: raw SKU title \"RECT METAL CHALKBOARD SIGN\""
+      ],
+      "screenshotFile": "search-15.png"
+    },
+    {
+      "query": "elegant gift presentation",
+      "responseTimeMs": 2839,
+      "resultCount": 40,
+      "products": [
+        {
+          "title": "GLASS VASE W/DANGLERS",
+          "price": "$2.17",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/84743.jpg"
+        },
+        {
+          "title": "RHODANTHE NATURAL PINK",
+          "price": "$9.60",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/00512.000.0.jpg"
+        },
+        {
+          "title": "12PC HEART GLASS VASE-2 ASST",
+          "price": "$80.40",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/12ASC04018.jpg"
+        },
+        {
+          "title": "LT PINK CRINKLE-CUT SHRED",
+          "price": "$52.90",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/1CC10.LTPINK.jpg"
+        },
+        {
+          "title": "HEART CERAMIC VASE",
+          "price": "$2.27",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/82747.jpg"
+        }
+      ],
+      "aspects": [
+        "gold foil wrapping",
+        "silk ribbon bow",
+        "custom monogram engraving",
+        "handcrafted wooden gift box",
+        "crystal glass presentation case",
+        "Under $25",
+        "$25–$50",
+        "$50–$100",
+        "$100–$200",
+        "$200"
+      ],
+      "facets": {},
+      "consoleErrors": [],
+      "issues": [
+        "P2: raw SKU title \"RHODANTHE NATURAL PINK\"",
+        "P2: raw SKU title \"12PC HEART GLASS VASE-2 ASST\"",
+        "P2: raw SKU title \"LT PINK CRINKLE-CUT SHRED\"",
+        "P2: raw SKU title \"HEART CERAMIC VASE\""
+      ],
+      "screenshotFile": "search-16.png"
+    },
+    {
+      "query": "planters under $50",
+      "responseTimeMs": 3832,
+      "resultCount": 40,
+      "products": [
+        {
+          "title": "OV GREEN WILLOW MINI WASH",
+          "price": "$0.00",
+          "vendor": "Unknown",
+          "hasImage": false,
+          "imageUrl": ""
+        },
+        {
+          "title": "OV TIN TUB SH",
+          "price": "$0.00",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/82931SP.jpg"
+        },
+        {
+          "title": "OV LINER 13.25 L  7.5 W 4 H",
+          "price": "$0.50",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/ABL.36.jpg"
+        },
+        {
+          "title": "RECT LINER  8 L  5.25 W  3 H",
+          "price": "$0.30",
+          "vendor": "e your pots with this rectangular liner. Its durable material ensures long-lasting use.</p>\"",
+          "hasImage": false,
+          "imageUrl": ""
+        },
+        {
+          "title": "PVC LINER FOR 871",
+          "price": "$0.00",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/ABL.51.jpg"
+        }
+      ],
+      "aspects": [
+        "8-inch diameter",
+        "Matte white finish",
+        "Hand‑painted ceramic",
+        "Corten steel",
+        "Terracotta",
+        "Under $25",
+        "$25–$50",
+        "$50–$100",
+        "$100–$200",
+        "$200"
+      ],
+      "facets": {},
+      "consoleErrors": [],
+      "issues": [
+        "P1: product \"OV GREEN WILLOW MINI WASH\" has price \"$0.00\"",
+        "P2: missing image for \"OV GREEN WILLOW MINI WASH\"",
+        "P2: raw SKU title \"OV GREEN WILLOW MINI WASH\"",
+        "P1: product \"OV TIN TUB SH\" has price \"$0.00\"",
+        "P2: raw SKU title \"OV TIN TUB SH\"",
+        "P2: missing image for \"RECT LINER  8 L  5.25 W  3 H\"",
+        "P1: product \"PVC LINER FOR 871\" has price \"$0.00\"",
+        "P2: raw SKU title \"PVC LINER FOR 871\""
+      ],
+      "screenshotFile": "search-17.png"
+    },
+    {
+      "query": "premium display pieces over $200",
+      "responseTimeMs": 2265,
+      "resultCount": 1,
+      "products": [
+        {
+          "title": "RD LINER  17 D   4 H",
+          "price": "$2.00",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/ABL.RD17.jpg"
+        }
+      ],
+      "aspects": [
+        "Murano glass",
+        "Solid walnut",
+        "Gold leaf finish",
+        "Limited edition 2023",
+        "Bizen kiln ceramic",
+        "Under $25",
+        "$25–$50",
+        "$50–$100",
+        "$100–$200",
+        "$200"
+      ],
+      "facets": {},
+      "consoleErrors": [],
+      "issues": [
+        "P2: raw SKU title \"RD LINER  17 D   4 H\""
+      ],
+      "screenshotFile": "search-18.png"
+    },
+    {
+      "query": "new arrivals",
+      "responseTimeMs": 2759,
+      "resultCount": 40,
+      "products": [
+        {
+          "title": "BOUQUET SPRING TRENDY 24-3",
+          "price": "$17.80",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/04411.000.0.jpg"
+        },
+        {
+          "title": "RD MOSS BUNNY BASKET OH",
+          "price": "$10.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/85594L.jpg"
+        },
+        {
+          "title": "BOUQUET SPRING TRENDY 24-2",
+          "price": "$17.80",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/04410.000.0.jpg"
+        },
+        {
+          "title": "RD MOSS EGG",
+          "price": "$7.75",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/85587L.jpg"
+        },
+        {
+          "title": "BOUQUET SPRING TRENDY 24-4",
+          "price": "$17.80",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/04412.000.0.jpg"
+        }
+      ],
+      "aspects": [
+        "2024 Spring Collection",
+        "Limited edition 500 pieces",
+        "Handcrafted in Italy",
+        "Solid walnut veneer",
+        "Gold leaf accent",
+        "Under $25",
+        "$25–$50",
+        "$50–$100",
+        "$100–$200",
+        "$200"
+      ],
+      "facets": {},
+      "consoleErrors": [],
+      "issues": [
+        "P2: raw SKU title \"BOUQUET SPRING TRENDY 24-3\"",
+        "P2: raw SKU title \"RD MOSS BUNNY BASKET OH\"",
+        "P2: raw SKU title \"BOUQUET SPRING TRENDY 24-2\"",
+        "P2: raw SKU title \"RD MOSS EGG\"",
+        "P2: raw SKU title \"BOUQUET SPRING TRENDY 24-4\""
+      ],
+      "screenshotFile": "search-19.png"
+    },
+    {
+      "query": "cozy gift for someone who is always cold",
+      "responseTimeMs": 2833,
+      "resultCount": 40,
+      "products": [
+        {
+          "title": "SWEATER COVER W/GLASS-SNOWMAN",
+          "price": "$4.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/85563.SNO.jpg"
+        },
+        {
+          "title": "CAST IRON TEA CUP-BLACK",
+          "price": "$3.95",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/81469C.jpg"
+        },
+        {
+          "title": "S/4 RATTAN SEATING SET",
+          "price": "$402.50",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/82536.jpg"
+        },
+        {
+          "title": "\"PLUSH WHITE BEAR W/SCARF-10\"\"\"",
+          "price": "$3.77",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/PLUSH.0024.jpg"
+        },
+        {
+          "title": "RD FELT SNOWMAN SLEEVE W/GLASS",
+          "price": "$3.30",
+          "vendor": "Willow Group Ltd.",
+          "hasImage": true,
+          "imageUrl": "https://s3.amazonaws.com/emuncloud-staticassets/productImages/wil187/large/85562.SNO.jpg"
+        }
+      ],
+      "aspects": [
+        "100% alpaca wool",
+        "Electric heating element 3 W",
+        "Queen size",
+        "Ivory color",
+        "Cashmere blend (70% cashmere, 30% merino)",
+        "Under $25",
+        "$25–$50",
+        "$50–$100",
+        "$100–$200",
+        "$200"
+      ],
+      "facets": {},
+      "consoleErrors": [],
+      "issues": [
+        "P2: raw SKU title \"CAST IRON TEA CUP-BLACK\""
+      ],
+      "screenshotFile": "search-20.png"
+    }
+  ],
+  "filterTests": [
+    {
+      "action": "Click first facet checkbox",
+      "resultCountBefore": 40,
+      "resultCountAfter": 40,
+      "passed": false,
+      "screenshotFile": ""
+    },
+    {
+      "action": "Clicked aspect chip: \"Handwoven wicker basket\"",
+      "resultCountBefore": 40,
+      "resultCountAfter": 40,
+      "passed": true,
+      "screenshotFile": "filter-02-aspect-chip.png"
+    },
+    {
+      "action": "Adjusted price slider (reduced max)",
+      "resultCountBefore": 40,
+      "resultCountAfter": 40,
+      "passed": true,
+      "screenshotFile": "filter-03-price-slider.png"
+    },
+    {
+      "action": "Click \"Clear all\"",
+      "resultCountBefore": 40,
+      "resultCountAfter": 40,
+      "passed": true,
+      "screenshotFile": ""
+    }
+  ],
+  "contentCapture": {
+    "defaultSuggestions": [
+      "cozy gift for someone who is always cold",
+      "hosting a dinner party this weekend",
+      "make my bathroom feel like a spa",
+      "dainty jewelry for everyday wear",
+      "setting up a home cocktail bar"
+    ],
+    "allProductTitles": [
+      "RECT METAL WALL SHELF",
+      "RECT METAL GRAY WIRE HOUSE",
+      "RECT WOOD/METAL SHELF",
+      "RD 3-TIER BLACK ZIG-WIRE DISP",
+      "RECT METAL/WOOD SHELF",
+      "RD TIN PLANTER",
+      "OV TIN PLANTER",
+      "OV TIN PLANTER SH",
+      "RD TIN PLANTER SH-3 ASST",
+      "RECT WOOD TRAY",
+      "RECT WOOD TRAY IH",
+      "OV WILLOW TRAY SH",
+      "S/3 RECT WOOD TRAYS",
+      "RED & SILVER CRINKLE-CUT SHRED",
+      "12PC EVD GIFT BOX - SM",
+      "GOLDEN ROD CRINKLE-CUT",
+      "WHITE & SILVER CRINKLE-CUT",
+      "S/3 SQ PPRBRD BOXES W/ LID",
+      "WHITE/OPAL MONO FINE CUT",
+      "WHITE/SILVER MONO FINE CUT (50",
+      "WHITE/SILVER MONO FINE CUT",
+      "CHRISTMAS BLEND VERYFINE CUT",
+      "CHRISTMAS BLEND VERYFINE",
+      "RD METAL CHICK-FEET PLANTER",
+      "METAL PLANTER DISPLAY RACK",
+      "RD STEEL PLANTER",
+      "LIME GREEN VERYFINE CUT",
+      "S/2 RD SEAGRASS STORAGE SH",
+      "RD SEAGRASS BASKET",
+      "OV WILLOW/SEAGRASS OH",
+      "S/3 RD SEAGRASS STORAGE SH",
+      "S/3 OV SEAGRASS STORAGE IH",
+      "VINE CORNUCOPIA",
+      "48PC WOOD FLOWER PICK DISPLAY",
+      "BOUQUET FALL LOOSE 24-2",
+      "6PC/BAG PANA PUMPKIN-ORANGE",
+      "BOUQUET FALL MIX TRIO 24-1",
+      "PEPPERMINT PAPERBOARD BOX",
+      "SQ PAPERBOARD TUB IH-SANTA",
+      "SQ PAPERBOARD TUB IH",
+      "RECT PAPERBOARD TRAY IH",
+      "RED POLKA DOT OVERWRAP",
+      "RD FELT SANTA SLEEVE W/GLASS",
+      "RD TIN PLANTER SH",
+      "SWEATER COVER W/GLASS-TREE",
+      "RD GALVANIZED TIN W/CHALKBOARD",
+      "RD CERAMIC TEA LITE HOLDER-RED",
+      "FELT HEART PICKS - 5 ASST",
+      "RD PORCELAIN PLATE",
+      "CERAMIC OWL PITCHER-3 ASST",
+      "SQ WOOD DINING TABLE",
+      "RD CERAMIC PLANTER",
+      "BOUQUET SPRING TRENDY 24-3",
+      "S/3 SQ METAL PLANTERS",
+      "S/3 GLASS W/HOLDER-6 AST %",
+      "RECT 4-TIER WOOD/METAL DISPLAY",
+      "RABBIT MOSS BASKET",
+      "RECT WOOD/METAL DISPLAY",
+      "RD MOSS EGG",
+      "RD METAL LOG HOLDER",
+      "SWEATER COVER W/GLASS-SNOWMAN",
+      "RECT RATTAN LOG BASKET",
+      "SWEATER COVER W/GLASS-DEER",
+      "RECT RED SOLID WOOD TRAY",
+      "RECT WOOD WALL DECOR-FARM MKT",
+      "SQ WOOD LANTERN",
+      "BIRCH DECOR-CHEER",
+      "RECT METAL CHALKBOARD SIGN",
+      "GLASS VASE W/DANGLERS",
+      "RHODANTHE NATURAL PINK",
+      "12PC HEART GLASS VASE-2 ASST",
+      "LT PINK CRINKLE-CUT SHRED",
+      "HEART CERAMIC VASE",
+      "OV GREEN WILLOW MINI WASH",
+      "OV TIN TUB SH",
+      "OV LINER 13.25 L  7.5 W 4 H",
+      "RECT LINER  8 L  5.25 W  3 H",
+      "PVC LINER FOR 871",
+      "RD LINER  17 D   4 H",
+      "RD MOSS BUNNY BASKET OH",
+      "BOUQUET SPRING TRENDY 24-2",
+      "BOUQUET SPRING TRENDY 24-4",
+      "CAST IRON TEA CUP-BLACK",
+      "S/4 RATTAN SEATING SET",
+      "\"PLUSH WHITE BEAR W/SCARF-10\"\"\"",
+      "RD FELT SNOWMAN SLEEVE W/GLASS"
+    ],
+    "allFacetValues": {},
+    "brokenImages": [],
+    "zeroPrices": [
+      "OV GREEN WILLOW MINI WASH: $0.00",
+      "OV TIN TUB SH: $0.00",
+      "PVC LINER FOR 871: $0.00"
+    ],
+    "rawSkuTitles": [
+      "RECT METAL WALL SHELF",
+      "RECT METAL GRAY WIRE HOUSE",
+      "RD 3-TIER BLACK ZIG-WIRE DISP",
+      "RD TIN PLANTER",
+      "OV TIN PLANTER",
+      "OV TIN PLANTER",
+      "OV TIN PLANTER SH",
+      "RD TIN PLANTER SH-3 ASST",
+      "RECT WOOD TRAY",
+      "RECT WOOD TRAY IH",
+      "RECT WOOD TRAY IH",
+      "OV WILLOW TRAY SH",
+      "12PC EVD GIFT BOX - SM",
+      "GOLDEN ROD CRINKLE-CUT",
+      "CHRISTMAS BLEND VERYFINE CUT",
+      "CHRISTMAS BLEND VERYFINE",
+      "RD METAL CHICK-FEET PLANTER",
+      "METAL PLANTER DISPLAY RACK",
+      "METAL PLANTER DISPLAY RACK",
+      "RD STEEL PLANTER",
+      "LIME GREEN VERYFINE CUT",
+      "RD SEAGRASS BASKET",
+      "VINE CORNUCOPIA",
+      "48PC WOOD FLOWER PICK DISPLAY",
+      "BOUQUET FALL LOOSE 24-2",
+      "BOUQUET FALL MIX TRIO 24-1",
+      "PEPPERMINT PAPERBOARD BOX",
+      "SQ PAPERBOARD TUB IH-SANTA",
+      "SQ PAPERBOARD TUB IH",
+      "RECT PAPERBOARD TRAY IH",
+      "RED POLKA DOT OVERWRAP",
+      "RD TIN PLANTER",
+      "RD TIN PLANTER SH",
+      "RD CERAMIC TEA LITE HOLDER-RED",
+      "FELT HEART PICKS - 5 ASST",
+      "RD PORCELAIN PLATE",
+      "CERAMIC OWL PITCHER-3 ASST",
+      "SQ WOOD DINING TABLE",
+      "RD TIN PLANTER SH-3 ASST",
+      "RD CERAMIC PLANTER",
+      "BOUQUET SPRING TRENDY 24-3",
+      "RD METAL CHICK-FEET PLANTER",
+      "RABBIT MOSS BASKET",
+      "RD MOSS EGG",
+      "RD METAL LOG HOLDER",
+      "RECT RATTAN LOG BASKET",
+      "RECT RED SOLID WOOD TRAY",
+      "RECT WOOD WALL DECOR-FARM MKT",
+      "SQ WOOD LANTERN",
+      "BIRCH DECOR-CHEER",
+      "SQ WOOD LANTERN",
+      "RECT METAL CHALKBOARD SIGN",
+      "RHODANTHE NATURAL PINK",
+      "12PC HEART GLASS VASE-2 ASST",
+      "LT PINK CRINKLE-CUT SHRED",
+      "HEART CERAMIC VASE",
+      "OV GREEN WILLOW MINI WASH",
+      "OV TIN TUB SH",
+      "PVC LINER FOR 871",
+      "RD LINER  17 D   4 H",
+      "BOUQUET SPRING TRENDY 24-3",
+      "RD MOSS BUNNY BASKET OH",
+      "BOUQUET SPRING TRENDY 24-2",
+      "RD MOSS EGG",
+      "BOUQUET SPRING TRENDY 24-4",
+      "CAST IRON TEA CUP-BLACK"
+    ]
+  },
+  "summary": {
+    "totalSearches": 20,
+    "successfulSearches": 20,
+    "failedSearches": 0,
+    "averageResponseTimeMs": 3599,
+    "totalIssues": 74,
+    "p0Issues": 0,
+    "p1Issues": 3
+  }
+}
