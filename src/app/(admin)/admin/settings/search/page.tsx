@@ -64,6 +64,15 @@ export default function SearchTuningPage() {
   const keywordDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
+    // Reset stale state from previous collection
+    setError(null)
+    setWarning(null)
+    setOptimizationResult(null)
+    setOptimizeError(null)
+    setHistoryEvents([])
+    setHistoryOpen(false)
+    setExpandedHistoryRow(null)
+
     setLoading(true)
     async function load() {
       try {
@@ -175,7 +184,7 @@ export default function SearchTuningPage() {
         if (!res.ok) throw new Error(`Save failed: ${res.status}`)
         const data = await res.json()
         if (data._source === "redis_fallback") {
-          setWarning("Settings saved locally — search backend unreachable")
+          setWarning(data.backendWarning || "Settings saved locally — search backend unreachable")
         }
       } catch (err) {
         console.error("Failed to save merch rerank strength:", err)
@@ -208,7 +217,7 @@ export default function SearchTuningPage() {
         if (!res.ok) throw new Error(`Save failed: ${res.status}`)
         const data = await res.json()
         if (data._source === "redis_fallback") {
-          setWarning("Settings saved locally — search backend unreachable")
+          setWarning(data.backendWarning || "Settings saved locally — search backend unreachable")
         }
       } catch (err) {
         console.error("Failed to save bm25 weight:", err)
@@ -241,7 +250,7 @@ export default function SearchTuningPage() {
         if (!res.ok) throw new Error(`Save failed: ${res.status}`)
         const data = await res.json()
         if (data._source === "redis_fallback") {
-          setWarning("Settings saved locally — search backend unreachable")
+          setWarning(data.backendWarning || "Settings saved locally — search backend unreachable")
         }
       } catch (err) {
         console.error("Failed to save keyword rerank strength:", err)
@@ -275,7 +284,7 @@ export default function SearchTuningPage() {
       if (!res.ok) throw new Error(`Save failed: ${res.status}`)
       const data = await res.json()
       if (data._source === "redis_fallback") {
-        setWarning("Settings saved locally — search backend unreachable")
+        setWarning(data.backendWarning || "Settings saved locally — search backend unreachable")
       }
     } catch (err) {
       console.error("Failed to save settings:", err)

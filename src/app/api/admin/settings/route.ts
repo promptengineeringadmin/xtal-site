@@ -83,9 +83,13 @@ export async function PUT(request: Request) {
     }
 
     // Backend failed but Redis succeeded — return success with warning
+    const errText = await res.text().catch(() => "unknown")
+    console.error(`Settings backend sync failed (${res.status}): ${errText}`)
     return NextResponse.json({
       ...body,
       _source: "redis_fallback",
+      backendWarning:
+        "Settings saved locally but failed to sync to search backend. Changes won't affect search results until the backend issue is resolved.",
     })
   } catch (error) {
     console.error("Settings PUT proxy error:", error)
@@ -93,6 +97,8 @@ export async function PUT(request: Request) {
     // Backend unreachable — Redis save already happened above
     return NextResponse.json({
       _source: "redis_fallback",
+      backendWarning:
+        "Settings saved locally but failed to sync to search backend. Changes won't affect search results until the backend issue is resolved.",
     })
   }
 }

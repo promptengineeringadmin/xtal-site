@@ -22,6 +22,10 @@ export default function BrandIdentityPage() {
   const [warning, setWarning] = useState<string | null>(null)
 
   useEffect(() => {
+    // Reset stale state from previous collection
+    setError(null)
+    setWarning(null)
+
     setLoading(true)
     async function load() {
       try {
@@ -72,8 +76,10 @@ export default function BrandIdentityPage() {
       const data = await res.json()
       setBrandPrompt(newPrompt)
 
-      if (data._source === "redis") {
-        setWarning("Prompt saved locally — search backend sync failed")
+      if (data._source === "redis_only" || data._source === "redis") {
+        setWarning(data.backendWarning || "Prompt saved locally — search backend sync failed")
+      } else {
+        setWarning(null)
       }
 
       // Refresh history

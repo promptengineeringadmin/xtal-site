@@ -82,6 +82,7 @@ export async function PUT(request: Request) {
   }
 
   // 2. Best-effort sync to backend
+  let backendWarning: string | undefined
   try {
     const params = new URLSearchParams({ collection })
     const backendUrl = `/api/vendor/brand-prompt?${params.toString()}`
@@ -100,10 +101,19 @@ export async function PUT(request: Request) {
 
     if (res.ok) {
       _source = "redis+backend"
+    } else {
+      const errText = await res.text().catch(() => "unknown")
+      console.error(`Brand prompt backend sync failed (${res.status}): ${errText}`)
+      _source = "redis_only"
+      backendWarning =
+        "Prompt saved locally but failed to sync to search backend. It won't affect search results until the backend issue is resolved."
     }
-  } catch {
-    // Backend sync failed — prompt is still saved in Redis
+  } catch (err) {
+    console.error("Brand prompt backend sync error:", err)
+    _source = "redis_only"
+    backendWarning =
+      "Prompt saved locally but failed to sync to search backend. It won't affect search results until the backend issue is resolved."
   }
 
-  return NextResponse.json({ brand_prompt, _source })
+  return NextResponse.json({ brand_prompt, _source, backendWarning })
 }
