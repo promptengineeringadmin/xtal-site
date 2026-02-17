@@ -133,11 +133,23 @@ export default function SearchPipelineCard({
                 <span className="text-sm text-blue-700 font-medium">
                   {d.enriched_query}
                 </span>
+                {d.product_keyword && (
+                  <span className="inline-block px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide rounded-full bg-emerald-100 text-emerald-700">
+                    keyword: {d.product_keyword}
+                  </span>
+                )}
               </div>
             ) : (
-              <p className="text-sm text-slate-500 italic">
-                No augmentation &mdash; query unchanged
-              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-sm text-slate-500 italic">
+                  No augmentation &mdash; query unchanged
+                </p>
+                {d.product_keyword && (
+                  <span className="inline-block px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide rounded-full bg-emerald-100 text-emerald-700">
+                    keyword: {d.product_keyword}
+                  </span>
+                )}
+              </div>
             )}
           </StepCard>
 
@@ -228,6 +240,11 @@ export default function SearchPipelineCard({
               >
                 {d.filter_in_place ? "Filter-in-place" : "Full pipeline"}
               </span>
+              {d.search_mode && (
+                <span className="inline-block px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide rounded-full bg-blue-100 text-blue-700">
+                  {d.search_mode}
+                </span>
+              )}
             </div>
 
             {d.result_ids_titles && d.result_ids_titles.length > 0 ? (

@@ -28,6 +28,8 @@ export interface SearchEventData {
   result_ids_titles: { id: string; title: string }[]
   filter_in_place: boolean
   facet_filters: Record<string, string[]> | null
+  product_keyword?: string | null
+  search_mode?: string | null
 }
 
 export interface MetricEvent {
@@ -78,4 +80,47 @@ export const EVENT_TYPE_COLORS: Record<EventType, string> = {
   product_fetch: "bg-green-100 text-green-700",
   brand_prompt_updated: "bg-amber-100 text-amber-700",
   marketing_prompt_updated: "bg-rose-100 text-rose-700",
+}
+
+// --- Analytics Dashboard types ---
+
+export interface AnalyticsSummary {
+  total_searches: number
+  unique_sessions: number
+  total_clicks: number
+  click_through_rate: number
+  avg_searches_per_session: number
+  searches_without_clicks: number
+  avg_click_position: number
+  add_to_cart_from_search: number
+  search_conversion_rate: number
+}
+
+export interface DailyVolume {
+  date: string
+  searches: number
+  clicks: number
+  add_to_carts: number
+}
+
+export interface TopQuery {
+  query: string
+  searches: number
+  clicks: number
+  ctr: number
+}
+
+export interface TopProduct {
+  product_id: string
+  product_title: string
+  clicks: number
+  from_queries: number
+  add_to_carts: number
+}
+
+export interface AnalyticsDashboard {
+  summary: AnalyticsSummary
+  daily_volume: DailyVolume[]
+  top_queries: TopQuery[]
+  top_products: TopProduct[]
 }

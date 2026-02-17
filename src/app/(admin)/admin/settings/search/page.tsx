@@ -108,8 +108,8 @@ export default function SearchTuningPage() {
       const data = await res.json()
       setMarketingPrompt(newPrompt)
 
-      if (data._source === "redis") {
-        setWarning("Prompt saved locally — search backend sync failed")
+      if (data._source === "redis_only" || data._source === "redis") {
+        setWarning(data.backendWarning || "Prompt saved locally — search backend sync failed")
       }
 
       // Refresh history
