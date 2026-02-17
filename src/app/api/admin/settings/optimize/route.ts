@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import { adminFetch } from "@/lib/admin/api"
 
+export const maxDuration = 120
+
 export async function POST(request: Request) {
   try {
     const { searchParams } = new URL(request.url)

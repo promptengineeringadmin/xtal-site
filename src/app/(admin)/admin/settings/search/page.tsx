@@ -5,11 +5,33 @@ import PromptEditor from "@/components/admin/PromptEditor"
 import SubPageHeader from "@/components/admin/SubPageHeader"
 import { useCollection } from "@/lib/admin/CollectionContext"
 import type { PromptDefaults } from "@/lib/admin/types"
-import type { OptimizationResult } from "@/lib/xtal-types"
+import type { OptimizationResult, ProductResult } from "@/lib/xtal-types"
+import { ChevronDown, ChevronRight, Check, X } from "lucide-react"
 
 interface HistoryEntry {
   content: string
   timestamp: string
+}
+
+interface OptimizationEvent {
+  id: string
+  timestamp: string
+  event_data: {
+    target: string
+    queries_tested: number
+    configs_tested: number
+    optimization_time: number
+    reasoning: string
+    current_config: Record<string, unknown>
+    recommended_config: Record<string, unknown>
+    all_configs: Record<string, unknown>[]
+    weirdest_results: { current: { query: string; product: string; reason: string }; recommended: { query: string; product: string; reason: string } } | null
+    sample_comparisons: { query: string; current_top_5: string[]; recommended_top_5: string[]; current_results: ProductResult[]; recommended_results: ProductResult[] }[]
+    test_queries: string[]
+    applied: boolean
+    applied_at?: string
+    per_query_rankings?: Record<string, number[]>
+  }
 }
 
 export default function SearchTuningPage() {
@@ -30,6 +52,11 @@ export default function SearchTuningPage() {
   const [optimizationResult, setOptimizationResult] =
     useState<OptimizationResult | null>(null)
   const [optimizeError, setOptimizeError] = useState<string | null>(null)
+  const [expandedComparisons, setExpandedComparisons] = useState<Set<number>>(new Set())
+  const [historyOpen, setHistoryOpen] = useState(false)
+  const [historyEvents, setHistoryEvents] = useState<OptimizationEvent[]>([])
+  const [historyLoading, setHistoryLoading] = useState(false)
+  const [expandedHistoryRow, setExpandedHistoryRow] = useState<string | null>(null)
   const rerankDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const bm25DebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const keywordDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -299,6 +326,16 @@ export default function SearchTuningPage() {
         }
       )
       if (!res.ok) throw new Error(`Save failed: ${res.status}`)
+
+      // Mark this optimization as applied
+      if (optimizationResult.event_id) {
+        fetch("/api/admin/settings/optimize/applied", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ event_id: optimizationResult.event_id }),
+        }).catch((err) => console.warn("Failed to track applied state:", err))
+      }
+
       // Update local state to match recommendation
       setQueryEnhancementEnabled(rec.query_enhancement_enabled)
       setMerchRerank(rec.merch_rerank_strength)
@@ -310,6 +347,38 @@ export default function SearchTuningPage() {
     } finally {
       setSettingsSaving(false)
     }
+  }
+
+  async function loadHistory() {
+    if (historyEvents.length > 0) return // Already loaded
+    setHistoryLoading(true)
+    try {
+      const cp = `?collection=${encodeURIComponent(collection)}`
+      const res = await fetch(`/api/admin/settings/optimize/history${cp}`)
+      if (res.ok) {
+        const data = await res.json()
+        setHistoryEvents(data.events || [])
+      }
+    } catch (err) {
+      console.error("Failed to load optimization history:", err)
+    } finally {
+      setHistoryLoading(false)
+    }
+  }
+
+  function toggleHistory() {
+    const opening = !historyOpen
+    setHistoryOpen(opening)
+    if (opening) loadHistory()
+  }
+
+  function toggleComparisonExpand(index: number) {
+    setExpandedComparisons((prev) => {
+      const next = new Set(prev)
+      if (next.has(index)) next.delete(index)
+      else next.add(index)
+      return next
+    })
   }
 
   if (loading) {
@@ -738,6 +807,41 @@ export default function SearchTuningPage() {
                   </p>
                 </div>
 
+                {/* Weirdest Results */}
+                {optimizationResult.weirdest_results && (
+                  <div className="border border-amber-200 bg-amber-50/50 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-amber-700 mb-3">
+                      Weirdest Results
+                    </h4>
+                    <div className="grid grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <p className="font-medium text-slate-500 mb-1">Current config</p>
+                        <p className="text-slate-700 font-medium">
+                          &ldquo;{optimizationResult.weirdest_results.current.query}&rdquo;
+                        </p>
+                        <p className="text-amber-800 mt-1">
+                          {optimizationResult.weirdest_results.current.product}
+                        </p>
+                        <p className="text-slate-500 mt-1 italic">
+                          {optimizationResult.weirdest_results.current.reason}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-medium text-xtal-navy mb-1">Recommended config</p>
+                        <p className="text-slate-700 font-medium">
+                          &ldquo;{optimizationResult.weirdest_results.recommended.query}&rdquo;
+                        </p>
+                        <p className="text-amber-800 mt-1">
+                          {optimizationResult.weirdest_results.recommended.product}
+                        </p>
+                        <p className="text-slate-500 mt-1 italic">
+                          {optimizationResult.weirdest_results.recommended.reason}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Sample comparisons */}
                 {optimizationResult.sample_comparisons.length > 0 && (
                   <div>
@@ -745,42 +849,63 @@ export default function SearchTuningPage() {
                       Sample before / after
                     </h4>
                     <div className="space-y-3">
-                      {optimizationResult.sample_comparisons.map((comp, i) => (
-                        <div
-                          key={i}
-                          className="border border-slate-200 rounded-lg p-3"
-                        >
-                          <p className="text-sm font-medium text-xtal-navy mb-2">
-                            &ldquo;{comp.query}&rdquo;
-                          </p>
-                          <div className="grid grid-cols-2 gap-3 text-xs">
-                            <div>
-                              <p className="font-medium text-slate-400 mb-1">
-                                Current
-                              </p>
-                              <ol className="list-decimal list-inside space-y-0.5 text-slate-600">
-                                {comp.current_top_5.map((t, j) => (
-                                  <li key={j} className="truncate">
-                                    {t}
-                                  </li>
-                                ))}
-                              </ol>
+                      {optimizationResult.sample_comparisons.map((comp, i) => {
+                        const isExpanded = expandedComparisons.has(i)
+                        const currentItems = isExpanded
+                          ? (comp.current_results?.length ? comp.current_results : comp.current_top_5.map(t => ({ title: t })))
+                          : comp.current_top_5.map(t => ({ title: t }))
+                        const recommendedItems = isExpanded
+                          ? (comp.recommended_results?.length ? comp.recommended_results : comp.recommended_top_5.map(t => ({ title: t })))
+                          : comp.recommended_top_5.map(t => ({ title: t }))
+                        const hasMore = (comp.current_results?.length || 0) > 5 || (comp.recommended_results?.length || 0) > 5
+
+                        return (
+                          <div
+                            key={i}
+                            className="border border-slate-200 rounded-lg p-3"
+                          >
+                            <p className="text-sm font-medium text-xtal-navy mb-2">
+                              &ldquo;{comp.query}&rdquo;
+                            </p>
+                            <div className="grid grid-cols-2 gap-3 text-xs">
+                              <div>
+                                <p className="font-medium text-slate-400 mb-1">
+                                  Current
+                                </p>
+                                <ol className="list-decimal list-inside space-y-0.5 text-slate-600">
+                                  {currentItems.map((item, j) => (
+                                    <li key={j} className="truncate" title={"title" in item ? item.title : String(item)}>
+                                      {"title" in item ? item.title : String(item)}
+                                      {"price" in item && item.price ? ` — $${Number(item.price).toFixed(2)}` : ""}
+                                    </li>
+                                  ))}
+                                </ol>
+                              </div>
+                              <div>
+                                <p className="font-medium text-xtal-navy mb-1">
+                                  Recommended
+                                </p>
+                                <ol className="list-decimal list-inside space-y-0.5 text-slate-600">
+                                  {recommendedItems.map((item, j) => (
+                                    <li key={j} className="truncate" title={"title" in item ? item.title : String(item)}>
+                                      {"title" in item ? item.title : String(item)}
+                                      {"price" in item && item.price ? ` — $${Number(item.price).toFixed(2)}` : ""}
+                                    </li>
+                                  ))}
+                                </ol>
+                              </div>
                             </div>
-                            <div>
-                              <p className="font-medium text-xtal-navy mb-1">
-                                Recommended
-                              </p>
-                              <ol className="list-decimal list-inside space-y-0.5 text-slate-600">
-                                {comp.recommended_top_5.map((t, j) => (
-                                  <li key={j} className="truncate">
-                                    {t}
-                                  </li>
-                                ))}
-                              </ol>
-                            </div>
+                            {hasMore && (
+                              <button
+                                onClick={() => toggleComparisonExpand(i)}
+                                className="mt-2 text-xs text-xtal-navy hover:underline"
+                              >
+                                {isExpanded ? "Show top 5" : `Show all ${Math.max(comp.current_results?.length || 0, comp.recommended_results?.length || 0)} results`}
+                              </button>
+                            )}
                           </div>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   </div>
                 )}
@@ -812,6 +937,180 @@ export default function SearchTuningPage() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Optimization History — collapsed by default */}
+        <div className="glass-card overflow-hidden">
+          <button
+            onClick={toggleHistory}
+            className="w-full flex items-center justify-between p-4 text-left hover:bg-slate-50/50 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              {historyOpen ? (
+                <ChevronDown className="w-4 h-4 text-slate-400" />
+              ) : (
+                <ChevronRight className="w-4 h-4 text-slate-400" />
+              )}
+              <h3 className="text-sm font-semibold text-xtal-navy">
+                Optimization History
+              </h3>
+              {historyEvents.length > 0 && (
+                <span className="text-xs text-slate-400">
+                  ({historyEvents.length} runs)
+                </span>
+              )}
+            </div>
+          </button>
+
+          {historyOpen && (
+            <div className="border-t border-slate-100 px-4 pb-4">
+              {historyLoading ? (
+                <div className="py-6 text-center text-sm text-slate-400">
+                  Loading history...
+                </div>
+              ) : historyEvents.length === 0 ? (
+                <div className="py-6 text-center text-sm text-slate-400">
+                  No optimization runs yet.
+                </div>
+              ) : (
+                <div className="mt-3 space-y-2">
+                  {historyEvents.map((evt) => {
+                    const d = evt.event_data
+                    const isExpanded = expandedHistoryRow === evt.id
+                    const date = new Date(evt.timestamp)
+                    const configChanged =
+                      JSON.stringify(d.current_config) !== JSON.stringify(d.recommended_config)
+
+                    return (
+                      <div key={evt.id} className="border border-slate-200 rounded-lg">
+                        <button
+                          onClick={() =>
+                            setExpandedHistoryRow(isExpanded ? null : evt.id)
+                          }
+                          className="w-full flex items-center gap-3 p-3 text-left text-xs hover:bg-slate-50/50 transition-colors"
+                        >
+                          {isExpanded ? (
+                            <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          ) : (
+                            <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          )}
+                          <span className="text-slate-500 shrink-0">
+                            {date.toLocaleDateString()}{" "}
+                            {date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                          <span className="text-xtal-navy font-medium shrink-0">
+                            {d.target}
+                          </span>
+                          <span className="text-slate-400">
+                            {d.configs_tested} configs / {d.queries_tested} queries / {d.optimization_time?.toFixed(1)}s
+                          </span>
+                          <span className="ml-auto flex items-center gap-1 shrink-0">
+                            {configChanged ? (
+                              <span className="text-blue-600">changed</span>
+                            ) : (
+                              <span className="text-slate-400">no change</span>
+                            )}
+                            {d.applied && (
+                              <span className="inline-flex items-center gap-0.5 text-green-600 font-medium">
+                                <Check className="w-3 h-3" /> applied
+                              </span>
+                            )}
+                          </span>
+                        </button>
+
+                        {isExpanded && (
+                          <div className="border-t border-slate-100 p-3 space-y-3 text-xs">
+                            {/* Reasoning */}
+                            {d.reasoning && (
+                              <div className="bg-xtal-ice/50 rounded p-3">
+                                <p className="font-medium text-xtal-navy mb-1">Reasoning</p>
+                                <p className="text-slate-600 whitespace-pre-line">{d.reasoning}</p>
+                              </div>
+                            )}
+
+                            {/* Config comparison */}
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <p className="font-medium text-slate-400 mb-1">Current</p>
+                                <pre className="bg-slate-50 rounded p-2 text-[11px] overflow-auto">
+                                  {JSON.stringify(d.current_config, null, 2)}
+                                </pre>
+                              </div>
+                              <div>
+                                <p className="font-medium text-xtal-navy mb-1">Recommended</p>
+                                <pre className="bg-slate-50 rounded p-2 text-[11px] overflow-auto">
+                                  {JSON.stringify(d.recommended_config, null, 2)}
+                                </pre>
+                              </div>
+                            </div>
+
+                            {/* Weirdest results */}
+                            {d.weirdest_results && (
+                              <div className="border border-amber-200 bg-amber-50/50 rounded p-3">
+                                <p className="font-medium text-amber-700 mb-2">Weirdest Results</p>
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div>
+                                    <p className="text-slate-500">Current: &ldquo;{d.weirdest_results.current.query}&rdquo;</p>
+                                    <p className="text-amber-800">{d.weirdest_results.current.product}</p>
+                                    <p className="text-slate-500 italic">{d.weirdest_results.current.reason}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-slate-500">Recommended: &ldquo;{d.weirdest_results.recommended.query}&rdquo;</p>
+                                    <p className="text-amber-800">{d.weirdest_results.recommended.product}</p>
+                                    <p className="text-slate-500 italic">{d.weirdest_results.recommended.reason}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Sample comparisons */}
+                            {d.sample_comparisons?.length > 0 && (
+                              <div>
+                                <p className="font-medium text-slate-500 mb-1">Sample comparisons</p>
+                                {d.sample_comparisons.map((comp, ci) => (
+                                  <div key={ci} className="border border-slate-100 rounded p-2 mb-1">
+                                    <p className="font-medium text-xtal-navy mb-1">
+                                      &ldquo;{comp.query}&rdquo;
+                                    </p>
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <ol className="list-decimal list-inside space-y-0.5 text-slate-600">
+                                        {comp.current_top_5.map((t, j) => (
+                                          <li key={j} className="truncate">{t}</li>
+                                        ))}
+                                      </ol>
+                                      <ol className="list-decimal list-inside space-y-0.5 text-slate-600">
+                                        {comp.recommended_top_5.map((t, j) => (
+                                          <li key={j} className="truncate">{t}</li>
+                                        ))}
+                                      </ol>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Test queries */}
+                            {d.test_queries?.length > 0 && (
+                              <details className="text-slate-500">
+                                <summary className="cursor-pointer font-medium hover:text-slate-700">
+                                  Test queries ({d.test_queries.length})
+                                </summary>
+                                <ul className="mt-1 list-disc list-inside">
+                                  {d.test_queries.map((q, qi) => (
+                                    <li key={qi}>{q}</li>
+                                  ))}
+                                </ul>
+                              </details>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

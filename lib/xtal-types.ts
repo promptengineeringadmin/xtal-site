@@ -67,20 +67,45 @@ export interface SearchConfig {
   hypothesis: string
 }
 
+export interface ProductResult {
+  title: string
+  product_type: string
+  price: number
+  vendor: string
+}
+
+export interface WeirdestResult {
+  query: string
+  product: string
+  reason: string
+}
+
+export interface WeirdestResults {
+  current: WeirdestResult
+  recommended: WeirdestResult
+}
+
 export interface SampleComparison {
   query: string
   current_top_5: string[]
   recommended_top_5: string[]
+  current_results: ProductResult[]
+  recommended_results: ProductResult[]
 }
 
 export interface OptimizationResult {
   current_config: SearchConfig
   recommended_config: SearchConfig
+  all_configs: SearchConfig[]
   sample_comparisons: SampleComparison[]
   reasoning: string
+  weirdest_results: WeirdestResults | null
+  per_query_rankings: Record<string, number[]>
+  test_queries: string[]
   queries_tested: number
   configs_tested: number
   optimization_time: number
+  event_id?: string
 }
 
 export interface OptimizationRequest {
