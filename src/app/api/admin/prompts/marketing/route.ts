@@ -106,13 +106,13 @@ export async function PUT(request: Request) {
       console.error(`Marketing prompt backend sync failed (${res.status}): ${errText}`)
       _source = "redis_only"
       backendWarning =
-        "Prompt saved locally but failed to sync to search backend. It won't affect search results until the backend issue is resolved."
+        `Prompt saved locally but failed to sync to search backend (${res.status}: ${errText}). It won't affect search results until the backend issue is resolved.`
     }
   } catch (err) {
     console.error("Marketing prompt backend sync error:", err)
     _source = "redis_only"
     backendWarning =
-      "Prompt saved locally but failed to sync to search backend. It won't affect search results until the backend issue is resolved."
+      `Prompt saved locally but failed to sync to search backend (${err}). It won't affect search results until the backend issue is resolved.`
   }
 
   return NextResponse.json({ marketing_prompt, _source, backendWarning })
