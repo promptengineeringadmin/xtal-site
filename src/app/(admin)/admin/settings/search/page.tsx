@@ -137,6 +137,8 @@ export default function SearchTuningPage() {
 
       if (data._source === "redis_only" || data._source === "redis") {
         setWarning(data.backendWarning || "Prompt saved locally — search backend sync failed")
+      } else {
+        setWarning(null)
       }
 
       // Refresh history
