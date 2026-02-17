@@ -52,6 +52,8 @@ export default function SearchTuningPage() {
   const [optimizationResult, setOptimizationResult] =
     useState<OptimizationResult | null>(null)
   const [optimizeError, setOptimizeError] = useState<string | null>(null)
+  const [optimizeStage, setOptimizeStage] = useState("")
+  const [optimizeElapsed, setOptimizeElapsed] = useState(0)
   const [expandedComparisons, setExpandedComparisons] = useState<Set<number>>(new Set())
   const [historyOpen, setHistoryOpen] = useState(false)
   const [historyEvents, setHistoryEvents] = useState<OptimizationEvent[]>([])
@@ -287,25 +289,54 @@ export default function SearchTuningPage() {
     setOptimizing(true)
     setOptimizeError(null)
     setOptimizationResult(null)
+    setOptimizeStage("starting")
+    setOptimizeElapsed(0)
     try {
       const cp = `?collection=${encodeURIComponent(collection)}`
-      const res = await fetch(`/api/admin/settings/optimize${cp}`, {
+
+      // 1. Start the async job
+      const startRes = await fetch(`/api/admin/settings/optimize${cp}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ optimization_target: "accuracy", num_queries: 12 }),
       })
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({ error: `Error ${res.status}` }))
-        throw new Error(data.error || `Optimization failed (${res.status})`)
+      if (!startRes.ok) {
+        const data = await startRes.json().catch(() => ({ error: `Error ${startRes.status}` }))
+        throw new Error(data.error || `Failed to start optimization (${startRes.status})`)
       }
-      const result: OptimizationResult = await res.json()
-      setOptimizationResult(result)
+      const { job_id } = await startRes.json()
+
+      // 2. Poll for progress
+      while (true) {
+        await new Promise((r) => setTimeout(r, 2000))
+
+        const pollRes = await fetch(
+          `/api/admin/settings/optimize?job_id=${encodeURIComponent(job_id)}`
+        )
+        if (!pollRes.ok) {
+          const data = await pollRes.json().catch(() => ({ error: `Poll error ${pollRes.status}` }))
+          throw new Error(data.error || `Polling failed (${pollRes.status})`)
+        }
+
+        const job = await pollRes.json()
+        setOptimizeStage(job.stage || "")
+        setOptimizeElapsed(job.elapsed || 0)
+
+        if (job.status === "completed") {
+          setOptimizationResult(job.result as OptimizationResult)
+          break
+        }
+        if (job.status === "failed") {
+          throw new Error(job.error || "Optimization failed")
+        }
+      }
     } catch (err) {
       setOptimizeError(
         err instanceof Error ? err.message : "Optimization failed"
       )
     } finally {
       setOptimizing(false)
+      setOptimizeStage("")
     }
   }
 
@@ -701,10 +732,40 @@ export default function SearchTuningPage() {
                 )}
               </button>
               {optimizing && (
-                <p className="mt-2 text-xs text-slate-400">
-                  This takes about 20-30 seconds. Testing multiple search
-                  configurations against your catalog.
-                </p>
+                <div className="mt-3 space-y-2">
+                  <div className="flex items-center gap-3 text-sm text-slate-600">
+                    <span className="font-medium">
+                      {optimizeStage === "gathering_context" && "Gathering catalog context..."}
+                      {optimizeStage === "proposing_configs" && "Claude is designing test configurations..."}
+                      {optimizeStage === "executing_searches" && "Running parallel searches..."}
+                      {optimizeStage === "evaluating_results" && "Claude is evaluating results..."}
+                      {(!optimizeStage || optimizeStage === "starting") && "Starting optimization..."}
+                    </span>
+                    {optimizeElapsed > 0 && (
+                      <span className="text-xs text-slate-400 tabular-nums">
+                        {Math.round(optimizeElapsed)}s
+                      </span>
+                    )}
+                  </div>
+                  <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className="bg-xtal-navy h-full rounded-full transition-all duration-1000 ease-out"
+                      style={{
+                        width: `${Math.max(5, (
+                          optimizeStage === "gathering_context" ? 5 :
+                          optimizeStage === "proposing_configs" ? 15 :
+                          optimizeStage === "executing_searches" ? 45 :
+                          optimizeStage === "evaluating_results" ? 85 :
+                          2
+                        ))}%`
+                      }}
+                    />
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    This typically takes 1-2 minutes. Testing multiple search
+                    configurations against your catalog.
+                  </p>
+                </div>
               )}
             </div>
 

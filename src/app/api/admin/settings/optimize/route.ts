@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server"
 import { adminFetch } from "@/lib/admin/api"
 
-export const maxDuration = 120
-
+/* POST starts an async optimization job (returns { job_id }) */
 export async function POST(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
@@ -32,6 +31,42 @@ export async function POST(request: Request) {
     return NextResponse.json(data)
   } catch (error) {
     console.error("Optimize proxy error:", error)
+    return NextResponse.json(
+      { error: "Failed to reach optimization service" },
+      { status: 502 }
+    )
+  }
+}
+
+/* GET polls an optimization job status by job_id query param */
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const jobId = searchParams.get("job_id")
+    if (!jobId) {
+      return NextResponse.json(
+        { error: "job_id query parameter is required" },
+        { status: 400 }
+      )
+    }
+
+    const res = await adminFetch(
+      `/api/vendor/settings/optimize/${jobId}`,
+      { method: "GET" }
+    )
+
+    if (!res.ok) {
+      const text = await res.text()
+      return NextResponse.json(
+        { error: text || `Backend returned ${res.status}` },
+        { status: res.status }
+      )
+    }
+
+    const data = await res.json()
+    return NextResponse.json(data)
+  } catch (error) {
+    console.error("Optimize poll error:", error)
     return NextResponse.json(
       { error: "Failed to reach optimization service" },
       { status: 502 }
