@@ -27,6 +27,9 @@ function bm25WeightKey(collection: string) {
 function keywordRerankKey(collection: string) {
   return `admin:settings:${collection}:keyword_rerank_strength`
 }
+function storeTypeKey(collection: string) {
+  return `admin:settings:${collection}:store_type`
+}
 
 // ─── Query Enhancement ─────────────────────────────────────
 
@@ -107,4 +110,25 @@ export async function saveKeywordRerankStrength(
 ): Promise<void> {
   const kv = getRedis()
   await kv.set(keywordRerankKey(collection), strength)
+}
+
+// ─── Store Type ─────────────────────────────────────────────
+
+export async function getStoreType(collection: string): Promise<string> {
+  try {
+    const kv = getRedis()
+    const stored = await kv.get<string>(storeTypeKey(collection))
+    if (stored) return stored
+  } catch {
+    // Redis unavailable
+  }
+  return "online retailer" // default
+}
+
+export async function saveStoreType(
+  collection: string,
+  storeType: string
+): Promise<void> {
+  const kv = getRedis()
+  await kv.set(storeTypeKey(collection), storeType)
 }

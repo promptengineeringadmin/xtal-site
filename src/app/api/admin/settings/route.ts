@@ -9,6 +9,8 @@ import {
   saveBm25Weight,
   getKeywordRerankStrength,
   saveKeywordRerankStrength,
+  getStoreType,
+  saveStoreType,
 } from "@/lib/admin/admin-settings"
 
 export async function GET(request: Request) {
@@ -30,17 +32,19 @@ export async function GET(request: Request) {
 
   // Fallback: read from Redis (scoped by collection)
   const fallbackCollection = collection ?? "default"
-  const [queryEnhancementEnabled, merchRerankStrength, bm25Weight, keywordRerankStrength] = await Promise.all([
+  const [queryEnhancementEnabled, merchRerankStrength, bm25Weight, keywordRerankStrength, storeType] = await Promise.all([
     getQueryEnhancement(fallbackCollection),
     getMerchRerankStrength(fallbackCollection),
     getBm25Weight(fallbackCollection),
     getKeywordRerankStrength(fallbackCollection),
+    getStoreType(fallbackCollection),
   ])
   return NextResponse.json({
     query_enhancement_enabled: queryEnhancementEnabled,
     merch_rerank_strength: merchRerankStrength,
     bm25_weight: bm25Weight,
     keyword_rerank_strength: keywordRerankStrength,
+    store_type: storeType,
     _source: "redis_fallback",
   })
 }
@@ -66,6 +70,9 @@ export async function PUT(request: Request) {
       }
       if (body.keyword_rerank_strength !== undefined) {
         await saveKeywordRerankStrength(fallbackCollection, body.keyword_rerank_strength)
+      }
+      if (body.store_type !== undefined) {
+        await saveStoreType(fallbackCollection, body.store_type)
       }
     } catch (e) {
       console.error("Redis settings save error:", e)

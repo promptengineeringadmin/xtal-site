@@ -55,10 +55,17 @@ export default function SearchTuningPage() {
   const [optimizeStage, setOptimizeStage] = useState("")
   const [optimizeElapsed, setOptimizeElapsed] = useState(0)
   const [expandedComparisons, setExpandedComparisons] = useState<Set<number>>(new Set())
+  const [storeType, setStoreType] = useState("online retailer")
+  const [storeTypeSaving, setStoreTypeSaving] = useState(false)
+  const [aspectsPrompt, setAspectsPrompt] = useState("")
+  const [aspectsHistory, setAspectsHistory] = useState<HistoryEntry[]>([])
+  const [aspectsDefault, setAspectsDefault] = useState("")
+  const [savingAspects, setSavingAspects] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
   const [historyEvents, setHistoryEvents] = useState<OptimizationEvent[]>([])
   const [historyLoading, setHistoryLoading] = useState(false)
   const [expandedHistoryRow, setExpandedHistoryRow] = useState<string | null>(null)
+  const storeTypeDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const rerankDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const bm25DebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const keywordDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -72,15 +79,19 @@ export default function SearchTuningPage() {
     setHistoryEvents([])
     setHistoryOpen(false)
     setExpandedHistoryRow(null)
+    setStoreType("online retailer")
+    setAspectsPrompt("")
+    setAspectsHistory([])
 
     setLoading(true)
     async function load() {
       try {
         const cp = `?collection=${encodeURIComponent(collection)}`
-        const [marketingRes, defaultsRes, settingsRes] = await Promise.all([
+        const [marketingRes, defaultsRes, settingsRes, aspectsRes] = await Promise.all([
           fetch(`/api/admin/prompts/marketing${cp}&includeHistory=true`),
           fetch(`/api/admin/prompts/defaults${cp}`),
           fetch(`/api/admin/settings${cp}`),
+          fetch(`/api/admin/settings/aspects-prompt?includeHistory=true`),
         ])
 
         let loadedDefaults: PromptDefaults | null = null
@@ -108,11 +119,21 @@ export default function SearchTuningPage() {
           setMerchRerank(data.merch_rerank_strength ?? 0.25)
           setBm25Weight(data.bm25_weight ?? 1.0)
           setKeywordRerank(data.keyword_rerank_strength ?? 0.3)
+          if (data.store_type) setStoreType(data.store_type)
           if (data._source === "redis_fallback") {
             warnings.push(
               "Search backend unreachable — settings loaded from local cache"
             )
           }
+        }
+
+        if (aspectsRes.ok) {
+          const data = await aspectsRes.json()
+          setAspectsPrompt(data.content ?? "")
+          setAspectsDefault(data.defaultContent ?? "")
+          setAspectsHistory(data.history ?? [])
+        } else {
+          warnings.push("Aspects prompt failed to load")
         }
 
         if (warnings.length > 0) {
@@ -291,6 +312,61 @@ export default function SearchTuningPage() {
       setQueryEnhancementEnabled(!newValue) // revert on error
     } finally {
       setSettingsSaving(false)
+    }
+  }
+
+  const saveStoreType = useCallback(
+    async (value: string) => {
+      setStoreTypeSaving(true)
+      try {
+        const res = await fetch(
+          `/api/admin/settings?collection=${encodeURIComponent(collection)}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ store_type: value }),
+          }
+        )
+        if (!res.ok) throw new Error(`Save failed: ${res.status}`)
+      } catch (err) {
+        console.error("Failed to save store type:", err)
+      } finally {
+        setStoreTypeSaving(false)
+      }
+    },
+    [collection]
+  )
+
+  function handleStoreTypeChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const value = e.target.value
+    setStoreType(value)
+    if (storeTypeDebounceRef.current) clearTimeout(storeTypeDebounceRef.current)
+    storeTypeDebounceRef.current = setTimeout(() => saveStoreType(value), 800)
+  }
+
+  async function saveAspectsPromptFn(newPrompt: string) {
+    setSavingAspects(true)
+    try {
+      const res = await fetch("/api/admin/settings/aspects-prompt", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: newPrompt }),
+      })
+      if (!res.ok) throw new Error(`Save failed: ${res.status}`)
+      setAspectsPrompt(newPrompt)
+
+      // Refresh history
+      try {
+        const histRes = await fetch("/api/admin/settings/aspects-prompt?includeHistory=true")
+        if (histRes.ok) {
+          const histData = await histRes.json()
+          setAspectsHistory(histData.history ?? [])
+        }
+      } catch {
+        // History refresh failed — not critical
+      }
+    } finally {
+      setSavingAspects(false)
     }
   }
 
@@ -475,6 +551,42 @@ export default function SearchTuningPage() {
       )}
 
       <div className="space-y-6">
+        {/* Store Identity Section */}
+        <div>
+          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
+            Store Identity
+          </h2>
+
+          <div className="glass-card p-6">
+            <div>
+              <h3 className="text-lg font-semibold text-xtal-navy">
+                Store Type
+              </h3>
+              <p className="text-sm text-slate-500 mt-1">
+                What kind of store this is. Used by AI prompts for aspect generation
+                and query augmentation (e.g., &ldquo;luxury home goods retailer&rdquo;,
+                &ldquo;whiskey and spirits shop&rdquo;).
+              </p>
+            </div>
+            <div className="mt-4 max-w-md">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={storeType}
+                  onChange={handleStoreTypeChange}
+                  placeholder="online retailer"
+                  className="flex-1 px-3 py-2 text-sm border border-slate-200 rounded-lg
+                    focus:outline-none focus:ring-2 focus:ring-xtal-navy/20 focus:border-xtal-navy
+                    placeholder:text-slate-300"
+                />
+                {storeTypeSaving && (
+                  <span className="text-xs text-slate-400 shrink-0">Saving...</span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Merchandising Section */}
         <div>
           <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
@@ -686,6 +798,23 @@ export default function SearchTuningPage() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Aspect Chips Section */}
+        <div>
+          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
+            Aspect Chips
+          </h2>
+
+          <PromptEditor
+            title="Aspect Chips Prompt"
+            prompt={aspectsPrompt}
+            defaultPrompt={aspectsDefault}
+            onSave={saveAspectsPromptFn}
+            saving={savingAspects}
+            placeholder="System prompt for generating discovery chips. Use {store_type} — it will be replaced with the Store Type value above."
+            history={aspectsHistory}
+          />
         </div>
 
         {/* Auto-Optimize Section */}

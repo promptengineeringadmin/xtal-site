@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server"
+import { getAspectsPrompt, DEFAULT_ASPECTS_SYSTEM_PROMPT } from "@/lib/admin/aspects-prompt"
+import { getStoreType } from "@/lib/admin/admin-settings"
 
 export async function POST(request: Request) {
   try {
@@ -10,10 +12,27 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "XTAL_BACKEND_URL not configured" }, { status: 500 })
     }
 
+    // Fetch aspects prompt and store type from Redis
+    const [rawPrompt, storeType] = await Promise.all([
+      getAspectsPrompt(),
+      getStoreType(collection || "default"),
+    ])
+
+    // Interpolate {store_type} into the prompt
+    const interpolated = rawPrompt.replaceAll("{store_type}", storeType)
+
+    // Only send system_prompt if prompt or store_type has been customized
+    const isCustom = rawPrompt !== DEFAULT_ASPECTS_SYSTEM_PROMPT || storeType !== "online retailer"
+    const payload = {
+      ...body,
+      collection,
+      ...(isCustom && { system_prompt: interpolated }),
+    }
+
     const res = await fetch(`${backendUrl}/api/aspects`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...body, collection }),
+      body: JSON.stringify(payload),
     })
 
     const data = await res.json()
