@@ -17,6 +17,8 @@ export default async function BestBuyPage({ searchParams }: { searchParams: Prom
     <>
       <Navbar />
       <main className="pt-20 min-h-screen bg-[#FCFDFF]">
+        {/* SSR debug — remove after confirming */}
+        <div data-ssr-debug={`q=${q ?? "NONE"} results=${initialSearchData?.total ?? "NULL"}`} style={{ display: "none" }} />
         <TrySearch collection="bestbuy" initialQuery={q} initialSearchData={initialSearchData} />
       </main>
     </>
