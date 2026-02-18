@@ -12,9 +12,9 @@ import AppliedFilters from "./AppliedFilters"
 import PriceSlider from "./PriceSlider"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { formatFacetValue } from "@/lib/facet-utils"
-import type { PriceRange } from "@/lib/xtal-types"
+import type { PriceRange, SearchResponse } from "@/lib/xtal-types"
 
-export default function TrySearch({ collection, suggestions }: { collection?: string; suggestions?: string[] } = {}) {
+export default function TrySearch({ collection, suggestions, initialQuery, initialSearchData }: { collection?: string; suggestions?: string[]; initialQuery?: string; initialSearchData?: SearchResponse | null } = {}) {
   const {
     query,
     sortedResults,
@@ -41,7 +41,7 @@ export default function TrySearch({ collection, suggestions }: { collection?: st
     clearAllFilters,
     explain,
     reportIrrelevant,
-  } = useXtalSearch(collection)
+  } = useXtalSearch(collection, initialQuery, initialSearchData)
 
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)

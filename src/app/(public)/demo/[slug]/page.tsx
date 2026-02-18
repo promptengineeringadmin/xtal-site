@@ -2,9 +2,11 @@ import { notFound } from "next/navigation"
 import { getAllCollections } from "@/lib/admin/demo-collections"
 import Navbar from "@/components/Navbar"
 import TrySearch from "@/components/try/TrySearch"
+import { serverSearch } from "@/lib/server-search"
 
 interface Props {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ q?: string }>
 }
 
 export async function generateMetadata({ params }: Props) {
@@ -18,18 +20,23 @@ export async function generateMetadata({ params }: Props) {
   }
 }
 
-export default async function DemoPage({ params }: Props) {
-  const { slug } = await params
-  const collections = await getAllCollections()
+export default async function DemoPage({ params, searchParams }: Props) {
+  const [{ slug }, { q }, collections] = await Promise.all([
+    params,
+    searchParams,
+    getAllCollections(),
+  ])
   const demo = collections.find((c) => c.id === slug)
 
   if (!demo) notFound()
+
+  const initialSearchData = q ? await serverSearch(q, slug) : null
 
   return (
     <>
       <Navbar />
       <main className="pt-20 min-h-screen bg-[#FCFDFF]">
-        <TrySearch collection={slug} suggestions={demo.suggestions} />
+        <TrySearch collection={slug} suggestions={demo.suggestions} initialQuery={q} initialSearchData={initialSearchData} />
       </main>
     </>
   )

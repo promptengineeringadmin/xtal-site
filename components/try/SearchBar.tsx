@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Search } from "lucide-react"
 
 const DEFAULT_SUGGESTIONS = [
@@ -21,6 +21,10 @@ interface SearchBarProps {
 
 export default function SearchBar({ onSearch, loading, initialQuery = "", hasSearched = false, suggestions }: SearchBarProps) {
   const [value, setValue] = useState(initialQuery)
+
+  useEffect(() => {
+    setValue(initialQuery)
+  }, [initialQuery])
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

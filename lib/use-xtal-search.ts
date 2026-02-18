@@ -15,23 +15,23 @@ type LoadingState =
   | { type: "searching" }
   | { type: "filtering" }
 
-export function useXtalSearch(collection?: string) {
-  const [query, setQuery] = useState("")
-  const [results, setResults] = useState<Product[]>([])
-  const [total, setTotal] = useState(0)
+export function useXtalSearch(collection?: string, initialQuery?: string, initialSearchData?: SearchResponse | null) {
+  const [query, setQuery] = useState(initialQuery || "")
+  const [results, setResults] = useState<Product[]>(initialSearchData?.results || [])
+  const [total, setTotal] = useState(initialSearchData?.total || 0)
   const [loadingState, setLoadingState] = useState<LoadingState>({ type: "idle" })
   const [error, setError] = useState<string | null>(null)
-  const [queryTime, setQueryTime] = useState(0)
+  const [queryTime, setQueryTime] = useState(initialSearchData?.query_time || 0)
 
   // search_context — cached from first response, sent back on filter-in-place
-  const [searchContext, setSearchContext] = useState<SearchContext | null>(null)
+  const [searchContext, setSearchContext] = useState<SearchContext | null>(initialSearchData?.search_context || null)
 
   // Aspects
   const [aspects, setAspects] = useState<string[]>([])
   const [selectedAspects, setSelectedAspects] = useState<string[]>([])
 
   // Facets (from computed_facets) — populated in M2
-  const [computedFacets, setComputedFacets] = useState<Record<string, Record<string, number>> | null>(null)
+  const [computedFacets, setComputedFacets] = useState<Record<string, Record<string, number>> | null>(initialSearchData?.computed_facets || null)
   const [activeFacetFilters, setActiveFacetFilters] = useState<Record<string, string[]>>({})
 
   // Expansion map: canonical facet value → original backend values (for synonym normalization)
@@ -56,7 +56,7 @@ export function useXtalSearch(collection?: string) {
   const [priceRange, setPriceRange] = useState<PriceRange | null>(null)
 
   // Relevance scores
-  const [relevanceScores, setRelevanceScores] = useState<Record<string, number>>({})
+  const [relevanceScores, setRelevanceScores] = useState<Record<string, number>>(initialSearchData?.relevance_scores || {})
 
   // Sort
   const [sortBy, setSortBy] = useState<"relevance" | "price-asc" | "price-desc">("relevance")
@@ -339,15 +339,34 @@ export function useXtalSearch(collection?: string) {
         // Synonyms unavailable — normalization proceeds without merging
       }
 
-      // Auto-search from URL
-      const params = new URLSearchParams(window.location.search)
-      const q = params.get("q")
-      if (q) {
-        search(q)
+      if (initialSearchData) {
+        // SSR data was provided — normalize facets now that synonyms are loaded,
+        // and fetch aspects client-side as a progressive enhancement
+        if (initialSearchData.computed_facets) {
+          setNormalizedFacets(initialSearchData.computed_facets)
+        }
+        if (initialQuery) {
+          fetch("/api/xtal/aspects", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query: initialQuery, ...(collection && { collection }) }),
+          })
+            .then((res) => (res.ok ? res.json() : { aspects: [] }))
+            .then((data) => setAspects(data.aspects || []))
+            .catch(() => {})
+        }
+      } else {
+        // No SSR data — auto-search from URL
+        const params = new URLSearchParams(window.location.search)
+        const q = params.get("q")
+        if (q) {
+          search(q)
+        }
       }
     }
     init()
-  }, [search])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const loading = loadingState.type !== "idle"
   const isSearching = loadingState.type === "searching"
