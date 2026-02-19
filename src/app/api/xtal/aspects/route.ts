@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { getAspectsPrompt, DEFAULT_ASPECTS_SYSTEM_PROMPT } from "@/lib/admin/aspects-prompt"
-import { getStoreType } from "@/lib/admin/admin-settings"
+import { getStoreType, getAspectsEnabled } from "@/lib/admin/admin-settings"
 
 export async function POST(request: Request) {
   try {
@@ -12,10 +12,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "XTAL_BACKEND_URL not configured" }, { status: 500 })
     }
 
-    // Fetch aspects prompt and store type from Redis
-    const [rawPrompt, storeType] = await Promise.all([
+    // Fetch aspects prompt, store type, and enabled flag from Redis
+    const [rawPrompt, storeType, aspectsEnabled] = await Promise.all([
       getAspectsPrompt(),
       getStoreType(collection || "default"),
+      getAspectsEnabled(collection || "default"),
     ])
 
     // Interpolate {store_type} into the prompt
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
     })
 
     const data = await res.json()
-    return NextResponse.json(data, { status: res.status })
+    return NextResponse.json({ ...data, aspects_enabled: aspectsEnabled }, { status: res.status })
   } catch (error) {
     console.error("Aspects proxy error:", error)
     return NextResponse.json({ error: "Aspects failed" }, { status: 502 })

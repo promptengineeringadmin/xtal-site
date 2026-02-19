@@ -57,6 +57,7 @@ export default function SearchTuningPage() {
   const [expandedComparisons, setExpandedComparisons] = useState<Set<number>>(new Set())
   const [storeType, setStoreType] = useState("online retailer")
   const [storeTypeSaving, setStoreTypeSaving] = useState(false)
+  const [aspectsEnabled, setAspectsEnabled] = useState(true)
   const [aspectsPrompt, setAspectsPrompt] = useState("")
   const [aspectsHistory, setAspectsHistory] = useState<HistoryEntry[]>([])
   const [aspectsDefault, setAspectsDefault] = useState("")
@@ -120,6 +121,7 @@ export default function SearchTuningPage() {
           setBm25Weight(data.bm25_weight ?? 1.0)
           setKeywordRerank(data.keyword_rerank_strength ?? 0.3)
           if (data.store_type) setStoreType(data.store_type)
+          setAspectsEnabled(data.aspects_enabled ?? true)
           if (data._source === "redis_fallback") {
             warnings.push(
               "Search backend unreachable — settings loaded from local cache"
@@ -310,6 +312,32 @@ export default function SearchTuningPage() {
     } catch (err) {
       console.error("Failed to save settings:", err)
       setQueryEnhancementEnabled(!newValue) // revert on error
+    } finally {
+      setSettingsSaving(false)
+    }
+  }
+
+  async function toggleAspectsEnabled() {
+    const newValue = !aspectsEnabled
+    setAspectsEnabled(newValue)
+    setSettingsSaving(true)
+    try {
+      const res = await fetch(
+        `/api/admin/settings?collection=${encodeURIComponent(collection)}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ aspects_enabled: newValue }),
+        }
+      )
+      if (!res.ok) throw new Error(`Save failed: ${res.status}`)
+      const data = await res.json()
+      if (data._source === "redis_fallback") {
+        setWarning(data.backendWarning || "Settings saved locally — search backend unreachable")
+      }
+    } catch (err) {
+      console.error("Failed to save aspects enabled:", err)
+      setAspectsEnabled(!newValue) // revert on error
     } finally {
       setSettingsSaving(false)
     }
@@ -568,7 +596,7 @@ export default function SearchTuningPage() {
                 &ldquo;whiskey and spirits shop&rdquo;).
               </p>
             </div>
-            <div className="mt-4 max-w-md">
+            <div className="mt-4 max-w-full sm:max-w-md">
               <div className="flex items-center gap-2">
                 <input
                   type="text"
@@ -616,7 +644,7 @@ export default function SearchTuningPage() {
                   in search results.
                 </p>
               </div>
-              <div className="mt-4 max-w-md">
+              <div className="mt-4 max-w-full sm:max-w-md">
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-medium text-slate-400 shrink-0">
                     Weak
@@ -672,7 +700,7 @@ export default function SearchTuningPage() {
                   above loosely related products.
                 </p>
               </div>
-              <div className="mt-4 max-w-md">
+              <div className="mt-4 max-w-full sm:max-w-md">
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-medium text-slate-400 shrink-0">
                     Semantic
@@ -721,7 +749,7 @@ export default function SearchTuningPage() {
                   preference for the correct product type.
                 </p>
               </div>
-              <div className="mt-4 max-w-md">
+              <div className="mt-4 max-w-full sm:max-w-md">
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-medium text-slate-400 shrink-0">
                     Off
@@ -805,6 +833,39 @@ export default function SearchTuningPage() {
           <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
             Aspect Chips
           </h2>
+
+          <div className="glass-card p-6 mb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-xtal-navy">
+                  Show Aspect Suggestions
+                </h3>
+                <p className="text-sm text-slate-500 mt-1">
+                  When enabled, AI-generated discovery chips appear below the
+                  search bar to help shoppers refine their results.
+                </p>
+              </div>
+              <button
+                onClick={toggleAspectsEnabled}
+                disabled={settingsSaving}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${
+                  aspectsEnabled ? "bg-xtal-navy" : "bg-slate-300"
+                } ${settingsSaving ? "opacity-50" : ""}`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    aspectsEnabled ? "translate-x-6" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
+            {!aspectsEnabled && (
+              <div className="mt-3 text-xs text-amber-600 bg-amber-50 rounded px-3 py-2">
+                Aspect suggestions are hidden. Shoppers will not see discovery
+                chips below the search bar.
+              </div>
+            )}
+          </div>
 
           <PromptEditor
             title="Aspect Chips Prompt"
@@ -1014,7 +1075,7 @@ export default function SearchTuningPage() {
                     <h4 className="text-sm font-semibold text-amber-700 mb-3">
                       Weirdest Results
                     </h4>
-                    <div className="grid grid-cols-2 gap-4 text-xs">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                       <div>
                         <p className="font-medium text-slate-500 mb-1">Current config</p>
                         <p className="text-slate-700 font-medium">
@@ -1068,7 +1129,7 @@ export default function SearchTuningPage() {
                             <p className="text-sm font-medium text-xtal-navy mb-2">
                               &ldquo;{comp.query}&rdquo;
                             </p>
-                            <div className="grid grid-cols-2 gap-3 text-xs">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                               <div>
                                 <p className="font-medium text-slate-400 mb-1">
                                   Current
@@ -1230,7 +1291,7 @@ export default function SearchTuningPage() {
                             )}
 
                             {/* Config comparison */}
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                               <div>
                                 <p className="font-medium text-slate-400 mb-1">Current</p>
                                 <pre className="bg-slate-50 rounded p-2 text-[11px] overflow-auto">
@@ -1249,7 +1310,7 @@ export default function SearchTuningPage() {
                             {d.weirdest_results && (
                               <div className="border border-amber-200 bg-amber-50/50 rounded p-3">
                                 <p className="font-medium text-amber-700 mb-2">Weirdest Results</p>
-                                <div className="grid grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                   <div>
                                     <p className="text-slate-500">Current: &ldquo;{d.weirdest_results.current.query}&rdquo;</p>
                                     <p className="text-amber-800">{d.weirdest_results.current.product}</p>
@@ -1273,7 +1334,7 @@ export default function SearchTuningPage() {
                                     <p className="font-medium text-xtal-navy mb-1">
                                       &ldquo;{comp.query}&rdquo;
                                     </p>
-                                    <div className="grid grid-cols-2 gap-2">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                       <ol className="list-decimal list-inside space-y-0.5 text-slate-600">
                                         {comp.current_top_5.map((t, j) => (
                                           <li key={j} className="truncate">{t}</li>

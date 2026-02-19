@@ -30,6 +30,9 @@ function keywordRerankKey(collection: string) {
 function storeTypeKey(collection: string) {
   return `admin:settings:${collection}:store_type`
 }
+function aspectsEnabledKey(collection: string) {
+  return `admin:settings:${collection}:aspects_enabled`
+}
 
 // ─── Query Enhancement ─────────────────────────────────────
 
@@ -131,4 +134,25 @@ export async function saveStoreType(
 ): Promise<void> {
   const kv = getRedis()
   await kv.set(storeTypeKey(collection), storeType)
+}
+
+// ─── Aspects Enabled ──────────────────────────────────────
+
+export async function getAspectsEnabled(collection: string): Promise<boolean> {
+  try {
+    const kv = getRedis()
+    const stored = await kv.get<boolean>(aspectsEnabledKey(collection))
+    if (stored !== null && stored !== undefined) return stored
+  } catch {
+    // Redis unavailable
+  }
+  return true // default: enabled
+}
+
+export async function saveAspectsEnabled(
+  collection: string,
+  enabled: boolean
+): Promise<void> {
+  const kv = getRedis()
+  await kv.set(aspectsEnabledKey(collection), enabled)
 }

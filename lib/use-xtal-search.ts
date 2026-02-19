@@ -123,7 +123,7 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
       }
 
       const searchData: SearchResponse = await searchRes.json()
-      const aspectsData: AspectsResponse = aspectsRes.ok ? await aspectsRes.json() : { aspects: [] }
+      const aspectsData: AspectsResponse & { aspects_enabled?: boolean } = aspectsRes.ok ? await aspectsRes.json() : { aspects: [] }
 
       if (controller.signal.aborted) return
 
@@ -141,7 +141,7 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
       }
       setNormalizedFacets(searchData.computed_facets || null)
 
-      setAspects(aspectsData.aspects || [])
+      setAspects(aspectsData.aspects_enabled !== false ? (aspectsData.aspects || []) : [])
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return
       console.error("Search error:", err)
@@ -352,7 +352,7 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
             body: JSON.stringify({ query: initialQuery, ...(collection && { collection }) }),
           })
             .then((res) => (res.ok ? res.json() : { aspects: [] }))
-            .then((data) => setAspects(data.aspects || []))
+            .then((data) => setAspects(data.aspects_enabled !== false ? (data.aspects || []) : []))
             .catch(() => {})
         }
       } else {
