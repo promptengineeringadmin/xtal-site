@@ -21,10 +21,11 @@ export async function POST(request: Request) {
 
     if (!res.ok) {
       const text = await res.text()
-      return NextResponse.json(
-        { error: text || `Backend returned ${res.status}` },
-        { status: res.status }
-      )
+      const isHtml = text.trim().startsWith("<")
+      const errorMsg = isHtml
+        ? `Backend returned ${res.status} (service may be unavailable)`
+        : text || `Backend returned ${res.status}`
+      return NextResponse.json({ error: errorMsg }, { status: res.status })
     }
 
     const data = await res.json()
@@ -57,10 +58,11 @@ export async function GET(request: Request) {
 
     if (!res.ok) {
       const text = await res.text()
-      return NextResponse.json(
-        { error: text || `Backend returned ${res.status}` },
-        { status: res.status }
-      )
+      const isHtml = text.trim().startsWith("<")
+      const errorMsg = isHtml
+        ? `Backend returned ${res.status} (service may be unavailable)`
+        : text || `Backend returned ${res.status}`
+      return NextResponse.json({ error: errorMsg }, { status: res.status })
     }
 
     const data = await res.json()
