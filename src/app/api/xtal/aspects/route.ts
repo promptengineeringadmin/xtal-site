@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     // Fetch aspects prompt, store type, and enabled flag from Redis
     const t0 = Date.now()
     const [rawPrompt, storeType, aspectsEnabled] = await Promise.all([
-      getAspectsPrompt(),
+      getAspectsPrompt(collection || "default"),
       getStoreType(collection || "default"),
       getAspectsEnabled(collection || "default"),
     ])

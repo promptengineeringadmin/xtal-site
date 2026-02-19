@@ -9,6 +9,7 @@ import {
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
+    const collection = searchParams.get("collection") || process.env.XTAL_COLLECTION || "default"
     const includeHistory = searchParams.get("includeHistory") === "true"
     const wantDefault = searchParams.get("default") === "true"
 
@@ -16,12 +17,12 @@ export async function GET(request: Request) {
       return NextResponse.json({ content: DEFAULT_ASPECTS_SYSTEM_PROMPT })
     }
 
-    const content = await getAspectsPrompt()
+    const content = await getAspectsPrompt(collection)
 
     let history: Awaited<ReturnType<typeof getAspectsPromptHistory>> = []
     if (includeHistory) {
       try {
-        history = await getAspectsPromptHistory()
+        history = await getAspectsPromptHistory(collection)
       } catch {
         // Redis unavailable for history — still return the prompt content
       }
@@ -43,6 +44,8 @@ export async function GET(request: Request) {
 
 export async function PUT(request: Request) {
   try {
+    const { searchParams } = new URL(request.url)
+    const collection = searchParams.get("collection") || process.env.XTAL_COLLECTION || "default"
     const body = await request.json()
     const { content } = body as { content: string }
 
@@ -54,7 +57,7 @@ export async function PUT(request: Request) {
     }
 
     try {
-      await saveAspectsPrompt(content)
+      await saveAspectsPrompt(collection, content)
       return NextResponse.json({ success: true })
     } catch (redisErr) {
       console.error("Aspects prompt Redis save failed:", redisErr)

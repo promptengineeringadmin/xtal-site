@@ -56,7 +56,7 @@ export async function GET(request: Request) {
 
     const res = await adminFetch(
       `/api/vendor/settings/optimize/${jobId}`,
-      { method: "GET" }
+      { method: "GET", signal: AbortSignal.timeout(25_000) }
     )
 
     if (!res.ok) {

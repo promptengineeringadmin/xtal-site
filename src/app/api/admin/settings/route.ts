@@ -25,6 +25,14 @@ export async function GET(request: Request) {
     const res = await adminFetch(`/api/vendor/settings?${params.toString()}`)
     if (res.ok) {
       const data = await res.json()
+      // Backend may not persist newer fields — fill from Redis
+      const fallbackCollection = collection ?? "default"
+      if (data.store_type === undefined || data.store_type === null) {
+        data.store_type = await getStoreType(fallbackCollection)
+      }
+      if (data.aspects_enabled === undefined || data.aspects_enabled === null) {
+        data.aspects_enabled = await getAspectsEnabled(fallbackCollection)
+      }
       return NextResponse.json(data)
     }
     // Backend returned an error — fall back to Redis

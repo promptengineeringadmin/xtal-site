@@ -92,7 +92,7 @@ export default function SearchTuningPage() {
           fetch(`/api/admin/prompts/marketing${cp}&includeHistory=true`),
           fetch(`/api/admin/prompts/defaults${cp}`),
           fetch(`/api/admin/settings${cp}`),
-          fetch(`/api/admin/settings/aspects-prompt?includeHistory=true`),
+          fetch(`/api/admin/settings/aspects-prompt${cp}&includeHistory=true`),
         ])
 
         let loadedDefaults: PromptDefaults | null = null
@@ -375,7 +375,8 @@ export default function SearchTuningPage() {
   async function saveAspectsPromptFn(newPrompt: string) {
     setSavingAspects(true)
     try {
-      const res = await fetch("/api/admin/settings/aspects-prompt", {
+      const cp = `?collection=${encodeURIComponent(collection)}`
+      const res = await fetch(`/api/admin/settings/aspects-prompt${cp}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content: newPrompt }),
@@ -385,7 +386,7 @@ export default function SearchTuningPage() {
 
       // Refresh history
       try {
-        const histRes = await fetch("/api/admin/settings/aspects-prompt?includeHistory=true")
+        const histRes = await fetch(`/api/admin/settings/aspects-prompt${cp}&includeHistory=true`)
         if (histRes.ok) {
           const histData = await histRes.json()
           setAspectsHistory(histData.history ?? [])
@@ -420,6 +421,7 @@ export default function SearchTuningPage() {
       const { job_id } = await startRes.json()
 
       // 2. Poll for progress
+      let consecutiveFailures = 0
       while (true) {
         await new Promise((r) => setTimeout(r, 2000))
 
@@ -427,10 +429,15 @@ export default function SearchTuningPage() {
           `/api/admin/settings/optimize?job_id=${encodeURIComponent(job_id)}`
         )
         if (!pollRes.ok) {
-          const data = await pollRes.json().catch(() => ({ error: `Poll error ${pollRes.status}` }))
-          throw new Error(data.error || `Polling failed (${pollRes.status})`)
+          consecutiveFailures++
+          if (consecutiveFailures >= 3) {
+            const data = await pollRes.json().catch(() => ({ error: `Poll error ${pollRes.status}` }))
+            throw new Error(data.error || `Polling failed after ${consecutiveFailures} retries (${pollRes.status})`)
+          }
+          continue
         }
 
+        consecutiveFailures = 0
         const job = await pollRes.json()
         setOptimizeStage(job.stage || "")
         setOptimizeElapsed(job.elapsed || 0)
