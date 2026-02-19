@@ -3,9 +3,8 @@
  * Paginates through all pages (100 products per page) and writes
  * a single JSONL file (one JSON object per line) for easy streaming ingestion.
  *
- * IMPORTANT: All prices in the XTAL system are stored in CENTS (integer).
- * The Best Buy API returns prices in DOLLARS (decimal).
- * This script converts prices to cents via transformProduct() before writing.
+ * Prices are stored in dollars (matching Qdrant convention).
+ * The Best Buy API returns prices in dollars — no conversion needed.
  *
  * Usage:
  *   npx tsx scripts/fetch-bestbuy-catalog.ts
@@ -87,19 +86,9 @@ interface BBProduct {
   [key: string]: unknown;
 }
 
-/** Convert Best Buy dollar prices to cents for XTAL's internal format. */
+/** Pass through product — prices already in dollars, no conversion needed. */
 function transformProduct(raw: BBProduct): BBProduct {
-  const product = { ...raw };
-  if (typeof product.regularPrice === "number") {
-    product.regularPrice = Math.round(product.regularPrice * 100);
-  }
-  if (typeof product.salePrice === "number") {
-    product.salePrice = Math.round(product.salePrice * 100);
-  }
-  if (typeof product.shippingCost === "number") {
-    product.shippingCost = Math.round(product.shippingCost * 100);
-  }
-  return product;
+  return { ...raw };
 }
 
 interface BBResponse {

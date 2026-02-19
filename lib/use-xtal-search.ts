@@ -178,11 +178,11 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
     const expandedFacets = expandFilters(facetsToSend, facetExpansionMap.current)
     const hasActiveFacets = Object.values(expandedFacets).some(v => v.length > 0)
 
-    // Convert user-facing dollar price range back to cents for the backend
-    const priceRangeInCents = priceToSend
+    // Price range — slider values are already in dollars, same as Qdrant
+    const priceRangeForApi = priceToSend
       ? {
-          min: priceToSend.min != null ? Math.round(priceToSend.min * 100) : null,
-          max: priceToSend.max != null ? Math.round(priceToSend.max * 100) : null,
+          min: priceToSend.min,
+          max: priceToSend.max,
         }
       : undefined
 
@@ -195,7 +195,7 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
           search_context: searchContext,
           selected_aspects: aspectsToSend.length > 0 ? aspectsToSend : undefined,
           facet_filters: hasActiveFacets ? expandedFacets : undefined,
-          price_range: priceRangeInCents,
+          price_range: priceRangeForApi,
           ...(collection && { collection }),
         }),
         signal: controller.signal,
