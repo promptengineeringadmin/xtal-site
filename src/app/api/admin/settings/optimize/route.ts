@@ -16,6 +16,7 @@ export async function POST(request: Request) {
       {
         method: "POST",
         body: JSON.stringify(body),
+        signal: AbortSignal.timeout(25_000),
       }
     )
 
@@ -31,9 +32,11 @@ export async function POST(request: Request) {
     const data = await res.json()
     return NextResponse.json(data)
   } catch (error) {
-    console.error("Optimize proxy error:", error)
+    const err = error instanceof Error ? error : new Error(String(error))
+    console.error(`Optimize proxy error [${err.name}]: ${err.message}`)
+    const detail = err.name === "TimeoutError" ? "Request timed out" : err.message
     return NextResponse.json(
-      { error: "Failed to reach optimization service" },
+      { error: `Failed to reach optimization service: ${detail}` },
       { status: 502 }
     )
   }
@@ -68,9 +71,11 @@ export async function GET(request: Request) {
     const data = await res.json()
     return NextResponse.json(data)
   } catch (error) {
-    console.error("Optimize poll error:", error)
+    const err = error instanceof Error ? error : new Error(String(error))
+    console.error(`Optimize poll error [${err.name}]: ${err.message}`)
+    const detail = err.name === "TimeoutError" ? "Request timed out" : err.message
     return NextResponse.json(
-      { error: "Failed to reach optimization service" },
+      { error: `Failed to poll optimization service: ${detail}` },
       { status: 502 }
     )
   }

@@ -21,14 +21,19 @@ export async function POST(request: Request) {
       geo_region: geoRegion,
     }
 
+    const t0 = Date.now()
     const res = await fetch(`${backendUrl}/api/search`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(enrichedBody),
     })
+    const backendMs = Date.now() - t0
 
     const data = await res.json()
-    return NextResponse.json(data, { status: res.status })
+    return NextResponse.json(data, {
+      status: res.status,
+      headers: { "Server-Timing": `backend;dur=${backendMs}` },
+    })
   } catch (error) {
     console.error("Search proxy error:", error)
     return NextResponse.json({ error: "Search failed" }, { status: 502 })

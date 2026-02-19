@@ -327,44 +327,41 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
 
   // --- Load synonym groups + auto-search from URL on mount ---
   useEffect(() => {
-    async function init() {
-      // Load synonyms (non-blocking — falls back to empty if unavailable)
-      try {
-        const res = await fetch("/api/admin/synonyms")
-        if (res.ok) {
-          const data = await res.json()
-          synonymGroups.current = data.groups || []
-        }
-      } catch {
-        // Synonyms unavailable — normalization proceeds without merging
+    // Fire synonyms fetch (non-blocking — only needed for facet normalization)
+    const synonymsReady = fetch("/api/admin/synonyms")
+      .then((res) => (res.ok ? res.json() : { groups: [] }))
+      .then((data) => { synonymGroups.current = data.groups || [] })
+      .catch(() => {})
+
+    if (initialSearchData) {
+      // SSR data — fire aspects immediately (no dependency on synonyms)
+      if (initialQuery) {
+        fetch("/api/xtal/aspects", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: initialQuery, ...(collection && { collection }) }),
+        })
+          .then((res) => (res.ok ? res.json() : { aspects: [] }))
+          .then((data) => setAspects(data.aspects_enabled !== false ? (data.aspects || []) : []))
+          .catch(() => {})
       }
 
-      if (initialSearchData) {
-        // SSR data was provided — normalize facets now that synonyms are loaded,
-        // and fetch aspects client-side as a progressive enhancement
-        if (initialSearchData.computed_facets) {
-          setNormalizedFacets(initialSearchData.computed_facets)
-        }
-        if (initialQuery) {
-          fetch("/api/xtal/aspects", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ query: initialQuery, ...(collection && { collection }) }),
-          })
-            .then((res) => (res.ok ? res.json() : { aspects: [] }))
-            .then((data) => setAspects(data.aspects_enabled !== false ? (data.aspects || []) : []))
-            .catch(() => {})
-        }
-      } else {
-        // No SSR data — auto-search from URL
+      // Normalize facets once synonyms are loaded (needs synonym groups for merging)
+      if (initialSearchData.computed_facets) {
+        synonymsReady.then(() => {
+          setNormalizedFacets(initialSearchData.computed_facets!)
+        })
+      }
+    } else {
+      // No SSR data — wait for synonyms then auto-search from URL
+      synonymsReady.then(() => {
         const params = new URLSearchParams(window.location.search)
         const q = params.get("q")
         if (q) {
           search(q)
         }
-      }
+      })
     }
-    init()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

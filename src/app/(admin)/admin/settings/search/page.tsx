@@ -934,11 +934,11 @@ export default function SearchTuningPage() {
                 <div className="mt-3 space-y-2">
                   <div className="flex items-center gap-3 text-sm text-slate-600">
                     <span className="font-medium">
-                      {optimizeStage === "gathering_context" && "Gathering catalog context..."}
-                      {optimizeStage === "proposing_configs" && "Claude is designing test configurations..."}
-                      {optimizeStage === "executing_searches" && "Running parallel searches..."}
-                      {optimizeStage === "evaluating_results" && "Claude is evaluating results..."}
-                      {(!optimizeStage || optimizeStage === "starting") && "Starting optimization..."}
+                      {optimizeStage === "gathering_context" && "Analyzing your catalog and recent searches..."}
+                      {optimizeStage === "proposing_configs" && "Claude is designing 30 test configurations..."}
+                      {optimizeStage === "executing_searches" && "Testing 360 search combinations across your catalog..."}
+                      {optimizeStage === "evaluating_results" && "Claude is evaluating results and picking a winner..."}
+                      {(!optimizeStage || optimizeStage === "starting") && "Connecting to optimization service..."}
                     </span>
                     {optimizeElapsed > 0 && (
                       <span className="text-xs text-slate-400 tabular-nums">
@@ -961,8 +961,8 @@ export default function SearchTuningPage() {
                     />
                   </div>
                   <p className="text-xs text-slate-400">
-                    This typically takes 1-2 minutes. Testing multiple search
-                    configurations against your catalog.
+                    This typically takes about 5 minutes. Testing 30 configurations
+                    across 12 queries to find your optimal search settings.
                   </p>
                 </div>
               )}
