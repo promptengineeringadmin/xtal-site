@@ -54,16 +54,15 @@ export default function TrySearch({ collection, suggestions, initialQuery, initi
   // Build a quick summary of what's actually in the results (vendors, types, sample titles)
   const resultsSummary = useMemo(() => {
     if (sortedResults.length === 0) return ""
-    const cap = (s: string) => s.length > 40 ? s.slice(0, 38) + "…" : s
     const isClean = (s: string) => s.length <= 60 && !s.includes(". ")
     const vendors = Array.from(new Set(sortedResults.map((p) => p.vendor).filter(Boolean).filter(isClean)))
     const types = Array.from(new Set(sortedResults.map((p) => p.product_type).filter(Boolean).filter(isClean)))
-    // Interleave vendors and types for variety, cap at 4 items
     const items: string[] = []
-    let vi = 0, ti = 0
-    while (items.length < 4 && (vi < vendors.length || ti < types.length)) {
-      if (vi < vendors.length) items.push(cap(vendors[vi++]))
-      if (items.length < 4 && ti < types.length) items.push(cap(types[ti++]))
+    // Types first — they describe what's in the results
+    for (let i = 0; i < types.length && items.length < 4; i++) items.push(types[i])
+    // Add vendors only if there are multiple (single vendor is redundant)
+    if (vendors.length > 1) {
+      for (let i = 0; i < vendors.length && items.length < 4; i++) items.push(vendors[i])
     }
     if (items.length === 0) {
       // Fallback: sample a few product titles
