@@ -72,7 +72,7 @@ export default function MobileFilterDrawer({
           <span className="text-sm font-semibold text-slate-700">Filters</span>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors"
+            className="p-2.5 text-slate-400 hover:text-slate-600 transition-colors"
             aria-label="Close filters"
           >
             <X size={20} />

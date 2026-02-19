@@ -65,10 +65,10 @@ export default function GraderRunsTable() {
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm min-w-[600px]">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50">
-                <th className="text-left px-4 py-3 font-medium text-slate-500">Store</th>
+                <th className="text-left px-4 py-3 font-medium text-slate-500 sticky left-0 bg-slate-50 z-10">Store</th>
                 <th className="text-left px-4 py-3 font-medium text-slate-500">Platform</th>
                 <th className="text-left px-4 py-3 font-medium text-slate-500">Score</th>
                 <th className="text-left px-4 py-3 font-medium text-slate-500">Status</th>
@@ -93,7 +93,7 @@ export default function GraderRunsTable() {
               ) : (
                 runs.map((run) => (
                   <tr key={run.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 sticky left-0 bg-white z-10">
                       <Link
                         href={`/admin/grader/${run.id}`}
                         className="font-medium text-xtal-navy hover:text-blue-600 transition-colors"

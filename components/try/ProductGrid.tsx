@@ -54,7 +54,7 @@ export default function ProductGrid({
   return (
     <div className="relative">
       {isFiltering && <FilterLoadingOverlay />}
-      <div className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 ${wideLayout ? "xl:grid-cols-5" : ""} gap-5`}>
+      <div className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 ${wideLayout ? "xl:grid-cols-5" : ""} gap-3 sm:gap-5`}>
         {results.map((product) => (
           <ProductCard
             key={product.id}

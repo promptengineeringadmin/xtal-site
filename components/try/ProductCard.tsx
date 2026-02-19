@@ -14,12 +14,20 @@ interface ProductCardProps {
 
 function formatPrice(price: number | number[]): string {
   if (Array.isArray(price)) {
+    // Dev warning: detect prices that look like dollars instead of cents
+    if (process.env.NODE_ENV === "development" && price.length > 0 && price.every(p => p > 0 && p < 10)) {
+      console.warn(`formatPrice: array prices [${price.join(", ")}] all < 10 — stored in dollars instead of cents?`)
+    }
     const sorted = [...price].map(p => p / 100).sort((a, b) => a - b)
     if (sorted.length === 0) return "N/A"
     if (sorted.length === 1 || sorted[0] === sorted[sorted.length - 1]) {
       return `$${sorted[0].toFixed(2)}`
     }
     return `$${sorted[0].toFixed(2)} – $${sorted[sorted.length - 1].toFixed(2)}`
+  }
+  // Dev warning: detect prices that look like dollars instead of cents
+  if (process.env.NODE_ENV === "development" && typeof price === "number" && price > 0 && price < 10) {
+    console.warn(`formatPrice: price=${price} yields $${(price / 100).toFixed(2)} — stored in dollars instead of cents?`)
   }
   return `$${(price / 100).toFixed(2)}`
 }
@@ -103,7 +111,7 @@ export default function ProductCard({ product, score, query, onExplain, onReport
           <button
             onClick={handleExplain}
             title="Why this result?"
-            className="p-1 rounded-md text-slate-400 hover:text-xtal-navy hover:bg-slate-50 transition-colors"
+            className="p-2 rounded-md text-slate-400 hover:text-xtal-navy hover:bg-slate-50 transition-colors"
           >
             {explainOpen ? <X size={16} /> : <HelpCircle size={16} />}
           </button>

@@ -83,8 +83,10 @@ export default function TrySearch({ collection, suggestions, initialQuery, initi
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Search bar — full width above grid */}
-      <SearchBar onSearch={search} loading={loading} initialQuery={query} hasSearched={!!query} suggestions={suggestions} />
+      {/* Search bar — sticky on mobile, static on desktop */}
+      <div className="sticky top-[80px] z-20 bg-[#FCFDFF] -mx-4 px-4 pt-2 pb-2 md:static md:mx-0 md:px-0 md:pt-0 md:pb-0 md:bg-transparent">
+        <SearchBar onSearch={search} loading={loading} initialQuery={query} hasSearched={!!query} suggestions={suggestions} />
+      </div>
 
       {/* Error */}
       {error && (
@@ -107,62 +109,83 @@ export default function TrySearch({ collection, suggestions, initialQuery, initi
 
       {/* Info bar: filter toggle + results count + sort — grid-aligned */}
       {query && !isSearching && !isFiltering && (sortedResults.length > 0 || hasActiveFilters) && (
-        <div
-          className={`mt-5 mb-2 grid ${
-            showFilters
-              ? "grid-cols-[260px_1fr] gap-10"
-              : hasFilterRail
-                ? "grid-cols-[auto_1fr] gap-4"
-                : ""
-          }`}
-        >
-          {/* Left: toggle icon + Filters label */}
-          {hasFilterRail && (
-            <div className="hidden md:flex items-center gap-2">
-              <button
-                onClick={() => setFiltersOpen(!filtersOpen)}
-                title={filtersOpen ? "Hide filters" : "Show filters"}
-                className="flex items-center justify-center w-7 h-7 rounded-md border border-slate-200
-                           text-slate-500 hover:border-xtal-navy hover:text-xtal-navy transition-colors"
-              >
-                <SlidersHorizontal size={14} />
-              </button>
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                Filters
-              </span>
-            </div>
-          )}
-
-          {/* Right: results count + sort */}
-          <div className="flex items-baseline justify-between gap-4">
-            <p className="text-[13px] whitespace-nowrap overflow-hidden">
-              <span className="font-medium text-slate-700">
-                {total} results for &ldquo;{query}&rdquo;
-              </span>
-              {resultsSummary && (
-                <span key={query} className="animate-wipe-tail text-slate-400">
-                  {" "}&mdash; {resultsSummary}{total > sortedResults.length ? ", and more" : ""}
+        <>
+          {/* Desktop info bar */}
+          <div
+            className={`mt-5 mb-2 hidden md:grid ${
+              showFilters
+                ? "grid-cols-[260px_1fr] gap-10"
+                : hasFilterRail
+                  ? "grid-cols-[auto_1fr] gap-4"
+                  : ""
+            }`}
+          >
+            {/* Left: toggle icon + Filters label */}
+            {hasFilterRail && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setFiltersOpen(!filtersOpen)}
+                  title={filtersOpen ? "Hide filters" : "Show filters"}
+                  className="flex items-center justify-center w-7 h-7 rounded-md border border-slate-200
+                             text-slate-500 hover:border-xtal-navy hover:text-xtal-navy transition-colors"
+                >
+                  <SlidersHorizontal size={14} />
+                </button>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                  Filters
                 </span>
-              )}
-            </p>
-            <div className="flex items-baseline gap-3 shrink-0">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                className="text-xs text-slate-600 bg-transparent border border-slate-200 rounded px-2 py-1
-                           focus:outline-none focus:ring-2 focus:ring-xtal-navy/30 focus:border-xtal-navy
-                           cursor-pointer"
-              >
-                <option value="relevance">AI Relevance</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-              </select>
-              <span className="text-xs text-slate-400">
-                {queryTime.toFixed(2)}s
-              </span>
+              </div>
+            )}
+
+            {/* Right: results count + sort */}
+            <div className="flex items-baseline justify-between gap-4">
+              <p className="text-[13px] whitespace-nowrap overflow-hidden">
+                <span className="font-medium text-slate-700">
+                  {total} results for &ldquo;{query}&rdquo;
+                </span>
+                {resultsSummary && (
+                  <span key={query} className="animate-wipe-tail text-slate-400">
+                    {" "}&mdash; {resultsSummary}{total > sortedResults.length ? ", and more" : ""}
+                  </span>
+                )}
+              </p>
+              <div className="flex items-baseline gap-3 shrink-0">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                  className="text-xs text-slate-600 bg-transparent border border-slate-200 rounded px-2 py-1
+                             focus:outline-none focus:ring-2 focus:ring-xtal-navy/30 focus:border-xtal-navy
+                             cursor-pointer"
+                >
+                  <option value="relevance">AI Relevance</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                </select>
+                <span className="text-xs text-slate-400">
+                  {queryTime.toFixed(2)}s
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+
+          {/* Mobile info bar — results count + sort */}
+          <div className="mt-4 mb-2 flex items-baseline justify-between gap-3 md:hidden">
+            <p className="text-[13px] text-slate-700 font-medium truncate">
+              {total} result{total !== 1 ? "s" : ""}
+            </p>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+              className="text-xs text-slate-600 bg-transparent border border-slate-200 rounded px-2 py-1.5
+                         focus:outline-none focus:ring-2 focus:ring-xtal-navy/30 focus:border-xtal-navy
+                         cursor-pointer shrink-0"
+            >
+              <option value="relevance">AI Relevance</option>
+              <option value="price-asc">Price: Low-High</option>
+              <option value="price-desc">Price: High-Low</option>
+            </select>
+          </div>
+        </>
       )}
 
       {/* Main grid: filter rail + product grid */}

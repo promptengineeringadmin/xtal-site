@@ -17,8 +17,8 @@ export default function AdminLayout({
       <CollectionProvider>
         <div className="min-h-screen bg-slate-50">
           <AdminSidebar />
-          <main className="ml-60 min-h-screen">
-            <div className="p-8">{children}</div>
+          <main className="md:ml-60 min-h-screen">
+            <div className="p-4 pt-16 md:pt-8 md:p-8">{children}</div>
           </main>
         </div>
       </CollectionProvider>

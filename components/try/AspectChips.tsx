@@ -21,14 +21,14 @@ export default function AspectChips({
   if (allAspects.length === 0) return null
 
   return (
-    <div className="flex flex-wrap gap-2.5">
+    <div className="flex gap-2.5 overflow-x-auto pb-2 md:flex-wrap md:overflow-visible md:pb-0 scrollbar-none [-webkit-overflow-scrolling:touch]">
       {allAspects.map((aspect) => {
         const isSelected = selectedAspects.includes(aspect)
         return (
           <button
             key={aspect}
             onClick={() => (isSelected ? onRemove(aspect) : onSelect(aspect))}
-            className={`text-[13px] px-[18px] py-2 rounded-full transition-colors
+            className={`text-[13px] px-[18px] py-2.5 md:py-2 rounded-full transition-colors shrink-0
                        focus:outline-none focus:ring-2 focus:ring-xtal-navy/50 focus:ring-offset-1 ${
               isSelected
                 ? "bg-xtal-navy text-white border border-xtal-navy"

@@ -85,7 +85,7 @@ export default function DemosPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Demos</h1>
           <p className="text-sm text-slate-500 mt-1">
@@ -111,7 +111,7 @@ export default function DemosPage() {
         />
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {collections.map((c) => (
           <DemoCard
             key={c.id}

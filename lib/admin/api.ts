@@ -24,6 +24,7 @@ async function getCognitoToken(): Promise<string> {
     body:
       `grant_type=client_credentials` +
       `&scope=${encodeURIComponent(COGNITO_SCOPE)}`,
+    signal: AbortSignal.timeout(5_000),
   })
 
   if (!resp.ok) {
@@ -61,5 +62,6 @@ export async function adminFetch(
   return fetch(`${BACKEND_URL}${path}`, {
     ...init,
     headers,
+    signal: init.signal ?? AbortSignal.timeout(10_000),
   })
 }

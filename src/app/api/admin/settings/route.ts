@@ -33,24 +33,37 @@ export async function GET(request: Request) {
   }
 
   // Fallback: read from Redis (scoped by collection)
-  const fallbackCollection = collection ?? "default"
-  const [queryEnhancementEnabled, merchRerankStrength, bm25Weight, keywordRerankStrength, storeType, aspectsEnabled] = await Promise.all([
-    getQueryEnhancement(fallbackCollection),
-    getMerchRerankStrength(fallbackCollection),
-    getBm25Weight(fallbackCollection),
-    getKeywordRerankStrength(fallbackCollection),
-    getStoreType(fallbackCollection),
-    getAspectsEnabled(fallbackCollection),
-  ])
-  return NextResponse.json({
-    query_enhancement_enabled: queryEnhancementEnabled,
-    merch_rerank_strength: merchRerankStrength,
-    bm25_weight: bm25Weight,
-    keyword_rerank_strength: keywordRerankStrength,
-    store_type: storeType,
-    aspects_enabled: aspectsEnabled,
-    _source: "redis_fallback",
-  })
+  try {
+    const fallbackCollection = collection ?? "default"
+    const [queryEnhancementEnabled, merchRerankStrength, bm25Weight, keywordRerankStrength, storeType, aspectsEnabled] = await Promise.all([
+      getQueryEnhancement(fallbackCollection),
+      getMerchRerankStrength(fallbackCollection),
+      getBm25Weight(fallbackCollection),
+      getKeywordRerankStrength(fallbackCollection),
+      getStoreType(fallbackCollection),
+      getAspectsEnabled(fallbackCollection),
+    ])
+    return NextResponse.json({
+      query_enhancement_enabled: queryEnhancementEnabled,
+      merch_rerank_strength: merchRerankStrength,
+      bm25_weight: bm25Weight,
+      keyword_rerank_strength: keywordRerankStrength,
+      store_type: storeType,
+      aspects_enabled: aspectsEnabled,
+      _source: "redis_fallback",
+    })
+  } catch (redisError) {
+    console.error("Settings Redis fallback error:", redisError)
+    return NextResponse.json({
+      query_enhancement_enabled: true,
+      merch_rerank_strength: 0.25,
+      bm25_weight: 1.0,
+      keyword_rerank_strength: 0.3,
+      store_type: "online retailer",
+      aspects_enabled: true,
+      _source: "hardcoded_defaults",
+    })
+  }
 }
 
 export async function PUT(request: Request) {
