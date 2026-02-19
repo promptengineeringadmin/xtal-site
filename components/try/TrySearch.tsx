@@ -54,14 +54,16 @@ export default function TrySearch({ collection, suggestions, initialQuery, initi
   // Build a quick summary of what's actually in the results (vendors, types, sample titles)
   const resultsSummary = useMemo(() => {
     if (sortedResults.length === 0) return ""
-    const vendors = Array.from(new Set(sortedResults.map((p) => p.vendor).filter(Boolean)))
-    const types = Array.from(new Set(sortedResults.map((p) => p.product_type).filter(Boolean)))
+    const cap = (s: string) => s.length > 40 ? s.slice(0, 38) + "…" : s
+    const isClean = (s: string) => s.length <= 60 && !s.includes(". ")
+    const vendors = Array.from(new Set(sortedResults.map((p) => p.vendor).filter(Boolean).filter(isClean)))
+    const types = Array.from(new Set(sortedResults.map((p) => p.product_type).filter(Boolean).filter(isClean)))
     // Interleave vendors and types for variety, cap at 4 items
     const items: string[] = []
     let vi = 0, ti = 0
     while (items.length < 4 && (vi < vendors.length || ti < types.length)) {
-      if (vi < vendors.length) items.push(vendors[vi++])
-      if (items.length < 4 && ti < types.length) items.push(types[ti++])
+      if (vi < vendors.length) items.push(cap(vendors[vi++]))
+      if (items.length < 4 && ti < types.length) items.push(cap(types[ti++]))
     }
     if (items.length === 0) {
       // Fallback: sample a few product titles
@@ -139,7 +141,7 @@ export default function TrySearch({ collection, suggestions, initialQuery, initi
 
             {/* Right: results count + sort */}
             <div className="flex items-baseline justify-between gap-4">
-              <p className="text-[13px] whitespace-nowrap overflow-hidden">
+              <p className="text-[13px] whitespace-nowrap overflow-hidden text-ellipsis min-w-0">
                 <span className="font-medium text-slate-700">
                   {total} results for &ldquo;{query}&rdquo;
                 </span>
