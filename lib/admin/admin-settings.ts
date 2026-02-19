@@ -33,6 +33,9 @@ function storeTypeKey(collection: string) {
 function aspectsEnabledKey(collection: string) {
   return `admin:settings:${collection}:aspects_enabled`
 }
+function resultsPerPageKey(collection: string) {
+  return `admin:settings:${collection}:results_per_page`
+}
 
 // ─── Query Enhancement ─────────────────────────────────────
 
@@ -155,4 +158,25 @@ export async function saveAspectsEnabled(
 ): Promise<void> {
   const kv = getRedis()
   await kv.set(aspectsEnabledKey(collection), enabled)
+}
+
+// ─── Results Per Page ──────────────────────────────────────
+
+export async function getResultsPerPage(collection: string): Promise<number> {
+  try {
+    const kv = getRedis()
+    const stored = await kv.get<number>(resultsPerPageKey(collection))
+    if (stored !== null && stored !== undefined) return stored
+  } catch {
+    // Redis unavailable
+  }
+  return 48 // default
+}
+
+export async function saveResultsPerPage(
+  collection: string,
+  value: number
+): Promise<void> {
+  const kv = getRedis()
+  await kv.set(resultsPerPageKey(collection), value)
 }

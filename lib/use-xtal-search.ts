@@ -15,7 +15,7 @@ type LoadingState =
   | { type: "searching" }
   | { type: "filtering" }
 
-export function useXtalSearch(collection?: string, initialQuery?: string, initialSearchData?: SearchResponse | null) {
+export function useXtalSearch(collection?: string, initialQuery?: string, initialSearchData?: SearchResponse | null, defaultResultsPerPage?: number) {
   const [query, setQuery] = useState(initialQuery || "")
   const [results, setResults] = useState<Product[]>(initialSearchData?.results || [])
   const [total, setTotal] = useState(initialSearchData?.total || 0)
@@ -61,6 +61,9 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
   // Sort
   const [sortBy, setSortBy] = useState<"relevance" | "price-asc" | "price-desc">("relevance")
 
+  // Results per page
+  const [resultsPerPage, setResultsPerPage] = useState<number>(defaultResultsPerPage || 48)
+
   // Abort controller for cancelling in-flight requests
   const abortRef = useRef<AbortController | null>(null)
 
@@ -104,7 +107,7 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
         fetch("/api/xtal/search", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query: trimmed, ...(collection && { collection }) }),
+          body: JSON.stringify({ query: trimmed, limit: resultsPerPage, ...(collection && { collection }) }),
           signal: controller.signal,
         }),
         fetch("/api/xtal/aspects", {
@@ -151,7 +154,7 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
         setLoadingState({ type: "idle" })
       }
     }
-  }, [collection])
+  }, [collection, resultsPerPage])
 
   // --- Filter-in-place (shared helper) ---
   const filterInPlace = useCallback(async (
@@ -196,6 +199,7 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
           selected_aspects: aspectsToSend.length > 0 ? aspectsToSend : undefined,
           facet_filters: hasActiveFacets ? expandedFacets : undefined,
           price_range: priceRangeForApi,
+          limit: resultsPerPage,
           ...(collection && { collection }),
         }),
         signal: controller.signal,
@@ -227,7 +231,7 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
         setLoadingState({ type: "idle" })
       }
     }
-  }, [query, searchContext, selectedAspects, activeFacetFilters, priceRange, collection])
+  }, [query, searchContext, selectedAspects, activeFacetFilters, priceRange, resultsPerPage, collection])
 
   // --- Aspect selection ---
   const selectAspect = useCallback(async (aspect: string) => {
@@ -277,6 +281,68 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
       priceRange: null,
     })
   }, [filterInPlace])
+
+  // --- Change results per page ---
+  const changeResultsPerPage = useCallback(async (value: number) => {
+    setResultsPerPage(value)
+    // Re-search with new limit if we have an active search
+    if (searchContext) {
+      // We need to manually trigger filterInPlace since resultsPerPage state
+      // won't have updated yet in this callback's closure
+      abortRef.current?.abort()
+      const controller = new AbortController()
+      abortRef.current = controller
+
+      setLoadingState({ type: "filtering" })
+      setError(null)
+
+      const expandedFacets = expandFilters(activeFacetFilters, facetExpansionMap.current)
+      const hasActiveFacets = Object.values(expandedFacets).some(v => v.length > 0)
+      const priceRangeForApi = priceRange
+        ? { min: priceRange.min, max: priceRange.max }
+        : undefined
+
+      try {
+        const res = await fetch("/api/xtal/search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query,
+            search_context: searchContext,
+            selected_aspects: selectedAspects.length > 0 ? selectedAspects : undefined,
+            facet_filters: hasActiveFacets ? expandedFacets : undefined,
+            price_range: priceRangeForApi,
+            limit: value,
+            ...(collection && { collection }),
+          }),
+          signal: controller.signal,
+        })
+
+        if (controller.signal.aborted) return
+        if (!res.ok) {
+          setError("Filter failed. Please try again.")
+          return
+        }
+
+        const data: SearchResponse = await res.json()
+        if (controller.signal.aborted) return
+
+        setResults(data.results || [])
+        setTotal(data.total || 0)
+        setQueryTime(data.query_time || 0)
+        setRelevanceScores(data.relevance_scores || {})
+        setNormalizedFacets(data.computed_facets || null)
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return
+        console.error("Results per page change error:", err)
+        setError("Failed to update results. Please try again.")
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoadingState({ type: "idle" })
+        }
+      }
+    }
+  }, [query, searchContext, selectedAspects, activeFacetFilters, priceRange, collection])
 
   // --- Explain (on-demand, cached) ---
   const explain = useCallback(async (productId: string, score?: number): Promise<string> => {
@@ -398,6 +464,8 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
     relevanceScores,
     sortBy,
     setSortBy,
+    resultsPerPage,
+    changeResultsPerPage,
     search,
     selectAspect,
     removeAspect,

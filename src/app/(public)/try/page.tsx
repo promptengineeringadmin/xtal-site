@@ -2,6 +2,7 @@ import { Metadata } from "next"
 import Navbar from "@/components/Navbar"
 import TrySearch from "@/components/try/TrySearch"
 import { serverSearch } from "@/lib/server-search"
+import { getResultsPerPage } from "@/lib/admin/admin-settings"
 
 export const metadata: Metadata = {
   title: "Try XTAL Search | Live AI Product Discovery Demo",
@@ -11,13 +12,15 @@ export const metadata: Metadata = {
 
 export default async function TryPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { q } = await searchParams
-  const initialSearchData = q ? await serverSearch(q) : null
+  const collection = process.env.XTAL_COLLECTION || "xtaldemo"
+  const resultsPerPage = await getResultsPerPage(collection)
+  const initialSearchData = q ? await serverSearch(q, undefined, resultsPerPage) : null
 
   return (
     <>
       <Navbar />
       <main className="pt-20 min-h-screen bg-[#FCFDFF]">
-        <TrySearch initialQuery={q} initialSearchData={initialSearchData} />
+        <TrySearch initialQuery={q} initialSearchData={initialSearchData} defaultResultsPerPage={resultsPerPage} />
       </main>
     </>
   )

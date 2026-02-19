@@ -13,6 +13,8 @@ import {
   saveStoreType,
   getAspectsEnabled,
   saveAspectsEnabled,
+  getResultsPerPage,
+  saveResultsPerPage,
 } from "@/lib/admin/admin-settings"
 
 export async function GET(request: Request) {
@@ -33,6 +35,9 @@ export async function GET(request: Request) {
       if (data.aspects_enabled === undefined || data.aspects_enabled === null) {
         data.aspects_enabled = await getAspectsEnabled(fallbackCollection)
       }
+      if (data.results_per_page === undefined || data.results_per_page === null) {
+        data.results_per_page = await getResultsPerPage(fallbackCollection)
+      }
       return NextResponse.json(data)
     }
     // Backend returned an error — fall back to Redis
@@ -43,13 +48,14 @@ export async function GET(request: Request) {
   // Fallback: read from Redis (scoped by collection)
   try {
     const fallbackCollection = collection ?? "default"
-    const [queryEnhancementEnabled, merchRerankStrength, bm25Weight, keywordRerankStrength, storeType, aspectsEnabled] = await Promise.all([
+    const [queryEnhancementEnabled, merchRerankStrength, bm25Weight, keywordRerankStrength, storeType, aspectsEnabled, resultsPerPage] = await Promise.all([
       getQueryEnhancement(fallbackCollection),
       getMerchRerankStrength(fallbackCollection),
       getBm25Weight(fallbackCollection),
       getKeywordRerankStrength(fallbackCollection),
       getStoreType(fallbackCollection),
       getAspectsEnabled(fallbackCollection),
+      getResultsPerPage(fallbackCollection),
     ])
     return NextResponse.json({
       query_enhancement_enabled: queryEnhancementEnabled,
@@ -58,6 +64,7 @@ export async function GET(request: Request) {
       keyword_rerank_strength: keywordRerankStrength,
       store_type: storeType,
       aspects_enabled: aspectsEnabled,
+      results_per_page: resultsPerPage,
       _source: "redis_fallback",
     })
   } catch (redisError) {
@@ -69,6 +76,7 @@ export async function GET(request: Request) {
       keyword_rerank_strength: 0.3,
       store_type: "online retailer",
       aspects_enabled: true,
+      results_per_page: 48,
       _source: "hardcoded_defaults",
     })
   }
@@ -101,6 +109,9 @@ export async function PUT(request: Request) {
       }
       if (body.aspects_enabled !== undefined) {
         await saveAspectsEnabled(fallbackCollection, body.aspects_enabled)
+      }
+      if (body.results_per_page !== undefined) {
+        await saveResultsPerPage(fallbackCollection, body.results_per_page)
       }
     } catch (e) {
       console.error("Redis settings save error:", e)

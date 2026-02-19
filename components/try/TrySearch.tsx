@@ -14,7 +14,7 @@ import { ChevronDown, ChevronUp } from "lucide-react"
 import { formatFacetValue } from "@/lib/facet-utils"
 import type { PriceRange, SearchResponse } from "@/lib/xtal-types"
 
-export default function TrySearch({ collection, suggestions, initialQuery, initialSearchData }: { collection?: string; suggestions?: string[]; initialQuery?: string; initialSearchData?: SearchResponse | null } = {}) {
+export default function TrySearch({ collection, suggestions, initialQuery, initialSearchData, defaultResultsPerPage }: { collection?: string; suggestions?: string[]; initialQuery?: string; initialSearchData?: SearchResponse | null; defaultResultsPerPage?: number } = {}) {
   const {
     query,
     sortedResults,
@@ -32,6 +32,8 @@ export default function TrySearch({ collection, suggestions, initialQuery, initi
     relevanceScores,
     sortBy,
     setSortBy,
+    resultsPerPage,
+    changeResultsPerPage,
     results,
     search,
     selectAspect,
@@ -41,7 +43,7 @@ export default function TrySearch({ collection, suggestions, initialQuery, initi
     clearAllFilters,
     explain,
     reportIrrelevant,
-  } = useXtalSearch(collection, initialQuery, initialSearchData)
+  } = useXtalSearch(collection, initialQuery, initialSearchData, defaultResultsPerPage)
 
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
@@ -152,6 +154,18 @@ export default function TrySearch({ collection, suggestions, initialQuery, initi
               </p>
               <div className="flex items-baseline gap-3 shrink-0">
                 <select
+                  value={resultsPerPage}
+                  onChange={(e) => changeResultsPerPage(parseInt(e.target.value, 10))}
+                  className="text-xs text-slate-600 bg-transparent border border-slate-200 rounded px-2 py-1
+                             focus:outline-none focus:ring-2 focus:ring-xtal-navy/30 focus:border-xtal-navy
+                             cursor-pointer"
+                >
+                  <option value={24}>24 per page</option>
+                  <option value={48}>48 per page</option>
+                  <option value={96}>96 per page</option>
+                  <option value={120}>120 per page</option>
+                </select>
+                <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
                   className="text-xs text-slate-600 bg-transparent border border-slate-200 rounded px-2 py-1
@@ -170,21 +184,35 @@ export default function TrySearch({ collection, suggestions, initialQuery, initi
           </div>
 
           {/* Mobile info bar — results count + sort */}
-          <div className="mt-4 mb-2 flex items-baseline justify-between gap-3 md:hidden">
+          <div className="mt-4 mb-2 flex items-baseline justify-between gap-2 md:hidden">
             <p className="text-[13px] text-slate-700 font-medium truncate">
               {total} result{total !== 1 ? "s" : ""}
             </p>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-              className="text-xs text-slate-600 bg-transparent border border-slate-200 rounded px-2 py-1.5
-                         focus:outline-none focus:ring-2 focus:ring-xtal-navy/30 focus:border-xtal-navy
-                         cursor-pointer shrink-0"
-            >
-              <option value="relevance">AI Relevance</option>
-              <option value="price-asc">Price: Low-High</option>
-              <option value="price-desc">Price: High-Low</option>
-            </select>
+            <div className="flex items-baseline gap-2 shrink-0">
+              <select
+                value={resultsPerPage}
+                onChange={(e) => changeResultsPerPage(parseInt(e.target.value, 10))}
+                className="text-xs text-slate-600 bg-transparent border border-slate-200 rounded px-2 py-1.5
+                           focus:outline-none focus:ring-2 focus:ring-xtal-navy/30 focus:border-xtal-navy
+                           cursor-pointer"
+              >
+                <option value={24}>24</option>
+                <option value={48}>48</option>
+                <option value={96}>96</option>
+                <option value={120}>120</option>
+              </select>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                className="text-xs text-slate-600 bg-transparent border border-slate-200 rounded px-2 py-1.5
+                           focus:outline-none focus:ring-2 focus:ring-xtal-navy/30 focus:border-xtal-navy
+                           cursor-pointer"
+              >
+                <option value="relevance">AI Relevance</option>
+                <option value="price-asc">Price: Low-High</option>
+                <option value="price-desc">Price: High-Low</option>
+              </select>
+            </div>
           </div>
         </>
       )}

@@ -58,6 +58,7 @@ export default function SearchTuningPage() {
   const [storeType, setStoreType] = useState("online retailer")
   const [storeTypeSaving, setStoreTypeSaving] = useState(false)
   const [aspectsEnabled, setAspectsEnabled] = useState(true)
+  const [resultsPerPage, setResultsPerPage] = useState(48)
   const [aspectsPrompt, setAspectsPrompt] = useState("")
   const [aspectsHistory, setAspectsHistory] = useState<HistoryEntry[]>([])
   const [aspectsDefault, setAspectsDefault] = useState("")
@@ -66,6 +67,7 @@ export default function SearchTuningPage() {
   const [historyEvents, setHistoryEvents] = useState<OptimizationEvent[]>([])
   const [historyLoading, setHistoryLoading] = useState(false)
   const [expandedHistoryRow, setExpandedHistoryRow] = useState<string | null>(null)
+  const [resultsPerPageSaving, setResultsPerPageSaving] = useState(false)
   const storeTypeDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const rerankDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const bm25DebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -81,6 +83,7 @@ export default function SearchTuningPage() {
     setHistoryOpen(false)
     setExpandedHistoryRow(null)
     setStoreType("online retailer")
+    setResultsPerPage(48)
     setAspectsPrompt("")
     setAspectsHistory([])
 
@@ -122,6 +125,7 @@ export default function SearchTuningPage() {
           setKeywordRerank(data.keyword_rerank_strength ?? 0.3)
           if (data.store_type) setStoreType(data.store_type)
           setAspectsEnabled(data.aspects_enabled ?? true)
+          setResultsPerPage(data.results_per_page ?? 48)
           if (data._source === "redis_fallback") {
             warnings.push(
               "Search backend unreachable — settings loaded from local cache"
@@ -372,6 +376,31 @@ export default function SearchTuningPage() {
     storeTypeDebounceRef.current = setTimeout(() => saveStoreType(value), 800)
   }
 
+  async function handleResultsPerPageChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const value = parseInt(e.target.value, 10)
+    setResultsPerPage(value)
+    setResultsPerPageSaving(true)
+    try {
+      const res = await fetch(
+        `/api/admin/settings?collection=${encodeURIComponent(collection)}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ results_per_page: value }),
+        }
+      )
+      if (!res.ok) throw new Error(`Save failed: ${res.status}`)
+      const data = await res.json()
+      if (data._source === "redis_fallback") {
+        setWarning(data.backendWarning || "Settings saved locally — search backend unreachable")
+      }
+    } catch (err) {
+      console.error("Failed to save results per page:", err)
+    } finally {
+      setResultsPerPageSaving(false)
+    }
+  }
+
   async function saveAspectsPromptFn(newPrompt: string) {
     setSavingAspects(true)
     try {
@@ -615,6 +644,38 @@ export default function SearchTuningPage() {
                     placeholder:text-slate-300"
                 />
                 {storeTypeSaving && (
+                  <span className="text-xs text-slate-400 shrink-0">Saving...</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="glass-card p-6">
+            <div>
+              <h3 className="text-lg font-semibold text-xtal-navy">
+                Results Per Page
+              </h3>
+              <p className="text-sm text-slate-500 mt-1">
+                Default number of products returned per search. End users can
+                override this from the search page.
+              </p>
+            </div>
+            <div className="mt-4 max-w-full sm:max-w-md">
+              <div className="flex items-center gap-2">
+                <select
+                  value={resultsPerPage}
+                  onChange={handleResultsPerPageChange}
+                  disabled={resultsPerPageSaving}
+                  className="px-3 py-2 text-sm border border-slate-200 rounded-lg
+                    focus:outline-none focus:ring-2 focus:ring-xtal-navy/20 focus:border-xtal-navy
+                    cursor-pointer disabled:opacity-50"
+                >
+                  <option value={24}>24 per page</option>
+                  <option value={48}>48 per page</option>
+                  <option value={96}>96 per page</option>
+                  <option value={120}>120 per page</option>
+                </select>
+                {resultsPerPageSaving && (
                   <span className="text-xs text-slate-400 shrink-0">Saving...</span>
                 )}
               </div>
