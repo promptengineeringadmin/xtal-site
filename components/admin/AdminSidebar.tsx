@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useSession, signOut } from "next-auth/react"
 import {
   BarChart3,
   Boxes,
@@ -12,23 +13,36 @@ import {
   ChevronDown,
   Menu,
   X,
+  Users,
+  Building2,
+  HelpCircle,
+  LogOut,
 } from "lucide-react"
 import { useCollection } from "@/lib/admin/CollectionContext"
 
 const NAV_ITEMS = [
-  { href: "/admin/dashboard", label: "Dashboard", icon: BarChart3 },
-  { href: "/admin/activity", label: "Activity", icon: Activity },
-  { href: "/admin/demos", label: "Demos", icon: Boxes },
-  { href: "/admin/grader", label: "Grader", icon: Gauge },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
+  { href: "/admin/dashboard", label: "Dashboard", icon: BarChart3, internal: false },
+  { href: "/admin/activity", label: "Activity", icon: Activity, internal: false },
+  { href: "/admin/demos", label: "Demos", icon: Boxes, internal: true },
+  { href: "/admin/grader", label: "Grader", icon: Gauge, internal: true },
+  { href: "/admin/settings", label: "Settings", icon: Settings, internal: false },
+  { href: "/admin/organizations", label: "Organizations", icon: Building2, internal: true },
+  { href: "/admin/users", label: "Users", icon: Users, internal: true },
+  { href: "/admin/help", label: "Help", icon: HelpCircle, internal: false },
 ]
 
-function SidebarContent({ collection, setCollection, collections, pathname }: {
+function SidebarContent({ collection, setCollection, collections, pathname, role }: {
   collection: string
   setCollection: (v: string) => void
   collections: { id: string; label: string }[]
   pathname: string
+  role: string
 }) {
+  const { data: session } = useSession()
+  const isInternal = role === "internal"
+
+  const visibleNav = NAV_ITEMS.filter((item) => isInternal || !item.internal)
+
   return (
     <>
       <div className="p-6 pb-4">
@@ -44,28 +58,34 @@ function SidebarContent({ collection, setCollection, collections, pathname }: {
         <label className="block text-[10px] font-medium text-white/40 uppercase tracking-wider mb-1.5 px-1">
           Experience
         </label>
-        <div className="relative">
-          <select
-            value={collection}
-            onChange={(e) => setCollection(e.target.value)}
-            className="w-full appearance-none bg-white/10 text-white text-sm font-medium rounded-lg pl-3 pr-8 py-2 border border-white/10 outline-none focus:border-white/30 transition-colors cursor-pointer"
-          >
-            {collections.map((c) => (
-              <option
-                key={c.id}
-                value={c.id}
-                className="text-slate-900 bg-white"
-              >
-                {c.label}
-              </option>
-            ))}
-          </select>
-          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50 pointer-events-none" />
-        </div>
+        {isInternal ? (
+          <div className="relative">
+            <select
+              value={collection}
+              onChange={(e) => setCollection(e.target.value)}
+              className="w-full appearance-none bg-white/10 text-white text-sm font-medium rounded-lg pl-3 pr-8 py-2 border border-white/10 outline-none focus:border-white/30 transition-colors cursor-pointer"
+            >
+              {collections.map((c) => (
+                <option
+                  key={c.id}
+                  value={c.id}
+                  className="text-slate-900 bg-white"
+                >
+                  {c.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50 pointer-events-none" />
+          </div>
+        ) : (
+          <div className="bg-white/10 text-white text-sm font-medium rounded-lg px-3 py-2 border border-white/10">
+            {collections.find((c) => c.id === collection)?.label ?? collection}
+          </div>
+        )}
       </div>
 
       <nav className="flex-1 px-3 space-y-1">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+        {visibleNav.map(({ href, label, icon: Icon }) => {
           const active = pathname === href || pathname.startsWith(href + "/")
           return (
             <Link
@@ -84,10 +104,25 @@ function SidebarContent({ collection, setCollection, collections, pathname }: {
         })}
       </nav>
 
-      <div className="p-4 border-t border-white/10">
+      <div className="p-4 border-t border-white/10 space-y-3">
+        {session?.user && (
+          <div className="flex items-center justify-between">
+            <div className="min-w-0">
+              <p className="text-xs text-white/70 truncate">{session.user.name || session.user.email}</p>
+              <p className="text-[10px] text-white/40 capitalize">{role}</p>
+            </div>
+            <button
+              onClick={() => signOut({ callbackUrl: "/auth/signin" })}
+              className="p-1.5 text-white/40 hover:text-white/70 transition-colors shrink-0"
+              title="Sign out"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        )}
         <Link
           href="/"
-          className="text-xs text-white/40 hover:text-white/70 transition-colors"
+          className="block text-xs text-white/40 hover:text-white/70 transition-colors"
         >
           &larr; Back to site
         </Link>
@@ -99,7 +134,10 @@ function SidebarContent({ collection, setCollection, collections, pathname }: {
 export default function AdminSidebar() {
   const pathname = usePathname()
   const { collection, setCollection, collections } = useCollection()
+  const { data: session } = useSession()
   const [mobileOpen, setMobileOpen] = useState(false)
+
+  const role = session?.user?.role ?? "client"
 
   // Close mobile sidebar on navigation
   useEffect(() => {
@@ -136,6 +174,7 @@ export default function AdminSidebar() {
           setCollection={setCollection}
           collections={collections}
           pathname={pathname}
+          role={role}
         />
       </aside>
 
@@ -168,6 +207,7 @@ export default function AdminSidebar() {
           setCollection={setCollection}
           collections={collections}
           pathname={pathname}
+          role={role}
         />
       </aside>
     </>

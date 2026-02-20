@@ -1,6 +1,6 @@
-import PasswordGate from "@/components/admin/PasswordGate"
 import AdminSidebar from "@/components/admin/AdminSidebar"
 import { CollectionProvider } from "@/lib/admin/CollectionContext"
+import { SessionProvider } from "next-auth/react"
 
 export const metadata = {
   title: "XTAL Admin",
@@ -13,7 +13,7 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   return (
-    <PasswordGate>
+    <SessionProvider>
       <CollectionProvider>
         <div className="min-h-screen bg-slate-50">
           <AdminSidebar />
@@ -22,6 +22,6 @@ export default function AdminLayout({
           </main>
         </div>
       </CollectionProvider>
-    </PasswordGate>
+    </SessionProvider>
   )
 }

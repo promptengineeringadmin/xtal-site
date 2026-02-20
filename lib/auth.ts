@@ -117,9 +117,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           .where(eq(organizationMemberships.userId, user.id))
 
         session.user.organizationId = memberships[0]?.organizationId ?? null
-        session.user.collectionIds = [
-          ...new Set(memberships.map((m) => m.collectionId)),
-        ]
+        session.user.collectionIds = Array.from(
+          new Set(memberships.map((m) => m.collectionId))
+        )
       } else {
         // Internal users have access to all collections
         session.user.organizationId = null
