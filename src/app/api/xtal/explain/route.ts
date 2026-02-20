@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server"
 import { getExplainPrompt, DEFAULT_EXPLAIN_SYSTEM_PROMPT } from "@/lib/admin/explain-prompt"
+import { corsHeaders, handleOptions } from "@/lib/api/cors"
+
+export async function OPTIONS() {
+  return handleOptions()
+}
 
 export async function POST(request: Request) {
   try {
@@ -29,9 +34,9 @@ export async function POST(request: Request) {
     })
 
     const data = await res.json()
-    return NextResponse.json(data, { status: res.status })
+    return NextResponse.json(data, { status: res.status, headers: corsHeaders() })
   } catch (error) {
     console.error("Explain proxy error:", error)
-    return NextResponse.json({ error: "Explain failed" }, { status: 502 })
+    return NextResponse.json({ error: "Explain failed" }, { status: 502, headers: corsHeaders() })
   }
 }
