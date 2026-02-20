@@ -3,11 +3,17 @@
 import { useState, useRef } from "react"
 import { HelpCircle, X, ThumbsDown } from "lucide-react"
 import type { Product } from "@/lib/xtal-types"
+import { appendUtm } from "@/lib/utm"
+
+function hasValidUrl(url: string | undefined | null): url is string {
+  return typeof url === "string" && url.startsWith("http")
+}
 
 interface ProductCardProps {
   product: Product
   score?: number
   query: string
+  collection?: string
   onExplain: (productId: string, score?: number) => Promise<string>
   onReportIrrelevant?: (productId: string, score?: number) => void
 }
@@ -30,7 +36,7 @@ function getAccentStyle(score?: number) {
   return "border-t-2 border-amber-200"
 }
 
-export default function ProductCard({ product, score, query, onExplain, onReportIrrelevant }: ProductCardProps) {
+export default function ProductCard({ product, score, query, collection, onExplain, onReportIrrelevant }: ProductCardProps) {
   const [explainOpen, setExplainOpen] = useState(false)
   const [explanation, setExplanation] = useState<string | null>(null)
   const [explainLoading, setExplainLoading] = useState(false)
@@ -38,6 +44,9 @@ export default function ProductCard({ product, score, query, onExplain, onReport
   const cardRef = useRef<HTMLDivElement>(null)
 
   const imageUrl = product.image_url || product.featured_image || product.images?.[0]?.src
+  const pdpUrl = hasValidUrl(product.product_url)
+    ? appendUtm(product.product_url, collection || "default", product.id, query)
+    : null
 
   async function handleExplain() {
     if (explainOpen) {
@@ -65,21 +74,26 @@ export default function ProductCard({ product, score, query, onExplain, onReport
       ref={cardRef}
       className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col ${getAccentStyle(score)} ${dismissed ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}
     >
-      {/* Image */}
-      <div className="aspect-square bg-slate-50 relative overflow-hidden">
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={product.title}
-            className="w-full h-full object-contain p-2 hover:scale-105 transition-transform duration-200"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-slate-300 text-sm">
-            No image
+      {/* Image — linked if valid product_url */}
+      {pdpUrl ? (
+        <a href={pdpUrl} target="_blank" rel="noopener noreferrer">
+          <div className="aspect-square bg-slate-50 relative overflow-hidden">
+            {imageUrl ? (
+              <img src={imageUrl} alt={product.title} className="w-full h-full object-contain p-2 hover:scale-105 transition-transform duration-200" loading="lazy" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-slate-300 text-sm">No image</div>
+            )}
           </div>
-        )}
-      </div>
+        </a>
+      ) : (
+        <div className="aspect-square bg-slate-50 relative overflow-hidden">
+          {imageUrl ? (
+            <img src={imageUrl} alt={product.title} className="w-full h-full object-contain p-2 hover:scale-105 transition-transform duration-200" loading="lazy" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-slate-300 text-sm">No image</div>
+          )}
+        </div>
+      )}
 
       {/* Content */}
       <div className="p-3 flex flex-col flex-1">
@@ -90,10 +104,14 @@ export default function ProductCard({ product, score, query, onExplain, onReport
           </span>
         )}
 
-        {/* Title */}
-        <h3 className="text-sm font-medium text-slate-800 line-clamp-2 mt-0.5 leading-snug">
-          {product.title}
-        </h3>
+        {/* Title — linked if valid product_url */}
+        {pdpUrl ? (
+          <a href={pdpUrl} target="_blank" rel="noopener noreferrer" className="hover:text-xtal-navy transition-colors">
+            <h3 className="text-sm font-medium text-slate-800 line-clamp-2 mt-0.5 leading-snug">{product.title}</h3>
+          </a>
+        ) : (
+          <h3 className="text-sm font-medium text-slate-800 line-clamp-2 mt-0.5 leading-snug">{product.title}</h3>
+        )}
 
         {/* Price + Explain */}
         <div className="flex items-center justify-between mt-auto pt-2">
