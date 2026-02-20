@@ -2,7 +2,7 @@ import { Metadata } from "next"
 import Navbar from "@/components/Navbar"
 import TrySearch from "@/components/try/TrySearch"
 import { serverSearch } from "@/lib/server-search"
-import { getResultsPerPage } from "@/lib/admin/admin-settings"
+import { getResultsPerPage, getStoreType } from "@/lib/admin/admin-settings"
 
 export const metadata: Metadata = {
   title: "Best Buy | XTAL AI Search Demo",
@@ -12,14 +12,17 @@ export const metadata: Metadata = {
 
 export default async function BestBuyPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { q } = await searchParams
-  const resultsPerPage = await getResultsPerPage("bestbuy")
+  const [resultsPerPage, storeType] = await Promise.all([
+    getResultsPerPage("bestbuy"),
+    getStoreType("bestbuy"),
+  ])
   const initialSearchData = q ? await serverSearch(q, "bestbuy", resultsPerPage) : null
 
   return (
     <>
       <Navbar />
       <main className="pt-20 min-h-screen bg-[#FCFDFF]">
-        <TrySearch collection="bestbuy" initialQuery={q} initialSearchData={initialSearchData} defaultResultsPerPage={resultsPerPage} />
+        <TrySearch collection="bestbuy" initialQuery={q} initialSearchData={initialSearchData} defaultResultsPerPage={resultsPerPage} storeType={storeType} />
       </main>
     </>
   )
