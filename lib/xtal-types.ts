@@ -106,6 +106,34 @@ export interface OptimizationResult {
   configs_tested: number
   optimization_time: number
   event_id?: string
+  persona?: { name: string; context: string }
+  query_evaluations?: QueryEvaluation[]
+}
+
+// Frontend-orchestrated optimizer types
+
+export interface OptimizerConfig {
+  index: number
+  label: string
+  query_enhancement_enabled: boolean
+  merch_rerank_strength: number
+  bm25_weight: number
+  keyword_rerank_strength: number
+}
+
+export type QueryType = "keyword" | "cluster" | "natural_language" | "vibes" | "problem_solving"
+
+export interface TestQuery {
+  query: string
+  type: QueryType
+}
+
+export interface QueryEvaluation {
+  query: string
+  query_type: string
+  scores: { config: number; score: number; rationale: string }[]
+  notable: string
+  skipped?: boolean
 }
 
 export interface OptimizationRequest {
