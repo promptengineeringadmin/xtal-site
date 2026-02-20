@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, Store, Sparkles, MessageSquareText, BookType } from "lucide-react"
+import { ArrowRight, Store, Sparkles, MessageSquareText, BookType, Code2 } from "lucide-react"
 
 const SETTINGS_PAGES = [
   {
@@ -31,6 +31,13 @@ const SETTINGS_PAGES = [
     description:
       "Merge duplicate facet values so customers see clean, organized filters.",
     icon: BookType,
+  },
+  {
+    href: "/admin/settings/snippet",
+    label: "Embed Snippet",
+    description:
+      "Generate a JavaScript snippet for merchants to embed XTAL search on their own websites.",
+    icon: Code2,
   },
 ]
 
