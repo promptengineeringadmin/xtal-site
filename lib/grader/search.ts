@@ -26,12 +26,26 @@ export interface SearchProgress {
   result?: QueryResult
 }
 
-// ─── Execute search on a Shopify store via API ──────────────
+// ─── Execute search on a Shopify store ───────────────────────
+// Primary: scrape the full search page (/search?q=) which is what
+// shoppers actually see.  Fallback: the /search/suggest.json
+// predictive API (fast + structured, but much stricter matching).
 
 async function searchShopify(
   origin: string,
   query: string
 ): Promise<{ results: SearchResult[]; count: number }> {
+  // 1. Try the full search page (matches what shoppers actually see)
+  try {
+    const htmlResults = await searchViaUrl(`${origin}/search?q=`, query)
+    if (htmlResults.results.length > 0 || htmlResults.count > 0) {
+      return htmlResults
+    }
+  } catch {
+    // Fall through to suggest API
+  }
+
+  // 2. Fallback to Shopify's predictive search / suggest API
   const url = `${origin}/search/suggest.json?q=${encodeURIComponent(query)}&resources[type]=product&resources[limit]=10`
 
   const res = await fetch(url, {
@@ -207,7 +221,7 @@ export async function runSingleQuery(
     let searchResults: { results: SearchResult[]; count: number }
 
     if (platform === "shopify") {
-      // Use Shopify's predictive search API (most reliable)
+      // Full search page first, suggest API fallback
       searchResults = await searchShopify(origin, testQuery.text)
     } else if (searchUrl) {
       // Use known search URL for this platform
