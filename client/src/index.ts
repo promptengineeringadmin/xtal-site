@@ -117,7 +117,7 @@ function boot() {
           // Results
           if (lastResponse.results.length > 0) {
             container.appendChild(
-              renderResultsGrid(lastResponse.results, lastQuery, shopId)
+              renderResultsGrid(lastResponse.results, lastQuery, shopId!)
             )
           } else {
             container.appendChild(renderEmpty(lastQuery))
