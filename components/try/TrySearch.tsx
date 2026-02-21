@@ -107,7 +107,7 @@ export default function TrySearch({ collection, suggestions, extraSuggestions, i
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Search bar — sticky on mobile, static on desktop */}
       <div className="sticky top-[80px] z-20 bg-[#FCFDFF] -mx-4 px-4 pt-2 pb-2 md:static md:mx-0 md:px-0 md:pt-0 md:pb-0 md:bg-transparent">
-        <SearchBar onSearch={handleSearch} loading={loading} initialQuery={query} hasSearched={!!query} suggestions={suggestions} showSuggestions={!hasShowcaseData} />
+        <SearchBar onSearch={handleSearch} loading={loading} initialQuery={query} hasSearched={!!query} subtitle={!query} suggestions={suggestions} showSuggestions={!hasShowcaseData} />
       </div>
 
       {/* Cold start: showcase rows or fallback chips */}

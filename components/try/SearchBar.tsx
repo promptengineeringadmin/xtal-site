@@ -16,11 +16,12 @@ interface SearchBarProps {
   loading: boolean
   initialQuery?: string
   hasSearched?: boolean
+  subtitle?: boolean
   suggestions?: string[]
   showSuggestions?: boolean
 }
 
-export default function SearchBar({ onSearch, loading, initialQuery = "", hasSearched = false, suggestions, showSuggestions = true }: SearchBarProps) {
+export default function SearchBar({ onSearch, loading, initialQuery = "", hasSearched = false, subtitle = false, suggestions, showSuggestions = true }: SearchBarProps) {
   const [value, setValue] = useState(initialQuery)
 
   useEffect(() => {
@@ -51,7 +52,7 @@ export default function SearchBar({ onSearch, loading, initialQuery = "", hasSea
             type="text"
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            placeholder="Describe what a customer is looking for..."
+            placeholder="Describe what you're looking for..."
             className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 bg-white text-sm
                        focus:outline-none focus:ring-2 focus:ring-xtal-navy/30 focus:border-xtal-navy
                        transition-colors"
@@ -67,6 +68,17 @@ export default function SearchBar({ onSearch, loading, initialQuery = "", hasSea
           {loading ? "Searching..." : "Search"}
         </button>
       </form>
+
+      {subtitle && !hasSearched && (
+        <div className="text-center mt-2">
+          <p className="text-sm text-slate-600 font-medium">
+            XTAL search works differently. Describe the need, not the product name.
+          </p>
+          <p className="text-[13px] text-slate-400 mt-0.5">
+            Try one below to see what comes back.
+          </p>
+        </div>
+      )}
 
       {!hasSearched && showSuggestions && (
         <div className="mt-3 flex gap-2 overflow-x-auto pb-1 md:flex-wrap md:overflow-visible md:pb-0 scrollbar-none">

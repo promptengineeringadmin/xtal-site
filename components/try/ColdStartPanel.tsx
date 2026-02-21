@@ -14,12 +14,7 @@ export default function ColdStartPanel({ showcaseData, onSearch, suggestions, ex
   const hasShowcase = showcaseData && showcaseData.length > 0
 
   return (
-    <div className="py-6">
-      {/* (A) Value line */}
-      <p className="text-[13px] text-slate-400 text-center mb-8">
-        Describe a scenario &mdash; not just a product name
-      </p>
-
+    <div className="pt-2 pb-6">
       {hasShowcase ? (
         <>
           {/* 3-column category cards */}
@@ -68,11 +63,6 @@ export default function ColdStartPanel({ showcaseData, onSearch, suggestions, ex
         </div>
       )}
 
-      {/* (F) Differentiator */}
-      <p className="text-[13px] text-slate-400 text-center mt-8">
-        Notice these aren&rsquo;t product names &mdash;{" "}
-        they&rsquo;re shopping scenarios. Try your own.
-      </p>
     </div>
   )
 }
@@ -95,7 +85,7 @@ function CategoryCard({ row, onSearch }: { row: ShowcaseRow; onSearch: (query: s
       </div>
 
       {/* (E1) Query text — prominent, above images */}
-      <p className="text-sm font-medium text-xtal-navy leading-snug mb-3">
+      <p className="text-base font-semibold text-xtal-navy leading-snug mb-3">
         &ldquo;{row.query}&rdquo;
       </p>
 
