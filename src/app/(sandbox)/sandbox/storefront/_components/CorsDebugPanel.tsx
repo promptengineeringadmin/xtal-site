@@ -110,9 +110,9 @@ export default function CorsDebugPanel() {
       const duration = Math.round(performance.now() - t0)
 
       const corsHeaders: Record<string, string> = {}
-      for (const [k, v] of res.headers.entries()) {
+      res.headers.forEach((v, k) => {
         if (k.startsWith("access-control")) corsHeaders[k] = v
-      }
+      })
 
       addLog({
         type: res.ok ? "success" : "error",
