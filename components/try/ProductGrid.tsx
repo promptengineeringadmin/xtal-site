@@ -12,7 +12,7 @@ interface ProductGridProps {
   isFiltering: boolean
   query: string
   onExplain: (productId: string, score?: number) => Promise<string>
-  onReportIrrelevant?: (productId: string, score?: number) => void
+  onReportIrrelevant?: (product: Product, score?: number) => void
   wideLayout?: boolean
 }
 

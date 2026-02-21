@@ -9,7 +9,7 @@ interface ProductCardProps {
   score?: number
   query: string
   onExplain: (productId: string, score?: number) => Promise<string>
-  onReportIrrelevant?: (productId: string, score?: number) => void
+  onReportIrrelevant?: (product: Product, score?: number) => void
 }
 
 function formatPrice(price: number | number[]): string {
@@ -56,7 +56,7 @@ export default function ProductCard({ product, score, query, onExplain, onReport
   function handleReportIrrelevant() {
     setDismissed(true)
     setTimeout(() => {
-      onReportIrrelevant?.(product.id, score)
+      onReportIrrelevant?.(product, score)
     }, 300)
   }
 
