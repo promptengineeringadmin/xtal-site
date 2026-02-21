@@ -8,6 +8,7 @@ import {
   Boxes,
   Activity,
   Gauge,
+  Flag,
   Settings,
   ChevronDown,
   Menu,
@@ -21,6 +22,7 @@ const NAV_ITEMS = [
   { href: "/admin/activity", label: "Activity", icon: Activity },
   { href: "/admin/demos", label: "Demos", icon: Boxes },
   { href: "/admin/grader", label: "Grader", icon: Gauge },
+  { href: "/admin/search-quality", label: "Search Quality", icon: Flag },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ]
 

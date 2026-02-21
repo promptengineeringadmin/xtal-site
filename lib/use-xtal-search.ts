@@ -67,8 +67,8 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
   // Abort controller for cancelling in-flight requests
   const abortRef = useRef<AbortController | null>(null)
 
-  // Explain cache: query::productId → explanation text
-  const explainCache = useRef<Map<string, string>>(new Map())
+  // Explain cache: query::productId → { explanation, prompt_hash }
+  const explainCache = useRef<Map<string, { explanation: string; prompt_hash: string }>>(new Map())
 
   // --- Full search (new query) ---
   const search = useCallback(async (newQuery: string) => {
@@ -345,7 +345,7 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
   }, [query, searchContext, selectedAspects, activeFacetFilters, priceRange, collection])
 
   // --- Explain (on-demand, cached) ---
-  const explain = useCallback(async (productId: string, score?: number): Promise<string> => {
+  const explain = useCallback(async (productId: string, score?: number): Promise<{ explanation: string; prompt_hash: string }> => {
     const cacheKey = `${query}::${productId}`
     const cached = explainCache.current.get(cacheKey)
     if (cached) return cached
@@ -359,37 +359,78 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
       if (!res.ok) {
         const errBody = await res.text()
         console.error(`Explain API error ${res.status}:`, errBody)
-        return `Explanation unavailable (${res.status}).`
+        return { explanation: `Explanation unavailable (${res.status}).`, prompt_hash: "" }
       }
       const data = await res.json()
-      const explanation = data.explanation || "No explanation available."
-      explainCache.current.set(cacheKey, explanation)
-      return explanation
+      const result = {
+        explanation: data.explanation || "No explanation available.",
+        prompt_hash: data.prompt_hash || "",
+      }
+      explainCache.current.set(cacheKey, result)
+      return result
     } catch (err) {
       console.error("Explain fetch error:", err)
-      return "Failed to load explanation."
+      return { explanation: "Failed to load explanation.", prompt_hash: "" }
     }
   }, [query, collection])
 
   // --- Report irrelevant (fire-and-forget + remove from results) ---
-  const reportIrrelevant = useCallback((productId: string, score?: number) => {
+  const reportIrrelevant = useCallback((product: Product, score?: number) => {
     // Remove from results immediately
-    setResults((prev) => prev.filter((p) => p.id !== productId))
+    setResults((prev) => prev.filter((p) => p.id !== product.id))
     setTotal((prev) => Math.max(0, prev - 1))
 
-    // Fire-and-forget feedback POST
+    // Get prompt_hash from explain cache if available
+    const cacheKey = `${query}::${product.id}`
+    const cached = explainCache.current.get(cacheKey)
+
+    // Fire-and-forget feedback POST (enriched payload for search quality log)
     fetch("/api/xtal/feedback", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         query,
-        product_id: productId,
+        product_id: product.id,
+        product_title: product.title,
+        product_vendor: product.vendor,
+        product_type: product.product_type,
+        product_tags: product.tags,
+        product_price: product.price,
+        product_image_url: product.image_url || product.featured_image || product.images?.[0]?.src || null,
+        augmented_query: searchContext?.augmented_query || null,
         score,
         action: "irrelevant",
+        ...(cached?.prompt_hash && { prompt_hash: cached.prompt_hash }),
         ...(collection && { collection }),
       }),
     }).catch((err) => console.error("Feedback submission error:", err))
-  }, [query, collection])
+  }, [query, collection, searchContext])
+
+  // --- Report well put (fire-and-forget, card stays visible) ---
+  const reportWellPut = useCallback((product: Product, score?: number) => {
+    const cacheKey = `${query}::${product.id}`
+    const cached = explainCache.current.get(cacheKey)
+
+    fetch("/api/xtal/feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query,
+        product_id: product.id,
+        product_title: product.title,
+        product_vendor: product.vendor,
+        product_type: product.product_type,
+        product_tags: product.tags,
+        product_price: product.price,
+        product_image_url: product.image_url || product.featured_image || product.images?.[0]?.src || null,
+        augmented_query: searchContext?.augmented_query || null,
+        score,
+        action: "well_put",
+        ...(cached?.prompt_hash && { prompt_hash: cached.prompt_hash }),
+        ...(collection && { collection }),
+      }),
+    }).catch((err) => console.error("Feedback submission error:", err))
+  }, [query, collection, searchContext])
 
   // --- Load synonym groups + auto-search from URL on mount ---
   useEffect(() => {
@@ -474,5 +515,6 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
     clearAllFilters,
     explain,
     reportIrrelevant,
+    reportWellPut,
   }
 }
