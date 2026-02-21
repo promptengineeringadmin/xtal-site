@@ -86,9 +86,17 @@ function CategoryCard({ row, onSearch }: { row: ShowcaseRow; onSearch: (query: s
                  hover:shadow-sm transition-all cursor-pointer"
       onClick={() => onSearch(row.query, row.products)}
     >
-      {/* (B) Category label */}
-      <p className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-3">
-        {row.label}
+      {/* (B) Category label + arrow */}
+      <div className="flex items-center gap-1.5 mb-1">
+        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+          {row.label}
+        </p>
+        <ChevronRight size={14} className="text-slate-400 shrink-0" />
+      </div>
+
+      {/* (E1) Query text — prominent, above images */}
+      <p className="text-sm font-medium text-xtal-navy leading-snug mb-3">
+        &ldquo;{row.query}&rdquo;
       </p>
 
       {/* (C) Hero image */}
@@ -108,17 +116,6 @@ function CategoryCard({ row, onSearch }: { row: ShowcaseRow; onSearch: (query: s
           ))}
         </div>
       )}
-
-      {/* (E1) Query text — full query in quotes */}
-      <p className="mt-3 text-xs text-slate-500 italic line-clamp-2">
-        &ldquo;{row.query}&rdquo;
-      </p>
-
-      {/* (E2) CTA button — "Show →" */}
-      <div className="mt-1.5 flex items-center gap-1 text-sm text-xtal-navy font-medium">
-        <span>Show</span>
-        <ChevronRight size={16} className="shrink-0" />
-      </div>
     </div>
   )
 }

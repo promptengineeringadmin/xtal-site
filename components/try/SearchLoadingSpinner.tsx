@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect, useRef } from "react"
 import { Sparkles } from "lucide-react"
 import { detectQuerySignal } from "@/lib/query-signals"
 
@@ -12,6 +13,17 @@ export default function SearchLoadingSpinner({ query, isFirstSearch }: SearchLoa
   const processDescription = query ? detectQuerySignal(query) : "Understanding your intent and finding matches"
   const displayQuery = query && query.length > 80 ? query.slice(0, 77) + "…" : query
 
+  // Live stopwatch: starts at 0 on mount, ticks every 50ms
+  const [elapsed, setElapsed] = useState(0)
+  const startRef = useRef(performance.now())
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setElapsed(performance.now() - startRef.current)
+    }, 50)
+    return () => clearInterval(id)
+  }, [])
+
   return (
     <div
       className="flex flex-col items-center justify-center py-16 md:py-20 px-6"
@@ -20,13 +32,18 @@ export default function SearchLoadingSpinner({ query, isFirstSearch }: SearchLoa
       aria-label="Searching for products"
     >
       {/* Zone A: Spinner */}
-      <div className="relative mb-8 w-20 h-20">
+      <div className="relative mb-4 w-20 h-20">
         <div className="absolute inset-0 border-4 border-xtal-ice rounded-full" />
         <div className="absolute inset-0 border-4 border-transparent border-t-xtal-navy rounded-full animate-spin" />
         <div className="absolute inset-0 flex items-center justify-center">
           <Sparkles className="w-8 h-8 text-xtal-navy animate-pulse" />
         </div>
       </div>
+
+      {/* Zone A-1: Live elapsed timer */}
+      <p className="text-xs text-slate-400 mb-4 tabular-nums" aria-hidden="true">
+        {(elapsed / 1000).toFixed(2)}s
+      </p>
 
       {/* Zone B + C: Query echo + process description */}
       <div className="max-w-[280px] sm:max-w-sm md:max-w-md text-center">
