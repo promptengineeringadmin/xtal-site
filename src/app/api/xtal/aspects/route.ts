@@ -27,8 +27,9 @@ export async function POST(request: Request) {
     // Only send system_prompt if prompt or store_type has been customized
     const isCustom = rawPrompt !== DEFAULT_ASPECTS_SYSTEM_PROMPT || storeType !== "online retailer"
     const payload = {
-      ...body,
+      query: body.query,
       collection,
+      selected_aspects: body.selected_aspects,
       ...(isCustom && { system_prompt: interpolated }),
     }
 

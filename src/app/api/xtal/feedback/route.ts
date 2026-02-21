@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server"
 import { createFeedback } from "@/lib/search-quality/logger"
+import { corsHeaders, handleOptions } from "@/lib/api/cors"
+import { COLLECTIONS } from "@/lib/admin/collections"
+
+export async function OPTIONS() {
+  return handleOptions()
+}
 
 export async function POST(request: Request) {
   try {
@@ -8,12 +14,25 @@ export async function POST(request: Request) {
     const collection = body.collection || process.env.XTAL_COLLECTION
 
     if (!backendUrl) {
-      return NextResponse.json({ error: "XTAL_BACKEND_URL not configured" }, { status: 500 })
+      return NextResponse.json(
+        { error: "XTAL_BACKEND_URL not configured" },
+        { status: 500, headers: corsHeaders() }
+      )
+    }
+
+    if (!COLLECTIONS.some((c) => c.id === collection)) {
+      return NextResponse.json(
+        { error: "Invalid collection" },
+        { status: 400, headers: corsHeaders() }
+      )
     }
 
     // Validate required fields
     if (!body.query || !body.product_id || !body.action) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400, headers: corsHeaders() }
+      )
     }
 
     // Persist enriched feedback to Redis (fire-and-forget — never blocks response)
@@ -47,9 +66,12 @@ export async function POST(request: Request) {
     })
 
     const data = await res.json()
-    return NextResponse.json(data, { status: res.status })
+    return NextResponse.json(data, { status: res.status, headers: corsHeaders() })
   } catch (error) {
     console.error("Feedback proxy error:", error)
-    return NextResponse.json({ error: "Feedback submission failed" }, { status: 502 })
+    return NextResponse.json(
+      { error: "Feedback submission failed" },
+      { status: 502, headers: corsHeaders() }
+    )
   }
 }

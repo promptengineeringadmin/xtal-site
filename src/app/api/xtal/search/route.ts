@@ -15,8 +15,16 @@ export async function POST(request: Request) {
     const geoRegion = request.headers.get("x-vercel-ip-country-region") || undefined
 
     const enrichedBody = {
-      ...body,
+      query: body.query,
       collection,
+      filters: body.filters,
+      page: body.page,
+      k: body.k,
+      limit: body.limit,
+      selected_aspects: body.selected_aspects,
+      search_context: body.search_context,
+      facet_filters: body.facet_filters,
+      price_range: body.price_range,
       geo_country: geoCountry,
       geo_region: geoRegion,
     }
