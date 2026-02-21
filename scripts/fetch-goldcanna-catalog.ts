@@ -53,7 +53,7 @@ const EFFECT_PATTERNS: [RegExp, string][] = [
 function extractTerpenes(html: string): string[] {
   const terpenes: string[] = [];
   // Match <strong>TERPENE_NAME</strong> patterns
-  const matches = html.matchAll(/<strong>([^<]+)<\/strong>/gi);
+  const matches = Array.from(html.matchAll(/<strong>([^<]+)<\/strong>/gi));
   for (const match of matches) {
     const name = match[1].trim().toLowerCase();
     if (KNOWN_TERPENES.includes(name)) {
