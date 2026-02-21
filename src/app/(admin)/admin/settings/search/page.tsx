@@ -707,146 +707,144 @@ export default function SearchTuningPage() {
           </h2>
 
           <div className="glass-card p-6 space-y-6">
-            {/* Marketing Influence Slider */}
-            <div>
-              <h3 className="text-lg font-semibold text-xtal-navy">
-                Marketing Influence
-              </h3>
-              <p className="text-sm text-slate-500 mt-1">
-                Controls how much the marketing prompt influences result
-                ordering. Higher values push marketing-aligned products higher
-                in search results.
-              </p>
-              <div className="mt-4 max-w-full sm:max-w-md">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-medium text-slate-400 shrink-0">
-                    Weak
-                  </span>
-                  <input
-                    type="range"
-                    min={0}
-                    max={0.5}
-                    step={0.05}
-                    value={merchRerank}
-                    onChange={handleMerchRerankChange}
-                    disabled={settingsSaving}
-                    className="flex-1 h-2 rounded-full appearance-none cursor-pointer
-                      bg-slate-200 accent-xtal-navy
-                      [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4
-                      [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-xtal-navy
-                      [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:cursor-pointer
-                      disabled:opacity-50"
-                  />
-                  <span className="text-xs font-medium text-slate-400 shrink-0">
-                    Strong
-                  </span>
-                  <span className="text-sm font-mono text-xtal-navy bg-xtal-ice rounded px-2 py-0.5 min-w-[3rem] text-center">
-                    {merchRerank.toFixed(2)}
-                  </span>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Marketing Influence Slider */}
+              <div>
+                <h3 className="text-lg font-semibold text-xtal-navy">
+                  Marketing Influence
+                </h3>
+                <p className="text-sm text-slate-500 mt-1">
+                  Controls how much the marketing prompt influences result
+                  ordering. Higher values push marketing-aligned products higher
+                  in search results.
+                </p>
+                <div className="mt-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-medium text-slate-400 shrink-0">
+                      Weak
+                    </span>
+                    <input
+                      type="range"
+                      min={0}
+                      max={0.5}
+                      step={0.05}
+                      value={merchRerank}
+                      onChange={handleMerchRerankChange}
+                      disabled={settingsSaving}
+                      className="flex-1 h-2 rounded-full appearance-none cursor-pointer
+                        bg-slate-200 accent-xtal-navy
+                        [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4
+                        [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-xtal-navy
+                        [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:cursor-pointer
+                        disabled:opacity-50"
+                    />
+                    <span className="text-xs font-medium text-slate-400 shrink-0">
+                      Strong
+                    </span>
+                    <span className="text-sm font-mono text-xtal-navy bg-xtal-ice rounded px-2 py-0.5 min-w-[3rem] text-center">
+                      {merchRerank.toFixed(2)}
+                    </span>
+                  </div>
                 </div>
+                {merchRerank === 0 && (
+                  <div className="mt-3 text-xs text-slate-500 bg-slate-50 rounded px-3 py-2">
+                    Marketing prompt has no influence on result ordering.
+                  </div>
+                )}
               </div>
-              {merchRerank === 0 && (
-                <div className="mt-3 text-xs text-slate-500 bg-slate-50 rounded px-3 py-2">
-                  Marketing prompt has no influence on result ordering.
-                </div>
-              )}
-            </div>
 
-            <hr className="border-slate-200" />
-
-            {/* Keyword Match Priority Slider */}
-            <div>
-              <h3 className="text-lg font-semibold text-xtal-navy">
-                Keyword Match Priority
-              </h3>
-              <p className="text-sm text-slate-500 mt-1">
-                How much to favor products that contain the exact words the
-                shopper typed. Higher values mean exact keyword matches rank
-                above loosely related products.
-              </p>
-              <div className="mt-4 max-w-full sm:max-w-md">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-medium text-slate-400 shrink-0">
-                    Semantic
-                  </span>
-                  <input
-                    type="range"
-                    min={0.5}
-                    max={5}
-                    step={0.5}
-                    value={bm25Weight}
-                    onChange={handleBm25Change}
-                    disabled={settingsSaving}
-                    className="flex-1 h-2 rounded-full appearance-none cursor-pointer
-                      bg-slate-200 accent-xtal-navy
-                      [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4
-                      [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-xtal-navy
-                      [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:cursor-pointer
-                      disabled:opacity-50"
-                  />
-                  <span className="text-xs font-medium text-slate-400 shrink-0">
-                    Keyword
-                  </span>
-                  <span className="text-sm font-mono text-xtal-navy bg-xtal-ice rounded px-2 py-0.5 min-w-[3rem] text-center">
-                    {bm25Weight.toFixed(1)}
-                  </span>
+              {/* Keyword Match Priority Slider */}
+              <div>
+                <h3 className="text-lg font-semibold text-xtal-navy">
+                  Keyword Match Priority
+                </h3>
+                <p className="text-sm text-slate-500 mt-1">
+                  How much to favor products that contain the exact words the
+                  shopper typed. Higher values mean exact keyword matches rank
+                  above loosely related products.
+                </p>
+                <div className="mt-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-medium text-slate-400 shrink-0">
+                      Semantic
+                    </span>
+                    <input
+                      type="range"
+                      min={0.5}
+                      max={5}
+                      step={0.5}
+                      value={bm25Weight}
+                      onChange={handleBm25Change}
+                      disabled={settingsSaving}
+                      className="flex-1 h-2 rounded-full appearance-none cursor-pointer
+                        bg-slate-200 accent-xtal-navy
+                        [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4
+                        [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-xtal-navy
+                        [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:cursor-pointer
+                        disabled:opacity-50"
+                    />
+                    <span className="text-xs font-medium text-slate-400 shrink-0">
+                      Keyword
+                    </span>
+                    <span className="text-sm font-mono text-xtal-navy bg-xtal-ice rounded px-2 py-0.5 min-w-[3rem] text-center">
+                      {bm25Weight.toFixed(1)}
+                    </span>
+                  </div>
                 </div>
+                {bm25Weight >= 3 && (
+                  <div className="mt-3 text-xs text-slate-500 bg-slate-50 rounded px-3 py-2">
+                    High keyword priority — searches will strongly favor exact text
+                    matches over semantic similarity.
+                  </div>
+                )}
               </div>
-              {bm25Weight >= 3 && (
-                <div className="mt-3 text-xs text-slate-500 bg-slate-50 rounded px-3 py-2">
-                  High keyword priority — searches will strongly favor exact text
-                  matches over semantic similarity.
-                </div>
-              )}
-            </div>
 
-            <hr className="border-slate-200" />
-
-            {/* Product Type Boost Slider */}
-            <div>
-              <h3 className="text-lg font-semibold text-xtal-navy">
-                Product Type Boost
-              </h3>
-              <p className="text-sm text-slate-500 mt-1">
-                When a shopper searches for a specific product (e.g.,
-                &ldquo;ties for a wedding&rdquo;), this boosts actual ties above
-                related but different products. Higher values mean stronger
-                preference for the correct product type.
-              </p>
-              <div className="mt-4 max-w-full sm:max-w-md">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-medium text-slate-400 shrink-0">
-                    Off
-                  </span>
-                  <input
-                    type="range"
-                    min={0}
-                    max={1}
-                    step={0.1}
-                    value={keywordRerank}
-                    onChange={handleKeywordRerankChange}
-                    disabled={settingsSaving}
-                    className="flex-1 h-2 rounded-full appearance-none cursor-pointer
-                      bg-slate-200 accent-xtal-navy
-                      [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4
-                      [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-xtal-navy
-                      [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:cursor-pointer
-                      disabled:opacity-50"
-                  />
-                  <span className="text-xs font-medium text-slate-400 shrink-0">
-                    Strong
-                  </span>
-                  <span className="text-sm font-mono text-xtal-navy bg-xtal-ice rounded px-2 py-0.5 min-w-[3rem] text-center">
-                    {keywordRerank.toFixed(1)}
-                  </span>
+              {/* Product Type Boost Slider */}
+              <div>
+                <h3 className="text-lg font-semibold text-xtal-navy">
+                  Product Type Boost
+                </h3>
+                <p className="text-sm text-slate-500 mt-1">
+                  When a shopper searches for a specific product (e.g.,
+                  &ldquo;ties for a wedding&rdquo;), this boosts actual ties above
+                  related but different products. Higher values mean stronger
+                  preference for the correct product type.
+                </p>
+                <div className="mt-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-medium text-slate-400 shrink-0">
+                      Off
+                    </span>
+                    <input
+                      type="range"
+                      min={0}
+                      max={1}
+                      step={0.1}
+                      value={keywordRerank}
+                      onChange={handleKeywordRerankChange}
+                      disabled={settingsSaving}
+                      className="flex-1 h-2 rounded-full appearance-none cursor-pointer
+                        bg-slate-200 accent-xtal-navy
+                        [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4
+                        [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-xtal-navy
+                        [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:cursor-pointer
+                        disabled:opacity-50"
+                    />
+                    <span className="text-xs font-medium text-slate-400 shrink-0">
+                      Strong
+                    </span>
+                    <span className="text-sm font-mono text-xtal-navy bg-xtal-ice rounded px-2 py-0.5 min-w-[3rem] text-center">
+                      {keywordRerank.toFixed(1)}
+                    </span>
+                  </div>
                 </div>
+                {keywordRerank === 0 && (
+                  <div className="mt-3 text-xs text-slate-500 bg-slate-50 rounded px-3 py-2">
+                    Product type boost is off — all products ranked purely by
+                    relevance score.
+                  </div>
+                )}
               </div>
-              {keywordRerank === 0 && (
-                <div className="mt-3 text-xs text-slate-500 bg-slate-50 rounded px-3 py-2">
-                  Product type boost is off — all products ranked purely by
-                  relevance score.
-                </div>
-              )}
             </div>
 
             <hr className="border-slate-200" />
