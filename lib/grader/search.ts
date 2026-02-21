@@ -144,6 +144,8 @@ async function searchViaUrl(
 
   // High-confidence patterns: class-based selectors specific to search results
   const highConfidencePatterns = [
+    // Schema.org structured data (Shopify, many themes)
+    /itemprop="name"\s+content="([^"]{3,100})"/gi,
     /class="[^"]*product[_-]?title[^"]*"[^>]*>([^<]{3,100})</gi,
     /class="[^"]*product[_-]?name[^"]*"[^>]*>([^<]{3,100})</gi,
     /class="[^"]*card[_-]?title[^"]*"[^>]*>([^<]{3,100})</gi,
@@ -192,6 +194,8 @@ async function searchViaUrl(
     /(\d+)\s*products?\s*found/i,
     // WooCommerce: "Showing all X results" or "Showing 1–12 of X results"
     /showing\s+(?:all\s+)?(\d+)\s+results?/i,
+    // Shopify: "(X items)" in page title
+    /\((\d+)\s*items?\)/i,
     // Generic: "X items" or "X products"
     /(\d+)\s*(?:items?|products?)\s*$/im,
   ]
