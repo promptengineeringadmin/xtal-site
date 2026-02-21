@@ -160,12 +160,23 @@ async function searchViaUrl(
   // URL-based patterns on scoped HTML.
 
   const results: SearchResult[] = []
+
+  // First: try Schema.org Product structured data on FULL HTML
+  // (self-scoping via itemtype check — doesn't need container scoping)
+  const schemaPattern = /itemtype="[^"]*Product[^"]*"[\s\S]{0,300}?itemprop="name"\s+content="([^"]{3,100})"/gi
+  for (const match of Array.from(html.matchAll(schemaPattern))) {
+    const title = decodeEntities(match[1].trim())
+    if (title && title.length > 2 && !results.some((r) => r.title === title)) {
+      results.push({ title })
+    }
+    if (results.length >= 10) break
+  }
+
+  // Fall back to scoped HTML patterns if Schema.org didn't find anything
   const scopedHtml = extractSearchResultsSection(html) ?? html
   const isScoped = scopedHtml !== html
 
   const highConfidencePatterns = [
-    // Schema.org Product structured data (Shopify, many themes)
-    /itemtype="[^"]*Product[^"]*"[\s\S]{0,300}?itemprop="name"\s+content="([^"]{3,100})"/gi,
     /class="[^"]*product[_-]?title[^"]*"[^>]*>([^<]{3,100})</gi,
     /class="[^"]*product[_-]?name[^"]*"[^>]*>([^<]{3,100})</gi,
     /class="[^"]*card[_-]?title[^"]*"[^>]*>([^<]{3,100})</gi,
@@ -179,14 +190,16 @@ async function searchViaUrl(
     /href="[^"]*\/products?\/[^"]*"[^>]*>([^<]{3,100})</gi,
   ]
 
-  for (const pattern of highConfidencePatterns) {
-    for (const match of Array.from(scopedHtml.matchAll(pattern))) {
-      const title = decodeEntities(match[1].trim())
-      if (title && title.length > 2 && !results.some((r) => r.title === title)) {
-        results.push({ title })
+  if (results.length === 0) {
+    for (const pattern of highConfidencePatterns) {
+      for (const match of Array.from(scopedHtml.matchAll(pattern))) {
+        const title = decodeEntities(match[1].trim())
+        if (title && title.length > 2 && !results.some((r) => r.title === title)) {
+          results.push({ title })
+        }
       }
+      if (results.length >= 10) break
     }
-    if (results.length >= 10) break
   }
 
   if (results.length === 0 && isScoped) {
