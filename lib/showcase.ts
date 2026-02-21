@@ -86,7 +86,7 @@ export async function fetchShowcaseData(
       queries.map(async ({ query, label }) => ({
         query,
         label,
-        products: (await serverSearch(query, collection, 4))?.results?.slice(0, 4) ?? [],
+        products: (await serverSearch(query, collection, 4, 3600))?.results?.slice(0, 4) ?? [],
       }))
     )
     const filtered = rows.filter(r => r.products.length > 0)

@@ -35,6 +35,12 @@
       "maxDuration": 15
     }
   },
+  "crons": [
+    {
+      "path": "/api/cron/warm-showcase",
+      "schedule": "0 * * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

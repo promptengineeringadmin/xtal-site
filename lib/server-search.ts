@@ -3,7 +3,8 @@ import type { SearchResponse } from "./xtal-types"
 export async function serverSearch(
   query: string,
   collection?: string,
-  limit?: number
+  limit?: number,
+  revalidate?: number,
 ): Promise<SearchResponse | null> {
   const backendUrl = process.env.XTAL_BACKEND_URL
   const col = collection || process.env.XTAL_COLLECTION
@@ -14,7 +15,7 @@ export async function serverSearch(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ query, collection: col, ...(limit && { limit }) }),
-      cache: "no-store",
+      ...(revalidate ? { next: { revalidate } } : { cache: "no-store" as const }),
     })
     if (!res.ok) {
       console.error(`[serverSearch] Backend returned ${res.status}`)
