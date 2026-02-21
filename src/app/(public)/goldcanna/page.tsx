@@ -1,6 +1,7 @@
 import { Metadata } from "next"
 import Navbar from "@/components/Navbar"
 import TrySearch from "@/components/try/TrySearch"
+import BudtenderTrigger from "@/components/try/BudtenderTrigger"
 import { serverSearch } from "@/lib/server-search"
 import { getResultsPerPage } from "@/lib/admin/admin-settings"
 
@@ -34,6 +35,7 @@ export default async function GoldCannaPage({ searchParams }: { searchParams: Pr
           initialSearchData={initialSearchData}
           defaultResultsPerPage={resultsPerPage}
         />
+        <BudtenderTrigger collection="goldcanna" />
       </main>
     </>
   )
