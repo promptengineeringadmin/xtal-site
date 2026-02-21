@@ -38,16 +38,21 @@ export async function GET(
       // deployment-specific URL behind Vercel's auth protection.
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://xtalsearch.com"
 
-      await page.goto(`${baseUrl}/grade/${id}`, {
+      await page.goto(`${baseUrl}/grade/${id}/print`, {
         waitUntil: "networkidle",
         timeout: 20_000,
       })
 
-      // Generate PDF with print-optimized CSS
+      // Generate PDF from print-optimized template
       const pdfBuffer = await page.pdf({
         format: "Letter",
         printBackground: true,
-        margin: { top: "0.4in", right: "0.4in", bottom: "0.4in", left: "0.4in" },
+        margin: { top: "0.6in", right: "0.4in", bottom: "0.6in", left: "0.4in" },
+        displayHeaderFooter: true,
+        headerTemplate: "<div></div>",
+        footerTemplate: `<div style="width:100%;text-align:center;font-size:8px;color:#94a3b8;">
+          <span class="pageNumber"></span> / <span class="totalPages"></span>
+        </div>`,
       })
 
       const filename = `${report.storeName.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase()}-search-report.pdf`
