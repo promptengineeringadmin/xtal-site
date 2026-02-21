@@ -43,6 +43,7 @@ export default function TrySearch({ collection, suggestions, initialQuery, initi
     clearAllFilters,
     explain,
     reportIrrelevant,
+    reportWellPut,
   } = useXtalSearch(collection, initialQuery, initialSearchData, defaultResultsPerPage)
 
   const [filtersOpen, setFiltersOpen] = useState(false)
@@ -247,6 +248,7 @@ export default function TrySearch({ collection, suggestions, initialQuery, initi
           query={query}
           onExplain={explain}
           onReportIrrelevant={reportIrrelevant}
+          onWellPut={reportWellPut}
           wideLayout={!showFilters}
         />
       </div>

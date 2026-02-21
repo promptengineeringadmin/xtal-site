@@ -29,12 +29,21 @@ export async function POST(request: Request) {
       product_price: body.product_price ?? 0,
       product_image_url: body.product_image_url || null,
       relevance_score: body.score ?? null,
+      prompt_hash: body.prompt_hash || null,
     }).catch((err) => console.error("Search quality log error:", err))
 
     const res = await fetch(`${backendUrl}/api/feedback/relevance`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...body, collection }),
+      body: JSON.stringify({
+        query: body.query,
+        collection,
+        product_id: body.product_id,
+        action: body.action,
+        score: body.score,
+        ...(body.prompt_hash && { prompt_hash: body.prompt_hash }),
+      }),
+      signal: AbortSignal.timeout(3000),
     })
 
     const data = await res.json()

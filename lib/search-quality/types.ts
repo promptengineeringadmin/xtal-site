@@ -12,5 +12,6 @@ export interface SearchQualityEntry {
   product_price: number | number[]
   product_image_url: string | null
   relevance_score: number | null
+  prompt_hash: string | null
   note: string | null
 }
