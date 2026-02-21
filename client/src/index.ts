@@ -15,7 +15,7 @@ function boot() {
       return
     }
 
-    const shopId = scriptTag.getAttribute("data-shop-id")
+    const shopId = scriptTag.getAttribute("data-shop-id") ?? ""
     if (!shopId) {
       console.warn("[xtal.js] data-shop-id is empty")
       return
