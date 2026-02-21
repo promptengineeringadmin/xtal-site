@@ -16,7 +16,7 @@ import { formatFacetValue } from "@/lib/facet-utils"
 import type { PriceRange, SearchResponse, ShowcaseRow } from "@/lib/xtal-types"
 import { useOnboardingState } from "@/lib/use-onboarding-state"
 
-export default function TrySearch({ collection, suggestions, initialQuery, initialSearchData, defaultResultsPerPage, showcaseData }: { collection?: string; suggestions?: string[]; initialQuery?: string; initialSearchData?: SearchResponse | null; defaultResultsPerPage?: number; showcaseData?: ShowcaseRow[] | null } = {}) {
+export default function TrySearch({ collection, suggestions, extraSuggestions, initialQuery, initialSearchData, defaultResultsPerPage, showcaseData }: { collection?: string; suggestions?: string[]; extraSuggestions?: string[]; initialQuery?: string; initialSearchData?: SearchResponse | null; defaultResultsPerPage?: number; showcaseData?: ShowcaseRow[] | null } = {}) {
   const {
     query,
     sortedResults,
@@ -112,7 +112,7 @@ export default function TrySearch({ collection, suggestions, initialQuery, initi
 
       {/* Cold start: showcase rows or fallback chips */}
       {showColdStart && (
-        <ColdStartPanel showcaseData={showcaseData ?? null} onSearch={handleSearch} suggestions={suggestions} />
+        <ColdStartPanel showcaseData={showcaseData ?? null} onSearch={handleSearch} suggestions={suggestions} extraSuggestions={extraSuggestions} />
       )}
 
       {/* Error */}

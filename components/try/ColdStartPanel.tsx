@@ -19,14 +19,10 @@ interface ColdStartPanelProps {
   showcaseData: ShowcaseRow[] | null
   onSearch: (query: string, previewProducts?: Product[]) => void
   suggestions?: string[]
+  extraSuggestions?: string[]
 }
 
-const EXTRA_SUGGESTIONS = [
-  "dainty jewelry for everyday wear",
-  "setting up a home cocktail bar",
-]
-
-export default function ColdStartPanel({ showcaseData, onSearch, suggestions }: ColdStartPanelProps) {
+export default function ColdStartPanel({ showcaseData, onSearch, suggestions, extraSuggestions = [] }: ColdStartPanelProps) {
   const hasShowcase = showcaseData && showcaseData.length > 0
 
   return (
@@ -46,9 +42,9 @@ export default function ColdStartPanel({ showcaseData, onSearch, suggestions }: 
           </div>
 
           {/* "More to try:" extra chips */}
-          <div className="mt-5 flex items-center gap-2 flex-wrap">
+          {extraSuggestions.length > 0 && <div className="mt-5 flex items-center gap-2 flex-wrap">
             <span className="text-xs text-slate-400">More to try:</span>
-            {EXTRA_SUGGESTIONS.map((s) => (
+            {extraSuggestions.map((s) => (
               <button
                 key={s}
                 onClick={() => onSearch(s)}
@@ -58,7 +54,7 @@ export default function ColdStartPanel({ showcaseData, onSearch, suggestions }: 
                 {s}
               </button>
             ))}
-          </div>
+          </div>}
         </>
       ) : (
         /* Fallback: flat query chips (no showcase data) */
@@ -67,7 +63,8 @@ export default function ColdStartPanel({ showcaseData, onSearch, suggestions }: 
             "cozy gift for someone who is always cold",
             "hosting a dinner party this weekend",
             "make my bathroom feel like a spa",
-            ...EXTRA_SUGGESTIONS,
+            "dainty jewelry for everyday wear",
+            "setting up a home cocktail bar",
           ]).map((s) => (
             <button
               key={s}

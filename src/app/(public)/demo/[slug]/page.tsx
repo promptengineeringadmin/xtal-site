@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar"
 import TrySearch from "@/components/try/TrySearch"
 import { serverSearch } from "@/lib/server-search"
 import { getResultsPerPage } from "@/lib/admin/admin-settings"
+import { getShowcaseQueries, getExtraSuggestions, fetchShowcaseData } from "@/lib/showcase"
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -34,11 +35,26 @@ export default async function DemoPage({ params, searchParams }: Props) {
   const resultsPerPage = await getResultsPerPage(slug)
   const initialSearchData = q ? await serverSearch(q, slug, resultsPerPage) : null
 
+  let showcaseData = null
+  if (!q) {
+    const queries = getShowcaseQueries(slug, demo.suggestions)
+    if (queries) showcaseData = await fetchShowcaseData(queries, slug)
+  }
+  const extraSuggestions = getExtraSuggestions(slug, demo.suggestions)
+
   return (
     <>
       <Navbar />
       <main className="pt-20 min-h-screen bg-[#FCFDFF]">
-        <TrySearch collection={slug} suggestions={demo.suggestions} initialQuery={q} initialSearchData={initialSearchData} defaultResultsPerPage={resultsPerPage} />
+        <TrySearch
+          collection={slug}
+          suggestions={demo.suggestions}
+          initialQuery={q}
+          initialSearchData={initialSearchData}
+          defaultResultsPerPage={resultsPerPage}
+          showcaseData={showcaseData}
+          extraSuggestions={extraSuggestions}
+        />
       </main>
     </>
   )

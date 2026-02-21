@@ -4,6 +4,7 @@ import TrySearch from "@/components/try/TrySearch"
 import BudtenderTrigger from "@/components/try/BudtenderTrigger"
 import { serverSearch } from "@/lib/server-search"
 import { getResultsPerPage } from "@/lib/admin/admin-settings"
+import { getShowcaseQueries, getExtraSuggestions, fetchShowcaseData } from "@/lib/showcase"
 
 export const metadata: Metadata = {
   title: "Gold Canna | XTAL AI Search Demo",
@@ -24,6 +25,13 @@ export default async function GoldCannaPage({ searchParams }: { searchParams: Pr
   const resultsPerPage = await getResultsPerPage("goldcanna")
   const initialSearchData = q ? await serverSearch(q, "goldcanna", resultsPerPage) : null
 
+  let showcaseData = null
+  if (!q) {
+    const queries = getShowcaseQueries("goldcanna")
+    if (queries) showcaseData = await fetchShowcaseData(queries, "goldcanna")
+  }
+  const extraSuggestions = getExtraSuggestions("goldcanna")
+
   return (
     <>
       <Navbar />
@@ -34,6 +42,8 @@ export default async function GoldCannaPage({ searchParams }: { searchParams: Pr
           initialQuery={q}
           initialSearchData={initialSearchData}
           defaultResultsPerPage={resultsPerPage}
+          showcaseData={showcaseData}
+          extraSuggestions={extraSuggestions}
         />
         <BudtenderTrigger collection="goldcanna" />
       </main>
