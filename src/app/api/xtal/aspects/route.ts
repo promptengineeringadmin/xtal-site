@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server"
 import { getAspectsPrompt, DEFAULT_ASPECTS_SYSTEM_PROMPT } from "@/lib/admin/aspects-prompt"
 import { getStoreType, getAspectsEnabled } from "@/lib/admin/admin-settings"
+import { corsHeaders, handleOptions } from "@/lib/api/cors"
+import { COLLECTIONS } from "@/lib/admin/collections"
+
+export async function OPTIONS() {
+  return handleOptions()
+}
 
 export async function POST(request: Request) {
   try {
@@ -9,7 +15,17 @@ export async function POST(request: Request) {
     const collection = body.collection || process.env.XTAL_COLLECTION
 
     if (!backendUrl) {
-      return NextResponse.json({ error: "XTAL_BACKEND_URL not configured" }, { status: 500 })
+      return NextResponse.json(
+        { error: "XTAL_BACKEND_URL not configured" },
+        { status: 500, headers: corsHeaders() }
+      )
+    }
+
+    if (!COLLECTIONS.some((c) => c.id === collection)) {
+      return NextResponse.json(
+        { error: "Invalid collection" },
+        { status: 400, headers: corsHeaders() }
+      )
     }
 
     // Fetch aspects prompt, store type, and enabled flag from Redis
@@ -37,16 +53,26 @@ export async function POST(request: Request) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(5000),
     })
     const backendMs = Date.now() - t1
 
     const data = await res.json()
     return NextResponse.json({ ...data, aspects_enabled: aspectsEnabled }, {
       status: res.status,
-      headers: { "Server-Timing": `redis;dur=${redisMs}, backend;dur=${backendMs}` },
+      headers: { ...corsHeaders(), "Server-Timing": `redis;dur=${redisMs}, backend;dur=${backendMs}` },
     })
-  } catch (error) {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.name === "TimeoutError") {
+      return NextResponse.json(
+        { error: "Backend timeout" },
+        { status: 504, headers: corsHeaders() }
+      )
+    }
     console.error("Aspects proxy error:", error)
-    return NextResponse.json({ error: "Aspects failed" }, { status: 502 })
+    return NextResponse.json(
+      { error: "Aspects failed" },
+      { status: 502, headers: corsHeaders() }
+    )
   }
 }

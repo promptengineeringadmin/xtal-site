@@ -1,4 +1,10 @@
 import { NextResponse } from "next/server"
+import { corsHeaders, handleOptions } from "@/lib/api/cors"
+import { COLLECTIONS } from "@/lib/admin/collections"
+
+export async function OPTIONS() {
+  return handleOptions()
+}
 
 export async function POST(request: Request) {
   try {
@@ -7,7 +13,17 @@ export async function POST(request: Request) {
     const collection = body.collection || process.env.XTAL_COLLECTION
 
     if (!backendUrl) {
-      return NextResponse.json({ error: "XTAL_BACKEND_URL not configured" }, { status: 500 })
+      return NextResponse.json(
+        { error: "XTAL_BACKEND_URL not configured" },
+        { status: 500, headers: corsHeaders() }
+      )
+    }
+
+    if (!COLLECTIONS.some((c) => c.id === collection)) {
+      return NextResponse.json(
+        { error: "Invalid collection" },
+        { status: 400, headers: corsHeaders() }
+      )
     }
 
     // Extract geo headers from Vercel
@@ -26,16 +42,26 @@ export async function POST(request: Request) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(enrichedBody),
+      signal: AbortSignal.timeout(8000),
     })
     const backendMs = Date.now() - t0
 
     const data = await res.json()
     return NextResponse.json(data, {
       status: res.status,
-      headers: { "Server-Timing": `backend;dur=${backendMs}` },
+      headers: { ...corsHeaders(), "Server-Timing": `backend;dur=${backendMs}` },
     })
-  } catch (error) {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.name === "TimeoutError") {
+      return NextResponse.json(
+        { error: "Backend timeout" },
+        { status: 504, headers: corsHeaders() }
+      )
+    }
     console.error("Search proxy error:", error)
-    return NextResponse.json({ error: "Search failed" }, { status: 502 })
+    return NextResponse.json(
+      { error: "Search failed" },
+      { status: 502, headers: corsHeaders() }
+    )
   }
 }
