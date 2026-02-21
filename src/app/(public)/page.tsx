@@ -26,14 +26,14 @@ export default function Home() {
               AI-Native Discovery
             </div>
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-[1.1] tracking-tight">
-              Your customers know what they want. <span className="text-blue-400">Today's search bars don't.</span>
+              Your customers know what they want.<span className="text-blue-400">Today's search bars don't.</span>
             </h1>
             <p className="text-lg md:text-xl text-slate-300 mb-10 leading-relaxed max-w-xl">
               XTAL is AI-powered search that actually understands intent, so customers buy instead of bounce. No engineering required.
             </p>
             <div className="flex flex-wrap gap-4">
               <a href="#demo" className="px-8 py-4 bg-white text-xtal-navy font-bold rounded-xl shadow-2xl hover:bg-slate-100 transition-all">
-                See It Work
+                See it work
               </a>
               <a href="#difference" className="px-8 py-4 bg-transparent border border-white/20 text-white font-bold rounded-xl hover:bg-white/5 transition-all">
                 The XTAL Difference
