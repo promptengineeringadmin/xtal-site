@@ -40,6 +40,27 @@ export async function POST(request: Request) {
       prompt_hash = "default"
     }
 
+    // Inject date context so the model can reason about seasonality
+    if (system_prompt) {
+      const now = new Date()
+      const dateStr = now.toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      })
+      const month = now.getMonth()
+      const season =
+        month <= 1 || month === 11
+          ? "winter"
+          : month <= 4
+            ? "spring"
+            : month <= 7
+              ? "summer"
+              : "fall"
+      system_prompt = `Today is ${dateStr} (${season}). If this product is seasonal, consider whether it fits this time of year.\n\n${system_prompt}`
+    }
+
     const res = await fetch(`${backendUrl}/api/explain`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
