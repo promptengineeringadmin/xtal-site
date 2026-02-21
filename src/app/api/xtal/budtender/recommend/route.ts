@@ -84,15 +84,21 @@ export async function POST(request: Request) {
       }
     }
     if (terpenes?.length)
-      resolvedFilters.terpene = [...new Set([...(resolvedFilters.terpene || []), ...terpenes])]
+      resolvedFilters.terpene = Array.from(
+        new Set((resolvedFilters.terpene || []).concat(terpenes))
+      )
     if (strains?.length)
-      resolvedFilters["strain-type"] = [
-        ...new Set([...(resolvedFilters["strain-type"] || []), ...strains]),
-      ]
+      resolvedFilters["strain-type"] = Array.from(
+        new Set((resolvedFilters["strain-type"] || []).concat(strains))
+      )
     if (effects?.length)
-      resolvedFilters.effect = [...new Set([...(resolvedFilters.effect || []), ...effects])]
+      resolvedFilters.effect = Array.from(
+        new Set((resolvedFilters.effect || []).concat(effects))
+      )
     if (formats?.length)
-      resolvedFilters.format = [...new Set([...(resolvedFilters.format || []), ...formats])]
+      resolvedFilters.format = Array.from(
+        new Set((resolvedFilters.format || []).concat(formats))
+      )
 
     const resolvedQuery =
       query || vibeProfile?.query || synthesizeQuery({ terpenes, strains, effects, formats })
