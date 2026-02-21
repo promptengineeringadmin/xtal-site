@@ -10,6 +10,7 @@ import {
   Gauge,
   Flag,
   Settings,
+  KeyRound,
   ChevronDown,
   Menu,
   X,
@@ -23,6 +24,7 @@ const NAV_ITEMS = [
   { href: "/admin/demos", label: "Demos", icon: Boxes },
   { href: "/admin/grader", label: "Grader", icon: Gauge },
   { href: "/admin/search-quality", label: "Search Quality", icon: Flag },
+  { href: "/admin/api-keys", label: "API Keys", icon: KeyRound },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ]
 

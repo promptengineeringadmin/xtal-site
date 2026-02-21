@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import { corsHeaders, handleOptions } from "@/lib/api/cors"
 import { VIBE_MAP, VALID_VIBES, synthesizeQuery } from "@/lib/budtender/vibes"
 import { buildBudtenderPrompt } from "@/lib/budtender/prompt"
+import { validateApiKey } from "@/lib/api/api-key-auth"
+import { trackBudtenderUsage } from "@/lib/api/budtender-usage"
 
 export async function OPTIONS() {
   return handleOptions()
@@ -42,6 +44,15 @@ async function doSearch(
 export async function POST(request: Request) {
   const t0 = Date.now()
 
+  // --- API key auth ---
+  const auth = await validateApiKey(request)
+  if (!auth.valid) {
+    return NextResponse.json(
+      { error: "Missing or invalid API key. Pass a valid X-API-Key header." },
+      { status: 401, headers: corsHeaders() }
+    )
+  }
+
   try {
     const body = await request.json()
     const backendUrl = process.env.XTAL_BACKEND_URL
@@ -55,6 +66,7 @@ export async function POST(request: Request) {
 
     // --- Validate inputs ---
     const { terpenes, strains, effects, formats, query, vibe, price_range } = body
+    const includeReasoning = body.include_reasoning === true
     const limit = Math.min(5, Math.max(1, body.limit ?? 3))
 
     if (vibe && !VALID_VIBES.includes(vibe)) {
@@ -151,45 +163,63 @@ export async function POST(request: Request) {
       )
     }
 
-    // --- Generate AI reasoning in parallel ---
-    const systemPrompt = buildBudtenderPrompt()
+    // --- Generate AI reasoning in parallel (only if requested) ---
+    let explainResults: PromiseSettledResult<{ explanation?: string }>[] | null = null
 
-    const explainResults = await Promise.allSettled(
-      topProducts.map((product) =>
-        fetch(`${backendUrl}/api/explain`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            query: resolvedQuery,
-            collection,
-            product_id: product.id,
-            score: searchData.relevance_scores?.[product.id],
-            system_prompt: systemPrompt,
-          }),
-          signal: AbortSignal.timeout(5000),
-        }).then((r) => r.json())
+    if (includeReasoning) {
+      const systemPrompt = buildBudtenderPrompt()
+      explainResults = await Promise.allSettled(
+        topProducts.map((product) =>
+          fetch(`${backendUrl}/api/explain`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              query: resolvedQuery,
+              collection,
+              product_id: product.id,
+              score: searchData.relevance_scores?.[product.id],
+              system_prompt: systemPrompt,
+            }),
+            signal: AbortSignal.timeout(5000),
+          }).then((r) => r.json())
+        )
       )
-    )
+    }
 
     // --- Assemble picks ---
-    const picks = topProducts.map((product, i) => ({
-      product: {
-        id: product.id,
-        title: product.title,
-        price: product.price,
-        vendor: product.vendor,
-        product_type: product.product_type,
-        image_url: product.image_url || product.images?.[0]?.src || null,
-        product_url: product.product_url,
-        tags: product.tags,
-        available: product.available,
-      },
-      reasoning:
-        explainResults[i].status === "fulfilled"
-          ? explainResults[i].value.explanation || "This product matches your preferences."
-          : "This product matches your preferences.",
-      relevance_score: searchData.relevance_scores?.[product.id] ?? 0,
-    }))
+    const picks = topProducts.map((product, i) => {
+      let reasoning: string | null = null
+      if (includeReasoning && explainResults) {
+        const result = explainResults[i]
+        reasoning =
+          result.status === "fulfilled"
+            ? result.value.explanation || "This product matches your preferences."
+            : "This product matches your preferences."
+      }
+
+      return {
+        product: {
+          id: product.id,
+          title: product.title,
+          price: product.price,
+          vendor: product.vendor,
+          product_type: product.product_type,
+          image_url: product.image_url || product.images?.[0]?.src || null,
+          product_url: product.product_url,
+          tags: product.tags,
+          available: product.available,
+        },
+        reasoning,
+        relevance_score: searchData.relevance_scores?.[product.id] ?? 0,
+      }
+    })
+
+    // Fire-and-forget: track usage for billing
+    trackBudtenderUsage(auth.client, {
+      endpoint: "/api/xtal/budtender/recommend",
+      status: 200,
+      latency_ms: Date.now() - t0,
+    })
 
     return NextResponse.json(
       {
