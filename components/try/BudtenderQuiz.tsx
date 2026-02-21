@@ -165,7 +165,7 @@ function quizReducer(state: QuizState, action: QuizAction): QuizState {
       }
 
     case "RESET":
-      return { ...INITIAL_STATE, visitedExpSteps: new Set() }
+      return { ...INITIAL_STATE, visitedExpSteps: new Set<string>() }
 
     default:
       return state

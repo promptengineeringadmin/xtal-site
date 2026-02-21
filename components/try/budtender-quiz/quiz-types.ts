@@ -82,7 +82,7 @@ export const INITIAL_STATE: QuizState = {
   currentStep: "intro",
   answers: {},
   history: [],
-  visitedExpSteps: new Set(),
+  visitedExpSteps: new Set<string>(),
   selectedKey: null,
   selectedValue: null,
   selectedNext: null,
