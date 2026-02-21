@@ -34,10 +34,9 @@ export async function GET(
     try {
       const page = await browser.newPage()
 
-      // Build the URL for the shared report page
-      const baseUrl = process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+      // Use the public production domain — NOT VERCEL_URL, which resolves to a
+      // deployment-specific URL behind Vercel's auth protection.
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://xtalsearch.com"
 
       await page.goto(`${baseUrl}/grade/${id}`, {
         waitUntil: "networkidle",
