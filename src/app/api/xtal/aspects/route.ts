@@ -1,11 +1,6 @@
 import { NextResponse } from "next/server"
 import { getAspectsPrompt, DEFAULT_ASPECTS_SYSTEM_PROMPT } from "@/lib/admin/aspects-prompt"
 import { getStoreType, getAspectsEnabled } from "@/lib/admin/admin-settings"
-import { corsHeaders, handleOptions } from "@/lib/api/cors"
-
-export async function OPTIONS() {
-  return handleOptions()
-}
 
 export async function POST(request: Request) {
   try {
@@ -48,10 +43,10 @@ export async function POST(request: Request) {
     const data = await res.json()
     return NextResponse.json({ ...data, aspects_enabled: aspectsEnabled }, {
       status: res.status,
-      headers: { ...corsHeaders(), "Server-Timing": `redis;dur=${redisMs}, backend;dur=${backendMs}` },
+      headers: { "Server-Timing": `redis;dur=${redisMs}, backend;dur=${backendMs}` },
     })
   } catch (error) {
     console.error("Aspects proxy error:", error)
-    return NextResponse.json({ error: "Aspects failed" }, { status: 502, headers: corsHeaders() })
+    return NextResponse.json({ error: "Aspects failed" }, { status: 502 })
   }
 }

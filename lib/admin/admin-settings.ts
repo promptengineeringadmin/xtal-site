@@ -36,24 +36,6 @@ function aspectsEnabledKey(collection: string) {
 function resultsPerPageKey(collection: string) {
   return `admin:settings:${collection}:results_per_page`
 }
-function snippetEnabledKey(collection: string) {
-  return `admin:settings:${collection}:snippet_enabled`
-}
-function snippetSiteUrlKey(collection: string) {
-  return `admin:settings:${collection}:snippet_site_url`
-}
-function snippetSearchSelectorKey(collection: string) {
-  return `admin:settings:${collection}:snippet_search_selector`
-}
-function snippetResultsSelectorKey(collection: string) {
-  return `admin:settings:${collection}:snippet_results_selector`
-}
-function snippetDisplayModeKey(collection: string) {
-  return `admin:settings:${collection}:snippet_display_mode`
-}
-function snippetStyleConfigKey(collection: string) {
-  return `admin:settings:${collection}:snippet_style_config`
-}
 
 // ─── Query Enhancement ─────────────────────────────────────
 
@@ -197,61 +179,4 @@ export async function saveResultsPerPage(
 ): Promise<void> {
   const kv = getRedis()
   await kv.set(resultsPerPageKey(collection), value)
-}
-
-// ─── Snippet Settings ────────────────────────────────────
-
-export interface SnippetSettings {
-  enabled: boolean
-  siteUrl: string
-  searchSelector: string
-  resultsSelector: string
-  displayMode: string
-  styleConfig: string
-}
-
-export async function getSnippetSettings(collection: string): Promise<SnippetSettings> {
-  try {
-    const kv = getRedis()
-    const [enabled, siteUrl, searchSelector, resultsSelector, displayMode, styleConfig] = await Promise.all([
-      kv.get<boolean>(snippetEnabledKey(collection)),
-      kv.get<string>(snippetSiteUrlKey(collection)),
-      kv.get<string>(snippetSearchSelectorKey(collection)),
-      kv.get<string>(snippetResultsSelectorKey(collection)),
-      kv.get<string>(snippetDisplayModeKey(collection)),
-      kv.get<string>(snippetStyleConfigKey(collection)),
-    ])
-    return {
-      enabled: enabled ?? false,
-      siteUrl: siteUrl ?? "",
-      searchSelector: searchSelector ?? 'input[type="search"]',
-      resultsSelector: resultsSelector ?? "",
-      displayMode: displayMode ?? "overlay",
-      styleConfig: styleConfig ?? "{}",
-    }
-  } catch {
-    return {
-      enabled: false,
-      siteUrl: "",
-      searchSelector: 'input[type="search"]',
-      resultsSelector: "",
-      displayMode: "overlay",
-      styleConfig: "{}",
-    }
-  }
-}
-
-export async function saveSnippetSettings(
-  collection: string,
-  settings: Partial<SnippetSettings>
-): Promise<void> {
-  const kv = getRedis()
-  const ops: Promise<unknown>[] = []
-  if (settings.enabled !== undefined) ops.push(kv.set(snippetEnabledKey(collection), settings.enabled))
-  if (settings.siteUrl !== undefined) ops.push(kv.set(snippetSiteUrlKey(collection), settings.siteUrl))
-  if (settings.searchSelector !== undefined) ops.push(kv.set(snippetSearchSelectorKey(collection), settings.searchSelector))
-  if (settings.resultsSelector !== undefined) ops.push(kv.set(snippetResultsSelectorKey(collection), settings.resultsSelector))
-  if (settings.displayMode !== undefined) ops.push(kv.set(snippetDisplayModeKey(collection), settings.displayMode))
-  if (settings.styleConfig !== undefined) ops.push(kv.set(snippetStyleConfigKey(collection), settings.styleConfig))
-  await Promise.all(ops)
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect, useRef } from "react"
+import { useState, useMemo } from "react"
 import { useXtalSearch } from "@/lib/use-xtal-search"
 import { SlidersHorizontal } from "lucide-react"
 import SearchBar from "./SearchBar"
@@ -14,7 +14,7 @@ import { ChevronDown, ChevronUp } from "lucide-react"
 import { formatFacetValue } from "@/lib/facet-utils"
 import type { PriceRange, SearchResponse } from "@/lib/xtal-types"
 
-export default function TrySearch({ collection, suggestions, storeType, initialQuery, initialSearchData, defaultResultsPerPage }: { collection?: string; suggestions?: string[]; storeType?: string; initialQuery?: string; initialSearchData?: SearchResponse | null; defaultResultsPerPage?: number } = {}) {
+export default function TrySearch({ collection, suggestions, initialQuery, initialSearchData, defaultResultsPerPage }: { collection?: string; suggestions?: string[]; initialQuery?: string; initialSearchData?: SearchResponse | null; defaultResultsPerPage?: number } = {}) {
   const {
     query,
     sortedResults,
@@ -47,11 +47,6 @@ export default function TrySearch({ collection, suggestions, storeType, initialQ
 
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
-  const hasSearchedRef = useRef(false)
-  const isFirstSearch = !hasSearchedRef.current
-  useEffect(() => {
-    if (query) hasSearchedRef.current = true
-  }, [query])
 
   const hasActiveFilters = Object.values(activeFacetFilters).some(v => v.length > 0) ||
     (priceRange != null && (priceRange.min !== null || priceRange.max !== null))
@@ -250,11 +245,6 @@ export default function TrySearch({ collection, suggestions, storeType, initialQ
           isSearching={isSearching}
           isFiltering={isFiltering}
           query={query}
-          collection={collection}
-          storeType={storeType}
-          suggestions={suggestions}
-          onSearch={search}
-          isFirstSearch={isFirstSearch}
           onExplain={explain}
           onReportIrrelevant={reportIrrelevant}
           wideLayout={!showFilters}

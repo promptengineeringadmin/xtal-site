@@ -3,7 +3,7 @@ import { getAllCollections } from "@/lib/admin/demo-collections"
 import Navbar from "@/components/Navbar"
 import TrySearch from "@/components/try/TrySearch"
 import { serverSearch } from "@/lib/server-search"
-import { getResultsPerPage, getStoreType } from "@/lib/admin/admin-settings"
+import { getResultsPerPage } from "@/lib/admin/admin-settings"
 
 export const metadata: Metadata = {
   title: "Willow Home Goods | XTAL AI Search Demo",
@@ -12,11 +12,10 @@ export const metadata: Metadata = {
 }
 
 export default async function WillowPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
-  const [{ q }, collections, resultsPerPage, storeType] = await Promise.all([
+  const [{ q }, collections, resultsPerPage] = await Promise.all([
     searchParams,
     getAllCollections(),
     getResultsPerPage("willow"),
-    getStoreType("willow"),
   ])
   const willow = collections.find((c) => c.id === "willow")
   const initialSearchData = q ? await serverSearch(q, "willow", resultsPerPage) : null
@@ -25,7 +24,7 @@ export default async function WillowPage({ searchParams }: { searchParams: Promi
     <>
       <Navbar />
       <main className="pt-20 min-h-screen bg-[#FCFDFF]">
-        <TrySearch collection="willow" suggestions={willow?.suggestions} initialQuery={q} initialSearchData={initialSearchData} defaultResultsPerPage={resultsPerPage} storeType={storeType} />
+        <TrySearch collection="willow" suggestions={willow?.suggestions} initialQuery={q} initialSearchData={initialSearchData} defaultResultsPerPage={resultsPerPage} />
       </main>
     </>
   )

@@ -1,9 +1,4 @@
 import { NextResponse } from "next/server"
-import { corsHeaders, handleOptions } from "@/lib/api/cors"
-
-export async function OPTIONS() {
-  return handleOptions()
-}
 
 export async function POST(request: Request) {
   try {
@@ -37,10 +32,10 @@ export async function POST(request: Request) {
     const data = await res.json()
     return NextResponse.json(data, {
       status: res.status,
-      headers: { ...corsHeaders(), "Server-Timing": `backend;dur=${backendMs}` },
+      headers: { "Server-Timing": `backend;dur=${backendMs}` },
     })
   } catch (error) {
     console.error("Search proxy error:", error)
-    return NextResponse.json({ error: "Search failed" }, { status: 502, headers: corsHeaders() })
+    return NextResponse.json({ error: "Search failed" }, { status: 502 })
   }
 }

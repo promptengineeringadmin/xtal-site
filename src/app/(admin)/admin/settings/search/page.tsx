@@ -5,15 +5,7 @@ import PromptEditor from "@/components/admin/PromptEditor"
 import SubPageHeader from "@/components/admin/SubPageHeader"
 import { useCollection } from "@/lib/admin/CollectionContext"
 import type { PromptDefaults } from "@/lib/admin/types"
-import type { OptimizationResult, ProductResult, TestQuery } from "@/lib/xtal-types"
-import {
-  generateCandidateConfigs,
-  executeSearches,
-  buildSearchTasks,
-  buildOptimizationResult,
-  resultsAreIdentical,
-} from "@/lib/admin/optimizer"
-import type { ScoringAggregation } from "@/lib/admin/optimizer"
+import type { OptimizationResult, ProductResult } from "@/lib/xtal-types"
 import { ChevronDown, ChevronRight, Check, X } from "lucide-react"
 
 interface HistoryEntry {
@@ -76,10 +68,6 @@ export default function SearchTuningPage() {
   const [historyLoading, setHistoryLoading] = useState(false)
   const [expandedHistoryRow, setExpandedHistoryRow] = useState<string | null>(null)
   const [resultsPerPageSaving, setResultsPerPageSaving] = useState(false)
-  const [coldStart, setColdStart] = useState(false)
-  const [optimizeProgress, setOptimizeProgress] = useState({ completed: 0, total: 0 })
-  const [optimizeStageLabel, setOptimizeStageLabel] = useState("")
-  const optimizeAbortRef = useRef<AbortController | null>(null)
   const storeTypeDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const rerankDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const bm25DebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -98,10 +86,6 @@ export default function SearchTuningPage() {
     setResultsPerPage(48)
     setAspectsPrompt("")
     setAspectsHistory([])
-    setColdStart(false)
-    setOptimizeProgress({ completed: 0, total: 0 })
-    setOptimizeStageLabel("")
-    optimizeAbortRef.current?.abort()
 
     setLoading(true)
     async function load() {
@@ -448,162 +432,61 @@ export default function SearchTuningPage() {
     setOptimizing(true)
     setOptimizeError(null)
     setOptimizationResult(null)
-    setOptimizeStage("generating_queries")
-    setOptimizeStageLabel("Generating test queries with AI...")
+    setOptimizeStage("starting")
     setOptimizeElapsed(0)
-    setOptimizeProgress({ completed: 0, total: 0 })
-
-    const startTime = Date.now()
-    const elapsedInterval = setInterval(() => {
-      setOptimizeElapsed((Date.now() - startTime) / 1000)
-    }, 500)
-
-    const abortController = new AbortController()
-    optimizeAbortRef.current = abortController
-
     try {
-      // 1. Generate test queries via Claude
-      const queriesRes = await fetch("/api/admin/settings/optimize/queries", {
+      const cp = `?collection=${encodeURIComponent(collection)}`
+
+      // 1. Start the async job
+      const startRes = await fetch(`/api/admin/settings/optimize${cp}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          collection,
-          store_type: storeType,
-          cold_start: coldStart,
-        }),
-        signal: abortController.signal,
+        body: JSON.stringify({ optimization_target: "accuracy", num_queries: 12 }),
       })
-
-      if (!queriesRes.ok) {
-        const data = await queriesRes.json().catch(() => ({ error: "Query generation failed" }))
-        throw new Error(data.error || "Failed to generate test queries")
+      if (!startRes.ok) {
+        const data = await startRes.json().catch(() => ({ error: `Error ${startRes.status}` }))
+        throw new Error(data.error || `Failed to start optimization (${startRes.status})`)
       }
+      const { job_id } = await startRes.json()
 
-      const { persona, queries } = (await queriesRes.json()) as {
-        persona: { name: string; context: string }
-        queries: TestQuery[]
-      }
+      // 2. Poll for progress
+      let consecutiveFailures = 0
+      while (true) {
+        await new Promise((r) => setTimeout(r, 2000))
 
-      if (abortController.signal.aborted) return
-
-      // 2. Generate candidate configs locally
-      setOptimizeStage("generating_configs")
-      setOptimizeStageLabel("Generating candidate configurations...")
-
-      const currentConfig = {
-        query_enhancement_enabled: queryEnhancementEnabled,
-        merch_rerank_strength: merchRerank,
-        bm25_weight: bm25Weight,
-        keyword_rerank_strength: keywordRerank,
-      }
-      const configs = generateCandidateConfigs(currentConfig)
-
-      // 3. Execute searches
-      setOptimizeStage("executing_searches")
-      const tasks = buildSearchTasks(configs, queries)
-      setOptimizeProgress({ completed: 0, total: tasks.length })
-      setOptimizeStageLabel(
-        `Testing ${configs.length} configs across ${queries.length} queries (${tasks.length} searches)...`
-      )
-
-      const searchResults = await executeSearches(
-        tasks,
-        collection,
-        2,
-        (completed, total) => setOptimizeProgress({ completed, total }),
-        abortController.signal,
-      )
-
-      if (abortController.signal.aborted) return
-
-      // 4. Evaluate results
-      setOptimizeStage("evaluating_results")
-      setOptimizeStageLabel("AI is evaluating search results...")
-
-      let scoring: ScoringAggregation
-      let reasoning: string
-
-      if (resultsAreIdentical(searchResults, configs.length)) {
-        // All configs returned same results — skip Claude evaluation
-        scoring = {
-          config_scores: Object.fromEntries(configs.map((c) => [c.index, 5])),
-          per_query: queries.map((q) => ({
-            query: q.query,
-            query_type: q.type,
-            scores: configs.map((c) => ({ config: c.index, score: 5, rationale: "" })),
-            notable: "All configurations returned identical results.",
-            skipped: true,
-          })),
-          winner_index: 0,
-          runner_up_index: configs.length > 1 ? 1 : 0,
-        }
-        reasoning =
-          "All search configurations returned identical results. This means the backend is not yet reading per-request config overrides. Your current settings are the effective configuration."
-      } else {
-        const evalRes = await fetch("/api/admin/settings/optimize/evaluate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            persona,
-            queries,
-            configs,
-            searchResults,
-            storeType,
-          }),
-          signal: abortController.signal,
-        })
-
-        if (!evalRes.ok) {
-          const data = await evalRes.json().catch(() => ({ error: "Evaluation failed" }))
-          throw new Error(data.error || "Failed to evaluate search results")
+        const pollRes = await fetch(
+          `/api/admin/settings/optimize?job_id=${encodeURIComponent(job_id)}`
+        )
+        if (!pollRes.ok) {
+          consecutiveFailures++
+          if (consecutiveFailures >= 3) {
+            const data = await pollRes.json().catch(() => ({ error: `Poll error ${pollRes.status}` }))
+            throw new Error(data.error || `Polling failed after ${consecutiveFailures} retries (${pollRes.status})`)
+          }
+          continue
         }
 
-        const evalData = await evalRes.json()
-        scoring = evalData.aggregation
-        reasoning = evalData.reasoning
+        consecutiveFailures = 0
+        const job = await pollRes.json()
+        setOptimizeStage(job.stage || "")
+        setOptimizeElapsed(job.elapsed || 0)
+
+        if (job.status === "completed") {
+          setOptimizationResult(job.result as OptimizationResult)
+          break
+        }
+        if (job.status === "failed") {
+          throw new Error(job.error || "Optimization failed")
+        }
       }
-
-      if (abortController.signal.aborted) return
-
-      // 5. Build result
-      const result = buildOptimizationResult(
-        configs,
-        queries,
-        searchResults,
-        scoring,
-        persona,
-        reasoning,
-        startTime,
-      )
-
-      setOptimizationResult(result)
-
-      // Persist to history (fire-and-forget)
-      fetch(
-        `/api/admin/settings/optimize?collection=${encodeURIComponent(collection)}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ optimization_target: "accuracy", result }),
-        },
-      ).catch((err) => console.warn("Failed to persist optimization history:", err))
     } catch (err) {
-      if (err instanceof DOMException && err.name === "AbortError") return
-      setOptimizeError(err instanceof Error ? err.message : "Optimization failed")
+      setOptimizeError(
+        err instanceof Error ? err.message : "Optimization failed"
+      )
     } finally {
-      clearInterval(elapsedInterval)
       setOptimizing(false)
       setOptimizeStage("")
-      setOptimizeStageLabel("")
-      optimizeAbortRef.current = null
     }
-  }
-
-  function cancelOptimization() {
-    optimizeAbortRef.current?.abort()
-    setOptimizing(false)
-    setOptimizeStage("")
-    setOptimizeStageLabel("")
   }
 
   async function applyRecommendation() {
@@ -1080,7 +963,7 @@ export default function SearchTuningPage() {
               </p>
             </div>
 
-            <div className="mt-4 flex items-center gap-4">
+            <div className="mt-4">
               <button
                 onClick={runOptimization}
                 disabled={optimizing || settingsSaving}
@@ -1109,70 +992,49 @@ export default function SearchTuningPage() {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                       />
                     </svg>
-                    Optimizing...
+                    Analyzing your catalog...
                   </span>
                 ) : (
                   "Optimize Settings"
                 )}
               </button>
-              <label className="flex items-center gap-2 text-xs text-slate-500">
-                <input
-                  type="checkbox"
-                  checked={coldStart}
-                  onChange={(e) => setColdStart(e.target.checked)}
-                  disabled={optimizing}
-                  className="rounded border-slate-300 text-xtal-navy focus:ring-xtal-navy/20"
-                />
-                Cold start
-              </label>
-            </div>
-            {optimizing && (
-              <div className="mt-3 space-y-2">
-                <div className="flex items-center gap-3 text-sm text-slate-600">
-                  <span className="font-medium">
-                    {optimizeStageLabel || "Starting optimization..."}
-                  </span>
-                  {optimizeElapsed > 0 && (
-                    <span className="text-xs text-slate-400 tabular-nums">
-                      {Math.round(optimizeElapsed)}s
+              {optimizing && (
+                <div className="mt-3 space-y-2">
+                  <div className="flex items-center gap-3 text-sm text-slate-600">
+                    <span className="font-medium">
+                      {optimizeStage === "gathering_context" && "Analyzing your catalog and recent searches..."}
+                      {optimizeStage === "proposing_configs" && "Claude is designing 30 test configurations..."}
+                      {optimizeStage === "executing_searches" && "Testing 360 search combinations across your catalog..."}
+                      {optimizeStage === "evaluating_results" && "Claude is evaluating results and picking a winner..."}
+                      {(!optimizeStage || optimizeStage === "starting") && "Connecting to optimization service..."}
                     </span>
-                  )}
-                </div>
-                <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
-                  <div
-                    className="bg-xtal-navy h-full rounded-full transition-all duration-500 ease-out"
-                    style={{
-                      width: `${Math.max(5, (
-                        optimizeStage === "generating_queries" ? 10 :
-                        optimizeStage === "generating_configs" ? 15 :
-                        optimizeStage === "executing_searches"
-                          ? 15 + (optimizeProgress.total > 0
-                              ? (optimizeProgress.completed / optimizeProgress.total) * 60
-                              : 0) :
-                        optimizeStage === "evaluating_results" ? 85 :
-                        2
-                      ))}%`
-                    }}
-                  />
-                </div>
-                {optimizeStage === "executing_searches" && optimizeProgress.total > 0 && (
-                  <p className="text-xs text-slate-400 tabular-nums">
-                    {optimizeProgress.completed} / {optimizeProgress.total} searches complete
-                  </p>
-                )}
-                <div className="flex items-center gap-3">
+                    {optimizeElapsed > 0 && (
+                      <span className="text-xs text-slate-400 tabular-nums">
+                        {Math.round(optimizeElapsed)}s
+                      </span>
+                    )}
+                  </div>
+                  <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className="bg-xtal-navy h-full rounded-full transition-all duration-1000 ease-out"
+                      style={{
+                        width: `${Math.max(5, (
+                          optimizeStage === "gathering_context" ? 5 :
+                          optimizeStage === "proposing_configs" ? 15 :
+                          optimizeStage === "executing_searches" ? 45 :
+                          optimizeStage === "evaluating_results" ? 85 :
+                          2
+                        ))}%`
+                      }}
+                    />
+                  </div>
                   <p className="text-xs text-slate-400">
-                    This typically takes 1-2 minutes.
+                    This typically takes about 5 minutes. Testing 30 configurations
+                    across 12 queries to find your optimal search settings.
                   </p>
-                  <button
-                    onClick={cancelOptimization}
-                    className="text-xs text-red-500 hover:text-red-700 underline"
-                  >
-                    Cancel
-                  </button>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
             {optimizeError && (
               <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
@@ -1274,70 +1136,6 @@ export default function SearchTuningPage() {
                     {optimizationResult.reasoning}
                   </p>
                 </div>
-
-                {/* Persona */}
-                {optimizationResult.persona && (
-                  <div className="bg-blue-50/50 rounded-lg p-4">
-                    <h4 className="text-sm font-semibold text-blue-700 mb-1">
-                      Test Persona
-                    </h4>
-                    <p className="text-sm text-slate-600">
-                      <span className="font-medium">{optimizationResult.persona.name}</span>
-                      {" — "}
-                      {optimizationResult.persona.context}
-                    </p>
-                  </div>
-                )}
-
-                {/* Per-query evaluation scores */}
-                {optimizationResult.query_evaluations && optimizationResult.query_evaluations.length > 0 && (
-                  <details className="border border-slate-200 rounded-lg">
-                    <summary className="cursor-pointer p-3 text-sm font-medium text-xtal-navy hover:bg-slate-50">
-                      Per-query scores ({optimizationResult.query_evaluations.filter((e) => !e.skipped).length} differentiated / {optimizationResult.query_evaluations.length} total)
-                    </summary>
-                    <div className="p-3 pt-0 space-y-2 max-h-80 overflow-y-auto">
-                      {optimizationResult.query_evaluations.map((ev, i) => (
-                        <div
-                          key={i}
-                          className={`text-xs p-2 rounded ${ev.skipped ? "bg-slate-50 text-slate-400" : "bg-white border border-slate-100"}`}
-                        >
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-slate-700">
-                              &ldquo;{ev.query}&rdquo;
-                            </span>
-                            <span className="text-slate-400">({ev.query_type})</span>
-                            {ev.skipped && (
-                              <span className="text-slate-300">identical</span>
-                            )}
-                          </div>
-                          {!ev.skipped && (
-                            <>
-                              <div className="flex gap-2 flex-wrap">
-                                {ev.scores.map((s) => (
-                                  <span
-                                    key={s.config}
-                                    className={`px-1.5 py-0.5 rounded text-[10px] font-mono ${
-                                      s.config === 0
-                                        ? "bg-slate-100"
-                                        : "bg-xtal-ice"
-                                    }`}
-                                  >
-                                    C{s.config}: {s.score}/10
-                                  </span>
-                                ))}
-                              </div>
-                              {ev.notable && (
-                                <p className="text-slate-500 mt-1 italic">
-                                  {ev.notable}
-                                </p>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </details>
-                )}
 
                 {/* Weirdest Results */}
                 {optimizationResult.weirdest_results && (

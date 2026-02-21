@@ -3,7 +3,7 @@ import { getAllCollections } from "@/lib/admin/demo-collections"
 import Navbar from "@/components/Navbar"
 import TrySearch from "@/components/try/TrySearch"
 import { serverSearch } from "@/lib/server-search"
-import { getResultsPerPage, getStoreType } from "@/lib/admin/admin-settings"
+import { getResultsPerPage } from "@/lib/admin/admin-settings"
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -31,17 +31,14 @@ export default async function DemoPage({ params, searchParams }: Props) {
 
   if (!demo) notFound()
 
-  const [resultsPerPage, storeType] = await Promise.all([
-    getResultsPerPage(slug),
-    getStoreType(slug),
-  ])
+  const resultsPerPage = await getResultsPerPage(slug)
   const initialSearchData = q ? await serverSearch(q, slug, resultsPerPage) : null
 
   return (
     <>
       <Navbar />
       <main className="pt-20 min-h-screen bg-[#FCFDFF]">
-        <TrySearch collection={slug} suggestions={demo.suggestions} initialQuery={q} initialSearchData={initialSearchData} defaultResultsPerPage={resultsPerPage} storeType={storeType} />
+        <TrySearch collection={slug} suggestions={demo.suggestions} initialQuery={q} initialSearchData={initialSearchData} defaultResultsPerPage={resultsPerPage} />
       </main>
     </>
   )

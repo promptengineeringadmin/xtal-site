@@ -4,7 +4,6 @@ import type { Product } from "@/lib/xtal-types"
 import ProductCard from "./ProductCard"
 import SearchLoadingSpinner from "./SearchLoadingSpinner"
 import FilterLoadingOverlay from "./FilterLoadingOverlay"
-import { LOADING_CONTENT } from "@/lib/loading-content"
 
 interface ProductGridProps {
   results: Product[]
@@ -12,11 +11,6 @@ interface ProductGridProps {
   isSearching: boolean
   isFiltering: boolean
   query: string
-  collection?: string
-  storeType?: string
-  suggestions?: string[]
-  onSearch?: (q: string) => void
-  isFirstSearch?: boolean
   onExplain: (productId: string, score?: number) => Promise<string>
   onReportIrrelevant?: (productId: string, score?: number) => void
   wideLayout?: boolean
@@ -28,25 +22,12 @@ export default function ProductGrid({
   isSearching,
   isFiltering,
   query,
-  collection,
-  storeType,
-  suggestions,
-  onSearch,
-  isFirstSearch,
   onExplain,
   onReportIrrelevant,
   wideLayout = false,
 }: ProductGridProps) {
   if (isSearching && results.length === 0) {
-    return (
-      <SearchLoadingSpinner
-        query={query}
-        storeType={storeType}
-        isFirstSearch={isFirstSearch}
-        suggestions={suggestions}
-        onSuggestionClick={onSearch}
-      />
-    )
+    return <SearchLoadingSpinner />
   }
 
   if (!isSearching && !isFiltering && results.length === 0 && query) {
@@ -59,13 +40,13 @@ export default function ProductGrid({
   }
 
   if (!query) {
-    const normalizedType = (storeType || "").toLowerCase()
-    const emptyMessage = LOADING_CONTENT.emptyStateMessages[normalizedType] || LOADING_CONTENT.emptyStateMessages.general
-
     return (
       <div className="text-center py-16">
         <p className="text-slate-700 text-base font-medium">Describe what a customer is looking for</p>
-        <p className="text-slate-400 text-sm mt-2">{emptyMessage}</p>
+        <p className="text-slate-400 text-sm mt-2">
+          XTAL understands shopping intent. Try natural language like
+          &ldquo;lightweight jacket for spring hiking&rdquo;
+        </p>
       </div>
     )
   }
@@ -80,7 +61,6 @@ export default function ProductGrid({
             product={product}
             score={relevanceScores[product.id]}
             query={query}
-            collection={collection}
             onExplain={onExplain}
             onReportIrrelevant={onReportIrrelevant}
           />

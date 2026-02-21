@@ -16,18 +16,7 @@
       "Bash(git merge:*)",
       "Bash(git push:*)",
       "Bash(.venv/Scripts/python:*)",
-      "Bash(wc:*)",
-      "Bash(ls:*)",
-      "WebFetch(domain:www.xtalsearch.com)",
-      "Bash(node --version:*)",
-      "Bash(node node_modules/.bin/tsc:*)",
-      "Bash(node ./node_modules/next/dist/bin/next build:*)",
-      "Bash(npm ls:*)",
-      "Bash(gh api:*)",
-      "Bash(source:*)",
-      "Bash(nvm uninstall:*)",
-      "Bash(/Users/tfpk/Projects/xtal-shopify-backend/.venv/bin/python:*)",
-      "Bash(/Users/tfpk/.nvm/versions/node/v22.22.0/bin/node /Users/tfpk/.nvm/versions/node/v22.22.0/bin/vercel:*)"
+      "Bash(wc:*)"
     ],
     "deny": [],
     "ask": []
