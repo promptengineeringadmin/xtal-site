@@ -95,30 +95,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Floating Decoration: "Dev Effort" Badge */}
-            <div className="absolute -bottom-6 -right-6 inline-flex items-center gap-4 bg-white py-3 px-5 rounded-xl shadow-2xl shadow-blue-900/10 border border-slate-100 ring-1 ring-slate-50/50 animate-bounce duration-[3000ms]">
-              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-cyan-500 shadow-lg shadow-cyan-500/30 shrink-0">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="w-5 h-5"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] mb-0.5">
-                  Dev Effort?
-                </span>
-                <span className="text-[21px] font-black text-[#0F1A35] tracking-tight text-center">
-                  ZERO
-                </span>
-              </div>
-            </div>
           </div>
         </div>
       </section>
