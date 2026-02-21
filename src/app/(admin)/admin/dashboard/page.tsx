@@ -32,7 +32,11 @@ export default function DashboardPage() {
       const res = await fetch(
         `/api/admin/analytics/dashboard?days=${days}&collection=${encodeURIComponent(collection)}`
       )
-      if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`)
+      if (!res.ok) {
+        const body = await res.json().catch(() => null)
+        const detail = body?.detail || body?.error || `Status ${res.status}`
+        throw new Error(`Failed to fetch: ${detail}`)
+      }
       const json: AnalyticsDashboard = await res.json()
       setData(json)
     } catch (err) {
