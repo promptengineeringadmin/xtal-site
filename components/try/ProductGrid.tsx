@@ -1,6 +1,7 @@
 "use client"
 
 import type { Product } from "@/lib/xtal-types"
+import { HelpCircle } from "lucide-react"
 import ProductCard from "./ProductCard"
 import SearchLoadingSpinner from "./SearchLoadingSpinner"
 import FilterLoadingOverlay from "./FilterLoadingOverlay"
@@ -50,6 +51,15 @@ export default function ProductGrid({
   return (
     <div className="relative">
       {isFiltering && <FilterLoadingOverlay />}
+
+      {/* One-time relevance legend (first search, before explain is used) */}
+      {showExplainNudge && (
+        <p className="text-[13px] text-slate-400 mb-3">
+          Gold-highlighted results scored highest for your intent.
+          Tap <HelpCircle size={12} className="inline -mt-0.5 mx-0.5" /> on any card to see why.
+        </p>
+      )}
+
       <div className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 ${wideLayout ? "xl:grid-cols-5" : ""} gap-3 sm:gap-5`}>
         {results.map((product, index) => (
           <ProductCard
