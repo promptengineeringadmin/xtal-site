@@ -14,11 +14,12 @@ export default function ColdStartPanel({ showcaseData, onSearch, suggestions, ex
   const hasShowcase = showcaseData && showcaseData.length > 0
 
   return (
-    <div className="pt-2 pb-6">
+    <div className="pt-8 md:pt-12 pb-8">
       {hasShowcase ? (
         <>
+          <h2 className="text-sm font-semibold text-indigo-600 tracking-wider uppercase mb-8 text-center">Try these examples</h2>
           {/* 3-column category cards */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:max-w-5xl md:mx-auto">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-8 md:max-w-6xl md:mx-auto">
             {showcaseData.map((row) => (
               <CategoryCard key={row.query} row={row} onSearch={onSearch} />
             ))}
@@ -72,12 +73,12 @@ function CategoryCard({ row, onSearch }: { row: ShowcaseRow; onSearch: (query: s
 
   return (
     <div
-      className="p-4 rounded-xl border border-slate-100 hover:border-xtal-navy/20
+      className="p-4 md:p-5 rounded-xl border border-slate-100 hover:border-xtal-navy/20
                  hover:shadow-sm transition-all cursor-pointer"
       onClick={() => onSearch(row.query, row.products)}
     >
       {/* (B) Category label + arrow */}
-      <div className="flex items-center gap-1.5 mb-1">
+      <div className="flex items-center gap-1.5 mb-1.5">
         <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
           {row.label}
         </p>
@@ -85,7 +86,7 @@ function CategoryCard({ row, onSearch }: { row: ShowcaseRow; onSearch: (query: s
       </div>
 
       {/* (E1) Query text — prominent, above images */}
-      <p className="text-base font-semibold text-xtal-navy leading-snug mb-3">
+      <p className="text-base font-semibold text-xtal-navy leading-snug mb-3.5">
         &ldquo;{row.query}&rdquo;
       </p>
 

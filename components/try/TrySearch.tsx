@@ -11,6 +11,7 @@ import MobileFilterDrawer from "./MobileFilterDrawer"
 import AppliedFilters from "./AppliedFilters"
 import PriceSlider from "./PriceSlider"
 import ColdStartPanel from "./ColdStartPanel"
+import ColdStartHero from "./ColdStartHero"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { formatFacetValue } from "@/lib/facet-utils"
 import type { PriceRange, SearchResponse, ShowcaseRow } from "@/lib/xtal-types"
@@ -105,14 +106,19 @@ export default function TrySearch({ collection, suggestions, extraSuggestions, i
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Search bar — sticky on mobile, static on desktop */}
-      <div className="sticky top-[80px] z-20 bg-[#FCFDFF] -mx-4 px-4 pt-2 pb-2 md:static md:mx-0 md:px-0 md:pt-0 md:pb-0 md:bg-transparent">
-        <SearchBar onSearch={handleSearch} loading={loading} initialQuery={query} hasSearched={!!query} subtitle={!query} suggestions={suggestions} showSuggestions={!hasShowcaseData} />
-      </div>
-
-      {/* Cold start: showcase rows or fallback chips */}
-      {showColdStart && (
-        <ColdStartPanel showcaseData={showcaseData ?? null} onSearch={handleSearch} suggestions={suggestions} extraSuggestions={extraSuggestions} />
+      {showColdStart ? (
+        <>
+          {/* Cold start: hero heading + prominent search bar */}
+          <ColdStartHero onSearch={handleSearch} loading={loading} />
+          <ColdStartPanel showcaseData={showcaseData ?? null} onSearch={handleSearch} suggestions={suggestions} extraSuggestions={extraSuggestions} />
+        </>
+      ) : (
+        <>
+          {/* Post-search: compact search bar, sticky on mobile */}
+          <div className="sticky top-[80px] z-20 bg-[#FCFDFF] -mx-4 px-4 pt-2 pb-2 md:static md:mx-0 md:px-0 md:pt-0 md:pb-0 md:bg-transparent">
+            <SearchBar onSearch={handleSearch} loading={loading} initialQuery={query} hasSearched={!!query} suggestions={suggestions} />
+          </div>
+        </>
       )}
 
       {/* Error */}

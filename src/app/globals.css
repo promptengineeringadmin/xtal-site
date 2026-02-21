@@ -80,6 +80,18 @@ html {
   100% { -webkit-mask-position: 200% 0; mask-position: 200% 0; }
 }
 
+/* Animated gradient shift for hero heading text */
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient {
+  background-size: 300% 300%;
+  animation: gradient 8s ease infinite;
+}
+
 .animate-wipe-tail {
   -webkit-mask-image: linear-gradient(to right, black 50%, transparent);
   mask-image: linear-gradient(to right, black 50%, transparent);
