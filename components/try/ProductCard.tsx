@@ -1,15 +1,16 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { HelpCircle, X, ThumbsDown } from "lucide-react"
+import { HelpCircle, X, ThumbsDown, ThumbsUp } from "lucide-react"
 import type { Product } from "@/lib/xtal-types"
 
 interface ProductCardProps {
   product: Product
   score?: number
   query: string
-  onExplain: (productId: string, score?: number) => Promise<string>
+  onExplain: (productId: string, score?: number) => Promise<{ explanation: string; prompt_hash: string }>
   onReportIrrelevant?: (product: Product, score?: number) => void
+  onWellPut?: (product: Product, score?: number) => void
 }
 
 function formatPrice(price: number | number[]): string {
@@ -30,11 +31,12 @@ function getAccentStyle(score?: number) {
   return "border-t-2 border-amber-200"
 }
 
-export default function ProductCard({ product, score, query, onExplain, onReportIrrelevant }: ProductCardProps) {
+export default function ProductCard({ product, score, query, onExplain, onReportIrrelevant, onWellPut }: ProductCardProps) {
   const [explainOpen, setExplainOpen] = useState(false)
   const [explanation, setExplanation] = useState<string | null>(null)
   const [explainLoading, setExplainLoading] = useState(false)
   const [dismissed, setDismissed] = useState(false)
+  const [wellPutSent, setWellPutSent] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
 
   const imageUrl = product.image_url || product.featured_image || product.images?.[0]?.src
@@ -47,8 +49,8 @@ export default function ProductCard({ product, score, query, onExplain, onReport
     setExplainOpen(true)
     if (!explanation) {
       setExplainLoading(true)
-      const text = await onExplain(product.id, score)
-      setExplanation(text)
+      const result = await onExplain(product.id, score)
+      setExplanation(result.explanation)
       setExplainLoading(false)
     }
   }
@@ -58,6 +60,11 @@ export default function ProductCard({ product, score, query, onExplain, onReport
     setTimeout(() => {
       onReportIrrelevant?.(product, score)
     }, 300)
+  }
+
+  function handleWellPut() {
+    setWellPutSent(true)
+    onWellPut?.(product, score)
   }
 
   return (
@@ -120,15 +127,31 @@ export default function ProductCard({ product, score, query, onExplain, onReport
             ) : (
               <>
                 {explanation}
-                {onReportIrrelevant && (
-                  <button
-                    onClick={handleReportIrrelevant}
-                    className="flex items-center gap-1 mt-2 text-[10px] text-slate-400 hover:text-red-500 transition-colors"
-                  >
-                    <ThumbsDown size={10} />
-                    Not relevant
-                  </button>
-                )}
+                <div className="flex items-center gap-3 mt-2">
+                  {onWellPut && (
+                    <button
+                      onClick={handleWellPut}
+                      disabled={wellPutSent}
+                      className={`flex items-center gap-1 text-[10px] transition-colors ${
+                        wellPutSent
+                          ? "text-green-500"
+                          : "text-slate-400 hover:text-green-600"
+                      }`}
+                    >
+                      <ThumbsUp size={10} />
+                      {wellPutSent ? "Thanks!" : "Well put!"}
+                    </button>
+                  )}
+                  {onReportIrrelevant && (
+                    <button
+                      onClick={handleReportIrrelevant}
+                      className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-red-500 transition-colors"
+                    >
+                      <ThumbsDown size={10} />
+                      Not relevant
+                    </button>
+                  )}
+                </div>
               </>
             )}
           </div>

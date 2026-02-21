@@ -11,8 +11,9 @@ interface ProductGridProps {
   isSearching: boolean
   isFiltering: boolean
   query: string
-  onExplain: (productId: string, score?: number) => Promise<string>
+  onExplain: (productId: string, score?: number) => Promise<{ explanation: string; prompt_hash: string }>
   onReportIrrelevant?: (product: Product, score?: number) => void
+  onWellPut?: (product: Product, score?: number) => void
   wideLayout?: boolean
 }
 
@@ -24,6 +25,7 @@ export default function ProductGrid({
   query,
   onExplain,
   onReportIrrelevant,
+  onWellPut,
   wideLayout = false,
 }: ProductGridProps) {
   if (isSearching && results.length === 0) {
@@ -63,6 +65,7 @@ export default function ProductGrid({
             query={query}
             onExplain={onExplain}
             onReportIrrelevant={onReportIrrelevant}
+            onWellPut={onWellPut}
           />
         ))}
       </div>
