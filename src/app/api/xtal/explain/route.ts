@@ -41,7 +41,13 @@ export async function POST(request: Request) {
     const res = await fetch(`${backendUrl}/api/explain`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...body, collection, ...(system_prompt && { system_prompt }) }),
+      body: JSON.stringify({
+        query: body.query,
+        collection,
+        product_id: body.product_id,
+        score: body.score,
+        ...(system_prompt && { system_prompt }),
+      }),
       signal: AbortSignal.timeout(5000),
     })
 

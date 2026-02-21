@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { corsHeaders, handleOptions } from "@/lib/api/cors"
+import { COLLECTIONS } from "@/lib/admin/collections"
 
 export async function OPTIONS() {
   return handleOptions()
@@ -18,6 +19,13 @@ export async function POST(request: Request) {
       )
     }
 
+    if (!COLLECTIONS.some((c) => c.id === collection)) {
+      return NextResponse.json(
+        { error: "Invalid collection" },
+        { status: 400, headers: corsHeaders() }
+      )
+    }
+
     // Validate required fields
     if (!body.query || !body.product_id || !body.action) {
       return NextResponse.json(
@@ -29,7 +37,13 @@ export async function POST(request: Request) {
     const res = await fetch(`${backendUrl}/api/feedback/relevance`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...body, collection }),
+      body: JSON.stringify({
+        query: body.query,
+        collection,
+        product_id: body.product_id,
+        action: body.action,
+        score: body.score,
+      }),
       signal: AbortSignal.timeout(3000),
     })
 

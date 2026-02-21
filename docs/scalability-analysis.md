@@ -90,7 +90,7 @@ User types query
 
 | Step                        | Duration    | Notes                           |
 |-----------------------------|-------------|----------------------------------|
-| CORS preflight (OPTIONS)    | 0-100ms     | Cached 24h via max-age=86400    |
+| CORS preflight (OPTIONS)    | 0-100ms     | Cached 1h via max-age=3600    |
 | Vercel function cold start  | 0-500ms     | Only on first invocation        |
 | Redis config fetch          | 20-80ms     | Upstash HTTP REST (not TCP)     |
 | Backend: embedding          | 100-300ms   | OpenAI ada-002                  |
@@ -113,31 +113,34 @@ User types query
 | 2 | **No request timeouts** | Critical | A slow backend hangs the Vercel function until platform kills it (default 10s) | Fixed in this PR — AbortSignal.timeout per route |
 | 3 | **No collection validation** | High | Any string forwarded to backend as collection name — information disclosure risk | Fixed in this PR — validate against `COLLECTIONS` |
 | 4 | **Request multiplication** | High | Each search = 2-3 separate HTTP round trips, each with CORS preflight + cold start | Mitigated — `search-full` combined endpoint |
+| 5 | **`system_prompt` injection via `...body` spread** | Critical | Attacker can inject `system_prompt` in POST body to override LLM instructions on any route where `isCustom` is false | Fixed in this PR — explicit field allowlisting replaces `...body` spread in all 5 route files |
+| 6 | **No rate limiting on LLM-hitting routes** | Critical | A `while true; do curl ...` loop against `search-full` or `aspects` could burn $50-100/hr in LLM costs. No auth, no rate limit, wildcard CORS. Backend slowapi only covers `/api/v1/*`, not internal endpoints. | Not yet implemented — needs Upstash Redis sliding-window rate limiter (next PR) |
 
 ### High (P1)
 
 | # | Bottleneck | Severity | Impact | Current State |
 |---|-----------|----------|--------|---------------|
-| 5 | **No rate limiting on public routes** | High | Any client can flood `/api/xtal/*` endpoints; no per-shopId throttling | Backend has slowapi on `/api/v1/*` but Vercel proxy routes have none |
-| 6 | **No origin validation** | High | Any website can use the API — no way to restrict to authorized merchants | Deferred — requires snippet settings (siteUrl per collection in Redis) |
-| 7 | **LLM throughput ceiling** | High | Aspects + explain both call LLMs; ~500ms-3s per call; rate-limited by provider | No fix available short of caching or reducing LLM calls |
-| 8 | **Hardcoded COLLECTIONS** | High | `lib/admin/collections.ts` is a static array — every new merchant requires a code deploy | Needs dynamic collection registry (Redis or DB) |
+| 7 | **No origin validation** | High | Any website can use the API — no way to restrict to authorized merchants | Deferred — requires snippet settings (siteUrl per collection in Redis) |
+| 8 | **LLM throughput ceiling** | High | Aspects + explain both call LLMs; ~500ms-3s per call; rate-limited by provider | No fix available short of caching or reducing LLM calls |
+| 9 | **Hardcoded COLLECTIONS** | High | `lib/admin/collections.ts` is a static array — every new merchant requires a code deploy | Needs dynamic collection registry (Redis or DB) |
+| 10 | **No input validation beyond allowlisting** | High | Explicit field picking blocks injection but a 10MB `body.query` could crash the function or exhaust backend memory | Needs Zod schema enforcement (max lengths, strict types) — next PR |
 
 ### Medium (P2)
 
 | # | Bottleneck | Severity | Impact | Current State |
 |---|-----------|----------|--------|---------------|
-| 9 | **No edge caching on search** | Medium | Every identical query hits backend; no CDN cache for search results | Vercel Edge Cache could cache POST responses with cache keys |
-| 10 | **Upstash Redis HTTP overhead** | Medium | REST API adds ~20-50ms vs TCP connection; fine for now, problematic at scale | Acceptable for <500 concurrent; consider Upstash Redis TCP or ElastiCache at scale |
-| 11 | **Vercel cold starts** | Medium | Each route is a separate function; `search` and `aspects` cold-start independently | Combined endpoint helps; Vercel Pro cron-based warming possible |
-| 12 | **No request deduplication** | Medium | Same user typing "blue shoes" fires multiple debounced requests; no server-side dedup | Client-side AbortController cancels in-flight; server-side dedup is future work |
+| 11 | **No edge caching on search** | Medium | Every identical query hits backend; no CDN cache for search results | Vercel Edge Cache could cache POST responses with cache keys |
+| 12 | **Upstash Redis HTTP overhead** | Medium | REST API adds ~20-50ms vs TCP connection; fine for now, problematic at scale | Acceptable for <500 concurrent; consider Upstash Redis TCP or ElastiCache at scale |
+| 13 | **Vercel cold starts** | Medium | Each route is a separate function; `search` and `aspects` cold-start independently | Combined endpoint helps; Vercel Pro cron-based warming possible |
+| 14 | **No request deduplication** | Medium | Same user typing "blue shoes" fires multiple debounced requests; no server-side dedup | Client-side AbortController cancels in-flight; server-side dedup is future work |
+| 15 | **Denial-of-wallet via proxy rotation** | Medium | Even with IP rate limiting, an attacker rotating proxy IPs can impose unbounded LLM costs (Layer 7 denial-of-wallet) | Needs query caching at Edge/Redis level — cache aspects responses keyed on `(collection, query, selected_aspects)` with short TTL (60-300s) |
 
 ### Low (P3)
 
 | # | Bottleneck | Severity | Impact | Current State |
 |---|-----------|----------|--------|---------------|
-| 13 | **No graceful degradation** | Low | If aspects or explain fail, the entire experience breaks | Client library will implement tiered degradation |
-| 14 | **No telemetry** | Low | No visibility into snippet performance, errors, or usage in production | Phase 7 — analytics events endpoint |
+| 16 | **No graceful degradation** | Low | If aspects or explain fail, the entire experience breaks | Client library will implement tiered degradation |
+| 17 | **No telemetry** | Low | No visibility into snippet performance, errors, or usage in production | Phase 7 — analytics events endpoint. Note: Gemini review recommends promoting to P1 before merchant onboarding |
 
 ---
 
@@ -256,6 +259,12 @@ Single-page applications (React, Vue, Next.js storefronts) present challenges:
 
 **Solution in xtal.js:** `InputInterceptor` module uses `MutationObserver` on `document.body` to detect when search inputs are added/removed. Re-attaches listeners automatically. Exposes `XTAL.init()` for manual re-initialization.
 
+### Bot Protection (Akamai/DataDome)
+
+Enterprise merchants (Nike, Target, Best Buy) deploy bot protection services that fingerprint all requests pre-inspection. These services block unknown third-party scripts regardless of CSP policy. This is a harder blocker than CSP for enterprise sites — XTAL cannot run where bot protection is active unless the merchant explicitly allowlists the XTAL script domain.
+
+**Impact:** Limits the initial addressable market to WooCommerce, basic Shopify, and Vercel-hosted headless storefronts. Enterprise merchants require partnership-level integration.
+
 ### Memory Leaks
 
 The snippet runs for the entire session on a merchant site. Must avoid:
@@ -276,6 +285,25 @@ The snippet renders results inside a Shadow DOM to isolate styles bidirectionall
 - Some CSS-in-JS libraries don't work inside Shadow DOM
 - `document.querySelector` from merchant code can't reach inside the shadow root
 - Focus management across shadow boundary requires careful handling
+
+### Target Market Compatibility
+
+Based on expert ecommerce compatibility review:
+
+| Site Type | CSP | Bot Protection | Existing Search | GTM | Rating |
+|-----------|-----|----------------|-----------------|-----|--------|
+| **WooCommerce (simple)** | Permissive | None | Native | Available | **Works** |
+| **Shopify (basic)** | Permissive | Low | Maybe Searchspring | Available | **Works with config** |
+| **Shopify Plus** | Stricter | Low | Searchspring/Algolia | Available | **Needs CSP change** |
+| **Shopify+ Headless** | Strict | DataDome | Algolia | No | **Blocked** |
+| **Nike/Target/BestBuy** | Very strict | Akamai/DataDome | Algolia/Bloomreach/Coveo | Maybe | **Blocked** |
+
+**Recommended initial target market:**
+1. WooCommerce stores with native search (largest untapped segment)
+2. Entry-to-mid Shopify without third-party search
+3. Headless storefronts on Vercel (can use Edge Middleware for CSP)
+
+**Key insight:** Bot protection (Akamai, DataDome) blocks unknown scripts regardless of CSP. These services fingerprint requests pre-inspection. This is a harder blocker than CSP for enterprise merchants.
 
 ---
 
@@ -299,28 +327,33 @@ The snippet must never break the merchant's site. Degradation is graceful:
 
 ### P0 — This PR (blocking deployment)
 - [x] CORS headers on all `/api/xtal/*` routes
-- [x] Collection validation (search, aspects, explain)
+- [x] Collection validation (search, aspects, explain, feedback)
 - [x] Backend proxy timeouts (AbortSignal.timeout)
 - [x] Vercel function maxDuration configuration
 - [x] Combined `search-full` endpoint
+- [x] Request body allowlisting — replaced `...body` spread with explicit field picks in all 5 route files (blocks `system_prompt` injection)
+- [x] CORS max-age reduced from 86400 to 3600 for faster iteration
 
 ### P1 — Next PR (blocking merchant onboarding)
+- [ ] Rate limiting on Vercel proxy routes — Upstash Redis sliding-window, 30 req/min per IP on LLM routes (aspects, explain, search-full), 120 req/min on search-only
+- [ ] Input validation schema (Zod) — enforce max lengths and strict types on all inputs (`query: z.string().max(500)`, `k: z.number().int().min(1).max(100)`)
 - [ ] Re-introduce snippet settings infrastructure (config route, admin-settings.ts, admin UI)
 - [ ] Origin validation (check `Origin` header against `siteUrl` in Redis)
 - [ ] Snippet enabled/disabled check per collection
-- [ ] Rate limiting on Vercel proxy routes (per-shopId)
 - [ ] Dynamic collection registry (replace hardcoded `COLLECTIONS` array)
+- [ ] Telemetry/error reporting — minimal beacon endpoint (`/api/xtal/telemetry`) before onboarding first 10 merchants
 
 ### P2 — Scale preparation
 - [ ] Edge caching for search responses (Vercel Edge Cache or CDN)
+- [ ] Query caching for denial-of-wallet mitigation — cache aspects responses keyed on `(collection, query, selected_aspects)` with 60-300s TTL
 - [ ] Request deduplication (server-side, keyed on query + collection)
 - [ ] Vercel function warming (cron-based keep-alive)
 - [ ] Upstash Redis TCP connection (or ElastiCache) for lower latency
 - [ ] LLM response caching (cache aspects for common queries)
+- [ ] Layer IP rate limiting with session cookie or browser fingerprinting to reduce false positives (shared IPs on campuses/offices/carrier-grade NAT)
 
 ### P3 — Production hardening
-- [ ] Analytics/telemetry endpoint (`/api/xtal/events`)
-- [ ] Error reporting via `navigator.sendBeacon`
+- [ ] Analytics events endpoint (`/api/xtal/events`)
 - [ ] Circuit breaker in xtal.js client
 - [ ] SPA navigation detection and re-initialization
 - [ ] CSP compatibility documentation and nonce-based loader

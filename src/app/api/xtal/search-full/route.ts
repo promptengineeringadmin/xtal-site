@@ -34,8 +34,16 @@ export async function POST(request: Request) {
     const geoRegion = request.headers.get("x-vercel-ip-country-region") || undefined
 
     const searchBody = {
-      ...body,
+      query: body.query,
       collection,
+      filters: body.filters,
+      page: body.page,
+      k: body.k,
+      limit: body.limit,
+      selected_aspects: body.selected_aspects,
+      search_context: body.search_context,
+      facet_filters: body.facet_filters,
+      price_range: body.price_range,
       geo_country: geoCountry,
       geo_region: geoRegion,
     }
@@ -53,8 +61,9 @@ export async function POST(request: Request) {
     const interpolated = rawPrompt.replaceAll("{store_type}", storeType)
     const isCustom = rawPrompt !== DEFAULT_ASPECTS_SYSTEM_PROMPT || storeType !== "online retailer"
     const aspectsBody = {
-      ...body,
+      query: body.query,
       collection,
+      selected_aspects: body.selected_aspects,
       ...(isCustom && { system_prompt: interpolated }),
     }
 

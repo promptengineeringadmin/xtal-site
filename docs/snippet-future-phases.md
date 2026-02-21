@@ -143,6 +143,92 @@ XtalClient (entry point)
 - **Dynamic CSS variables** — inject from `styleConfig` into Shadow DOM root
 - **Zero global pollution** — only `window.XTAL` namespace is added
 
+### Expert Review Findings (Phase 6 additions)
+
+The following items were identified through 3 independent expert reviews (security, frontend DOM, ecommerce compatibility) and should be addressed during Phase 6 implementation.
+
+#### 1. InputInterceptor — Fallback Selector Chain
+
+Instead of relying on a single configured CSS selector, use a prioritized fallback chain:
+
+```
+input[type="search"]
+input[name="q"]                              // Shopify universal
+.search__input                               // Shopify Dawn/Debut
+.woocommerce-product-search .search-field    // WooCommerce
+#search_query_adv                            // BigCommerce
+.search-input                                // Squarespace
+input[name="s"]                              // WordPress generic
+form[role="search"] input                    // ARIA fallback
+```
+
+The configured selector (from admin settings) takes highest priority. Fall through the chain until a match is found.
+
+#### 2. InputInterceptor — Platform Detection Heuristic
+
+Auto-detect the merchant platform on init to select optimal defaults:
+
+- Check `<meta name="shopify-*">` tags → Shopify
+- Check `.woocommerce` class on `<body>` → WooCommerce
+- Check `BigCommerce` in script sources → BigCommerce
+
+Platform detection informs the selector chain priority and can pre-configure known quirks (e.g., Shopify's `<details>`-based search).
+
+#### 3. InputInterceptor — Competitor Detection
+
+Detect competing search tools on init to avoid double-firing:
+
+- Check `window.algolia`, `window.SearchSpring`, `window.Klevu`
+- Check for `<predictive-search>` elements (Shopify native)
+
+When a competitor is detected: log via telemetry, optionally suppress XTAL or require explicit opt-in from the merchant. Dual-firing (XTAL + Algolia both listening on the same input) causes competing overlays and double API calls.
+
+#### 4. SPA Navigation — Use Navigation API as Primary
+
+The pushState monkey-patch is fragile (Next.js App Router calls `event.stopImmediatePropagation()`). Use a layered approach:
+
+1. **Primary:** `navigation.addEventListener('navigate')` (Navigation API — baseline support in Chrome/Edge/Firefox/Safari 26.2+)
+2. **Fallback:** URL polling (`setInterval` checking `location.href` every 200ms)
+3. **Tertiary:** pushState/replaceState monkey-patch (legacy browsers only)
+
+#### 5. Shadow DOM — Positioning and Accessibility
+
+- Append host element as **direct child of `document.body`** (not inside the merchant's DOM tree)
+- Set `z-index` on the **host element** (light DOM), not inside the shadow — shadow z-index only stacks within its own context
+- Cross-boundary ARIA `id` refs don't work — can't use `aria-owns` across shadow boundary
+- Use `aria-expanded` + `role="combobox"` on the light-DOM input
+- Use `role="listbox"` + `role="option"` inside the shadow DOM
+
+#### 6. Overlay Behavior Gaps
+
+- **Dismiss:** Escape key, click outside, mobile back button (`popstate`)
+- **Repositioning:** Resize/scroll handler using `getBoundingClientRect()` + `visualViewport` API
+- **Mobile:** Full-screen modal on viewport < 768px
+- **Multiple inputs:** Use `querySelectorAll` + attach to visible/focused input (header + mobile hamburger menu)
+
+#### 7. Enter Key Safety Valve
+
+Only `preventDefault()` on Enter when XTAL overlay is **open AND operational**:
+- If circuit breaker is open → let native form submission through
+- If overlay is closed → let native behavior through
+- This ensures the merchant's search always works as a fallback
+
+#### 8. MutationObserver Optimization
+
+Three-phase observer strategy to minimize performance impact:
+
+1. **Phase 1:** Observe `document.body` with `subtree: true` to find the search input
+2. **Phase 2:** Once found, narrow observer to the input's parent container
+3. **Phase 3:** If input is lost (SPA navigation removes it), fall back to body observer
+
+This avoids keeping a full-document observer running permanently.
+
+#### 9. Security in Snippet Code
+
+- Use `textContent` not `innerHTML` for all API response data rendering (XSS prevention)
+- Add SRI (Subresource Integrity) hash to the loader `<script>` tag in the merchant snippet
+- Top-level try/catch on all entry points (already in plan — verify during implementation)
+
 ### Graceful Degradation Tiers
 
 The snippet must **never** break the merchant's site. Degradation is always graceful:
@@ -266,3 +352,58 @@ The backend (xtal-shopify-backend) has its own auth model:
 - **Public routes** via the Vercel proxy: Application-layer security only (origin check, snippet_enabled, rate limiting). No per-user authentication required.
 
 This two-tier model (proxy-level bypass + application-level enforcement) satisfies both Peenak's security requirements and the "zero setup" product goal for merchants.
+
+---
+
+## Target Market Compatibility
+
+Based on expert ecommerce compatibility review. This matrix should inform Phase 6 implementation priorities and Phase 5 style analysis scope.
+
+| Site Type | CSP | Bot Protection | Existing Search | GTM | Rating |
+|-----------|-----|----------------|-----------------|-----|--------|
+| **WooCommerce (simple)** | Permissive | None | Native | Available | **Works** |
+| **Shopify (basic)** | Permissive | Low | Maybe Searchspring | Available | **Works with config** |
+| **Shopify Plus** | Stricter | Low | Searchspring/Algolia | Available | **Needs CSP change** |
+| **Shopify+ Headless** | Strict | DataDome | Algolia | No | **Blocked** |
+| **Nike/Target/BestBuy** | Very strict | Akamai/DataDome | Algolia/Bloomreach/Coveo | Maybe | **Blocked** |
+
+**Recommended initial target market:**
+1. WooCommerce stores with native search (largest untapped segment)
+2. Entry-to-mid Shopify without third-party search
+3. Headless storefronts on Vercel (can use Edge Middleware for CSP)
+
+**Key insight:** Bot protection (Akamai, DataDome) blocks unknown scripts regardless of CSP. These services fingerprint requests pre-inspection. This is a harder blocker than CSP for enterprise merchants. Partnership-level integration would be needed for enterprise sites.
+
+---
+
+## Gemini Director-Level Review Addendum
+
+> Added after implementation for architectural record. These items inform future PRs and are documented here for traceability.
+
+### Strengths Acknowledged
+- Security triage (system_prompt injection catch) — correctly prioritized as P0
+- Frontend resilience (Shadow DOM, MutationObserver, multi-stage loader) — industry-standard for third-party scripts
+- Scope discipline — hardening foundation before building snippet UI
+- GTM & architecture alignment — targeting WooCommerce/basic Shopify avoids wasted effort on blocked enterprise sites
+
+### Risks & Blind Spots to Address in Future PRs
+
+**1. Input validation is still weak (P1 — next PR)**
+Explicit field picking prevents prompt injection but doesn't prevent payload abuse. A 10MB `body.query` string could crash the Vercel function or exhaust backend memory.
+- **Recommendation:** Add a validation schema (Zod) to enforce strict types and max lengths on all inputs (e.g., `query: z.string().max(500)`, `k: z.number().int().min(1).max(100)`).
+- **Where:** All 5 route files in `src/app/api/xtal/`. Can be a shared schema in `lib/api/validation.ts`.
+
+**2. IP-based rate limiting catches collateral damage (P1 design consideration)**
+IP rate limiting on B2C ecommerce sites will block legitimate users behind shared IPs (university campuses, corporate offices, carrier-grade NAT — hundreds of users on one IP).
+- **Recommendation:** V1 IP-based limiting is acceptable, but quickly layer in IP + short-lived session cookie or browser fingerprinting to reduce false positives.
+- **Impact:** Rate limiter design in next PR must account for this from the start.
+
+**3. Denial-of-wallet via proxy rotation (P2)**
+Even with 30 req/min per IP, an attacker rotating proxy IPs can still impose unbounded LLM costs (Layer 7 denial-of-wallet attack).
+- **Recommendation:** Query caching at Vercel Edge Cache or Redis level. If 1,000 bots ask for "shoes", only the first request should hit the LLM. Cache aspects responses keyed on `(collection, query, selected_aspects)` with a short TTL (60-300s).
+- **When:** Before scaling beyond early beta (P2 priority).
+
+**4. Telemetry must ship before merchant onboarding (P1, not P3)**
+If the snippet fails silently on merchant sites, we have zero visibility. The `navigator.sendBeacon` error reporting planned in Phase 7/Telemetry module must be implemented before onboarding the first 10 merchants, not after.
+- **Recommendation:** Promote telemetry/error reporting from P3 to P1. Implement a minimal beacon endpoint (`/api/xtal/telemetry`) that accepts error payloads before building the full analytics pipeline.
+- **Minimum viable:** Error type, shopId, snippet version, page URL (no query params), UA. Batch to 1 report per 30s per error type.
