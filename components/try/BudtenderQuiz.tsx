@@ -46,7 +46,7 @@ function quizReducer(state: QuizState, action: QuizAction): QuizState {
         history: [...state.history, state.currentStep],
         currentStep: nextStep,
         answers: { experience: action.level },
-        visitedExpSteps: new Set(),
+        visitedExpSteps: new Set<string>(),
         selectedKey: null,
         selectedValue: null,
         selectedNext: null,
@@ -189,7 +189,7 @@ export default function BudtenderQuiz({
 }: BudtenderQuizProps) {
   const [state, dispatch] = useReducer(quizReducer, {
     ...INITIAL_STATE,
-    visitedExpSteps: new Set(),
+    visitedExpSteps: new Set<string>(),
   })
   const stepRef = useRef<HTMLDivElement>(null)
 
