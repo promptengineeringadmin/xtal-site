@@ -36,6 +36,18 @@ function aspectsEnabledKey(collection: string) {
 function resultsPerPageKey(collection: string) {
   return `admin:settings:${collection}:results_per_page`
 }
+function snippetEnabledKey(collection: string) {
+  return `admin:settings:${collection}:snippet_enabled`
+}
+function snippetSiteUrlKey(collection: string) {
+  return `admin:settings:${collection}:snippet_site_url`
+}
+function snippetSearchSelectorKey(collection: string) {
+  return `admin:settings:${collection}:snippet_search_selector`
+}
+function snippetDisplayModeKey(collection: string) {
+  return `admin:settings:${collection}:snippet_display_mode`
+}
 
 // ─── Query Enhancement ─────────────────────────────────────
 
@@ -179,4 +191,88 @@ export async function saveResultsPerPage(
 ): Promise<void> {
   const kv = getRedis()
   await kv.set(resultsPerPageKey(collection), value)
+}
+
+// ─── Snippet: Enabled ────────────────────────────────────
+
+export async function getSnippetEnabled(collection: string): Promise<boolean> {
+  try {
+    const kv = getRedis()
+    const stored = await kv.get<boolean>(snippetEnabledKey(collection))
+    if (stored !== null && stored !== undefined) return stored
+  } catch {
+    // Redis unavailable
+  }
+  return false // default: disabled
+}
+
+export async function saveSnippetEnabled(
+  collection: string,
+  enabled: boolean
+): Promise<void> {
+  const kv = getRedis()
+  await kv.set(snippetEnabledKey(collection), enabled)
+}
+
+// ─── Snippet: Site URL ───────────────────────────────────
+
+export async function getSnippetSiteUrl(collection: string): Promise<string> {
+  try {
+    const kv = getRedis()
+    const stored = await kv.get<string>(snippetSiteUrlKey(collection))
+    if (stored) return stored
+  } catch {
+    // Redis unavailable
+  }
+  return "" // default: empty
+}
+
+export async function saveSnippetSiteUrl(
+  collection: string,
+  url: string
+): Promise<void> {
+  const kv = getRedis()
+  await kv.set(snippetSiteUrlKey(collection), url)
+}
+
+// ─── Snippet: Search Selector ────────────────────────────
+
+export async function getSnippetSearchSelector(collection: string): Promise<string> {
+  try {
+    const kv = getRedis()
+    const stored = await kv.get<string>(snippetSearchSelectorKey(collection))
+    if (stored) return stored
+  } catch {
+    // Redis unavailable
+  }
+  return 'input[type="search"]' // default
+}
+
+export async function saveSnippetSearchSelector(
+  collection: string,
+  selector: string
+): Promise<void> {
+  const kv = getRedis()
+  await kv.set(snippetSearchSelectorKey(collection), selector)
+}
+
+// ─── Snippet: Display Mode ──────────────────────────────
+
+export async function getSnippetDisplayMode(collection: string): Promise<string> {
+  try {
+    const kv = getRedis()
+    const stored = await kv.get<string>(snippetDisplayModeKey(collection))
+    if (stored) return stored
+  } catch {
+    // Redis unavailable
+  }
+  return "overlay" // default
+}
+
+export async function saveSnippetDisplayMode(
+  collection: string,
+  mode: string
+): Promise<void> {
+  const kv = getRedis()
+  await kv.set(snippetDisplayModeKey(collection), mode)
 }
