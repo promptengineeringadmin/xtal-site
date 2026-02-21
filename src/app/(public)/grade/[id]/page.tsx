@@ -5,9 +5,9 @@ import ReportLayout from "@/components/grader/report/ReportLayout"
 import type { GraderReport } from "@/lib/grader/types"
 
 async function getReport(id: string): Promise<GraderReport | null> {
-  const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+  // Use the public production domain — NOT VERCEL_URL, which resolves to a
+  // deployment-specific URL behind Vercel's auth protection.
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://xtalsearch.com"
 
   try {
     const res = await fetch(`${baseUrl}/api/grader/report/${id}`, {
