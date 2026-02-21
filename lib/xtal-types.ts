@@ -113,6 +113,12 @@ export interface OptimizationRequest {
   num_queries?: number
 }
 
+export interface ShowcaseRow {
+  query: string
+  label: string
+  products: Product[]
+}
+
 export interface Product {
   id: string
   title: string

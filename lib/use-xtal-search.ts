@@ -71,7 +71,7 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
   const explainCache = useRef<Map<string, { explanation: string; prompt_hash: string }>>(new Map())
 
   // --- Full search (new query) ---
-  const search = useCallback(async (newQuery: string) => {
+  const search = useCallback(async (newQuery: string, previewResults?: Product[]) => {
     const trimmed = newQuery.trim()
     if (!trimmed) return
 
@@ -80,9 +80,9 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
     const controller = new AbortController()
     abortRef.current = controller
 
-    // Full reset
+    // Full reset — if previewResults provided, show them instantly instead of empty
     setQuery(trimmed)
-    setResults([])
+    setResults(previewResults || [])
     setTotal(0)
     setError(null)
     setLoadingState({ type: "searching" })

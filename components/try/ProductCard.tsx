@@ -11,6 +11,7 @@ interface ProductCardProps {
   onExplain: (productId: string, score?: number) => Promise<{ explanation: string; prompt_hash: string }>
   onReportIrrelevant?: (product: Product, score?: number) => void
   onWellPut?: (product: Product, score?: number) => void
+  showExplainNudge?: boolean
 }
 
 function formatPrice(price: number | number[]): string {
@@ -31,7 +32,7 @@ function getAccentStyle(score?: number) {
   return "border-t-2 border-amber-200"
 }
 
-export default function ProductCard({ product, score, query, onExplain, onReportIrrelevant, onWellPut }: ProductCardProps) {
+export default function ProductCard({ product, score, query, onExplain, onReportIrrelevant, onWellPut, showExplainNudge }: ProductCardProps) {
   const [explainOpen, setExplainOpen] = useState(false)
   const [explanation, setExplanation] = useState<string | null>(null)
   const [explainLoading, setExplainLoading] = useState(false)
@@ -110,7 +111,9 @@ export default function ProductCard({ product, score, query, onExplain, onReport
           <button
             onClick={handleExplain}
             title="Why this result?"
-            className="p-2 rounded-md text-slate-400 hover:text-xtal-navy hover:bg-slate-50 transition-colors"
+            className={`p-2 rounded-md text-slate-400 hover:text-xtal-navy hover:bg-slate-50 transition-colors${
+              showExplainNudge && !explainOpen ? " animate-nudge-once" : ""
+            }`}
           >
             {explainOpen ? <X size={16} /> : <HelpCircle size={16} />}
           </button>

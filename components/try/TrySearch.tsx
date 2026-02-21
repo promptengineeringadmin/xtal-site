@@ -10,11 +10,13 @@ import FilterRail from "./FilterRail"
 import MobileFilterDrawer from "./MobileFilterDrawer"
 import AppliedFilters from "./AppliedFilters"
 import PriceSlider from "./PriceSlider"
+import ColdStartPanel from "./ColdStartPanel"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { formatFacetValue } from "@/lib/facet-utils"
-import type { PriceRange, SearchResponse } from "@/lib/xtal-types"
+import type { PriceRange, SearchResponse, ShowcaseRow } from "@/lib/xtal-types"
+import { useOnboardingState } from "@/lib/use-onboarding-state"
 
-export default function TrySearch({ collection, suggestions, initialQuery, initialSearchData, defaultResultsPerPage }: { collection?: string; suggestions?: string[]; initialQuery?: string; initialSearchData?: SearchResponse | null; defaultResultsPerPage?: number } = {}) {
+export default function TrySearch({ collection, suggestions, initialQuery, initialSearchData, defaultResultsPerPage, showcaseData }: { collection?: string; suggestions?: string[]; initialQuery?: string; initialSearchData?: SearchResponse | null; defaultResultsPerPage?: number; showcaseData?: ShowcaseRow[] | null } = {}) {
   const {
     query,
     sortedResults,
@@ -45,6 +47,10 @@ export default function TrySearch({ collection, suggestions, initialQuery, initi
     reportIrrelevant,
     reportWellPut,
   } = useXtalSearch(collection, initialQuery, initialSearchData, defaultResultsPerPage)
+
+  const { isFirstSearch, hasUsedExplain, incrementSearchCount, markExplainUsed } = useOnboardingState()
+  const showColdStart = !query && !isSearching
+  const hasShowcaseData = showcaseData && showcaseData.length > 0
 
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
@@ -85,12 +91,29 @@ export default function TrySearch({ collection, suggestions, initialQuery, initi
     return count
   }, [activeFacetFilters, priceRange])
 
+  // Wrap search to track onboarding state
+  function handleSearch(q: string, previewProducts?: import("@/lib/xtal-types").Product[]) {
+    incrementSearchCount()
+    search(q, previewProducts)
+  }
+
+  // Wrap explain to track onboarding state
+  async function handleExplain(productId: string, score?: number) {
+    markExplainUsed()
+    return explain(productId, score)
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Search bar — sticky on mobile, static on desktop */}
       <div className="sticky top-[80px] z-20 bg-[#FCFDFF] -mx-4 px-4 pt-2 pb-2 md:static md:mx-0 md:px-0 md:pt-0 md:pb-0 md:bg-transparent">
-        <SearchBar onSearch={search} loading={loading} initialQuery={query} hasSearched={!!query} suggestions={suggestions} />
+        <SearchBar onSearch={handleSearch} loading={loading} initialQuery={query} hasSearched={!!query} suggestions={suggestions} showSuggestions={!hasShowcaseData} />
       </div>
+
+      {/* Cold start: showcase rows or fallback chips */}
+      {showColdStart && (
+        <ColdStartPanel showcaseData={showcaseData ?? null} onSearch={handleSearch} suggestions={suggestions} />
+      )}
 
       {/* Error */}
       {error && (
@@ -107,6 +130,7 @@ export default function TrySearch({ collection, suggestions, initialQuery, initi
             selectedAspects={selectedAspects}
             onSelect={selectAspect}
             onRemove={removeAspect}
+            showLabel={isFirstSearch}
           />
         </div>
       )}
@@ -246,8 +270,10 @@ export default function TrySearch({ collection, suggestions, initialQuery, initi
           isSearching={isSearching}
           isFiltering={isFiltering}
           query={query}
-          onExplain={explain}
+          onExplain={handleExplain}
           onReportIrrelevant={reportIrrelevant}
+          isFirstSearch={isFirstSearch}
+          showExplainNudge={isFirstSearch && !hasUsedExplain}
           onWellPut={reportWellPut}
           wideLayout={!showFilters}
         />

@@ -17,9 +17,10 @@ interface SearchBarProps {
   initialQuery?: string
   hasSearched?: boolean
   suggestions?: string[]
+  showSuggestions?: boolean
 }
 
-export default function SearchBar({ onSearch, loading, initialQuery = "", hasSearched = false, suggestions }: SearchBarProps) {
+export default function SearchBar({ onSearch, loading, initialQuery = "", hasSearched = false, suggestions, showSuggestions = true }: SearchBarProps) {
   const [value, setValue] = useState(initialQuery)
 
   useEffect(() => {
@@ -67,7 +68,7 @@ export default function SearchBar({ onSearch, loading, initialQuery = "", hasSea
         </button>
       </form>
 
-      {!hasSearched && (
+      {!hasSearched && showSuggestions && (
         <div className="mt-3 flex gap-2 overflow-x-auto pb-1 md:flex-wrap md:overflow-visible md:pb-0 scrollbar-none">
           <span className="text-xs text-slate-400 py-1">Example queries:</span>
           {(suggestions ?? DEFAULT_SUGGESTIONS).map((s) => (

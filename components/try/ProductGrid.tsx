@@ -15,6 +15,8 @@ interface ProductGridProps {
   onReportIrrelevant?: (product: Product, score?: number) => void
   onWellPut?: (product: Product, score?: number) => void
   wideLayout?: boolean
+  isFirstSearch?: boolean
+  showExplainNudge?: boolean
 }
 
 export default function ProductGrid({
@@ -27,9 +29,11 @@ export default function ProductGrid({
   onReportIrrelevant,
   onWellPut,
   wideLayout = false,
+  isFirstSearch,
+  showExplainNudge,
 }: ProductGridProps) {
   if (isSearching && results.length === 0) {
-    return <SearchLoadingSpinner />
+    return <SearchLoadingSpinner query={query} isFirstSearch={isFirstSearch} />
   }
 
   if (!isSearching && !isFiltering && results.length === 0 && query) {
@@ -41,23 +45,13 @@ export default function ProductGrid({
     )
   }
 
-  if (!query) {
-    return (
-      <div className="text-center py-16">
-        <p className="text-slate-700 text-base font-medium">Describe what a customer is looking for</p>
-        <p className="text-slate-400 text-sm mt-2">
-          XTAL understands shopping intent. Try natural language like
-          &ldquo;lightweight jacket for spring hiking&rdquo;
-        </p>
-      </div>
-    )
-  }
+  if (!query) return null
 
   return (
     <div className="relative">
       {isFiltering && <FilterLoadingOverlay />}
       <div className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 ${wideLayout ? "xl:grid-cols-5" : ""} gap-3 sm:gap-5`}>
-        {results.map((product) => (
+        {results.map((product, index) => (
           <ProductCard
             key={product.id}
             product={product}
@@ -66,6 +60,7 @@ export default function ProductGrid({
             onExplain={onExplain}
             onReportIrrelevant={onReportIrrelevant}
             onWellPut={onWellPut}
+            showExplainNudge={showExplainNudge && index === 0}
           />
         ))}
       </div>

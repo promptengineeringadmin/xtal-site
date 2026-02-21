@@ -5,6 +5,7 @@ interface AspectChipsProps {
   selectedAspects: string[]
   onSelect: (aspect: string) => void
   onRemove: (aspect: string) => void
+  showLabel?: boolean
 }
 
 export default function AspectChips({
@@ -12,6 +13,7 @@ export default function AspectChips({
   selectedAspects,
   onSelect,
   onRemove,
+  showLabel,
 }: AspectChipsProps) {
   const allAspects = [
     ...selectedAspects,
@@ -22,6 +24,11 @@ export default function AspectChips({
 
   return (
     <div className="flex gap-2.5 overflow-x-auto pb-2 md:flex-wrap md:overflow-visible md:pb-0 scrollbar-none [-webkit-overflow-scrolling:touch]">
+      {showLabel && (
+        <span className="text-xs text-slate-400 font-medium uppercase tracking-wider shrink-0 self-center">
+          Refine:
+        </span>
+      )}
       {allAspects.map((aspect) => {
         const isSelected = selectedAspects.includes(aspect)
         return (
