@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { corsHeaders, handleOptions } from "@/lib/api/cors"
 import { COLLECTIONS } from "@/lib/admin/collections"
+import { logProxyTiming } from "@/lib/admin/proxy-timing"
 
 export async function OPTIONS() {
   return handleOptions()
@@ -47,6 +48,18 @@ export async function POST(request: Request) {
     const backendMs = Date.now() - t0
 
     const data = await res.json()
+
+    // Fire-and-forget: log proxy timing to Redis for admin drilldowns
+    logProxyTiming({
+      query: (body.query ?? "").toLowerCase(),
+      collection,
+      timestamp: t0,
+      route: "search",
+      redisMs: 0,
+      backendMs,
+      totalMs: backendMs,
+    })
+
     return NextResponse.json(data, {
       status: res.status,
       headers: { ...corsHeaders(), "Server-Timing": `backend;dur=${backendMs}` },

@@ -3,6 +3,7 @@ import { getAspectsPrompt, DEFAULT_ASPECTS_SYSTEM_PROMPT } from "@/lib/admin/asp
 import { getStoreType, getAspectsEnabled } from "@/lib/admin/admin-settings"
 import { corsHeaders, handleOptions } from "@/lib/api/cors"
 import { COLLECTIONS } from "@/lib/admin/collections"
+import { logProxyTiming } from "@/lib/admin/proxy-timing"
 
 export async function OPTIONS() {
   return handleOptions()
@@ -90,6 +91,18 @@ export async function POST(request: Request) {
     const searchData = searchResult.value
     const aspectsData =
       aspectsResult.status === "fulfilled" ? aspectsResult.value : null
+
+    // Fire-and-forget: log proxy timing to Redis for admin drilldowns
+    logProxyTiming({
+      query: (body.query ?? "").toLowerCase(),
+      collection,
+      timestamp: t0,
+      route: "search-full",
+      redisMs,
+      backendMs,
+      totalMs: Date.now() - t0,
+      aspectsFailed: aspectsResult.status === "rejected",
+    })
 
     const response = {
       ...searchData,

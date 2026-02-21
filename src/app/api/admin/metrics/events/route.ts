@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server"
 import { adminFetch } from "@/lib/admin/api"
+import { getProxyTimings, matchProxyTiming } from "@/lib/admin/proxy-timing"
+import type { MetricEvent, SearchEventData } from "@/lib/admin/types"
 
 export async function GET(request: Request) {
   try {
@@ -33,6 +35,48 @@ export async function GET(request: Request) {
 
     const res = await adminFetch(`/api/metrics/events?${params.toString()}`)
     const data = await res.json()
+
+    // Enrich search_request events with proxy timing from Redis
+    const events: MetricEvent[] = data.events ?? []
+    if (events.length > 0 && collection) {
+      try {
+        const timestamps = events.map((e) => new Date(e.timestamp).getTime())
+        const minTs = Math.min(...timestamps) - 10_000
+        const maxTs = Math.max(...timestamps) + 10_000
+
+        const timings = await getProxyTimings(collection, minTs, maxTs)
+
+        if (timings.length > 0) {
+          const consumed = new Set<number>()
+
+          for (const event of events) {
+            if (event.event_type !== "search_request") continue
+            const sd = event.event_data as SearchEventData
+            const eventTs = new Date(event.timestamp).getTime()
+
+            const match = matchProxyTiming(
+              timings,
+              sd.user_query ?? "",
+              eventTs,
+              consumed,
+            )
+
+            if (match) {
+              ;(event.event_data as Record<string, unknown>).proxy_timing = {
+                redis_ms: match.redisMs,
+                backend_ms: match.backendMs,
+                total_ms: match.totalMs,
+                route: match.route,
+                aspects_failed: match.aspectsFailed,
+              }
+            }
+          }
+        }
+      } catch {
+        // Redis unavailable — return events without enrichment
+      }
+    }
+
     return NextResponse.json(data, { status: res.status })
   } catch (error) {
     console.error("Metrics events proxy error:", error)
