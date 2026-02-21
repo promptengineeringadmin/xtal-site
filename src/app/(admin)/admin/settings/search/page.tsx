@@ -689,29 +689,34 @@ export default function SearchTuningPage() {
             Merchandising
           </h2>
 
-          <div className="space-y-4">
-            <PromptEditor
-              title="Marketing Prompt"
-              prompt={marketingPrompt}
-              defaultPrompt={defaults?.default_marketing_prompt ?? ""}
-              onSave={saveMarketing}
-              saving={savingMarketing}
-              placeholder="Describe your current marketing goals and product priorities. Controls query augmentation and how results are re-ranked to align with your merchandising strategy."
-              history={marketingHistory}
-            />
+          <PromptEditor
+            title="Marketing Prompt"
+            prompt={marketingPrompt}
+            defaultPrompt={defaults?.default_marketing_prompt ?? ""}
+            onSave={saveMarketing}
+            saving={savingMarketing}
+            placeholder="Describe your current marketing goals and product priorities. Controls query augmentation and how results are re-ranked to align with your merchandising strategy."
+            history={marketingHistory}
+          />
+        </div>
 
+        {/* Search Weights Section */}
+        <div>
+          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
+            Search Weights
+          </h2>
+
+          <div className="glass-card p-6 space-y-6">
             {/* Marketing Influence Slider */}
-            <div className="glass-card p-6">
-              <div>
-                <h3 className="text-lg font-semibold text-xtal-navy">
-                  Marketing Influence
-                </h3>
-                <p className="text-sm text-slate-500 mt-1">
-                  Controls how much the marketing prompt influences result
-                  ordering. Higher values push marketing-aligned products higher
-                  in search results.
-                </p>
-              </div>
+            <div>
+              <h3 className="text-lg font-semibold text-xtal-navy">
+                Marketing Influence
+              </h3>
+              <p className="text-sm text-slate-500 mt-1">
+                Controls how much the marketing prompt influences result
+                ordering. Higher values push marketing-aligned products higher
+                in search results.
+              </p>
               <div className="mt-4 max-w-full sm:max-w-md">
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-medium text-slate-400 shrink-0">
@@ -746,28 +751,19 @@ export default function SearchTuningPage() {
                 </div>
               )}
             </div>
-          </div>
-        </div>
 
-        {/* Ranking Section */}
-        <div>
-          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
-            Ranking
-          </h2>
+            <hr className="border-slate-200" />
 
-          <div className="space-y-4">
             {/* Keyword Match Priority Slider */}
-            <div className="glass-card p-6">
-              <div>
-                <h3 className="text-lg font-semibold text-xtal-navy">
-                  Keyword Match Priority
-                </h3>
-                <p className="text-sm text-slate-500 mt-1">
-                  How much to favor products that contain the exact words the
-                  shopper typed. Higher values mean exact keyword matches rank
-                  above loosely related products.
-                </p>
-              </div>
+            <div>
+              <h3 className="text-lg font-semibold text-xtal-navy">
+                Keyword Match Priority
+              </h3>
+              <p className="text-sm text-slate-500 mt-1">
+                How much to favor products that contain the exact words the
+                shopper typed. Higher values mean exact keyword matches rank
+                above loosely related products.
+              </p>
               <div className="mt-4 max-w-full sm:max-w-md">
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-medium text-slate-400 shrink-0">
@@ -804,19 +800,19 @@ export default function SearchTuningPage() {
               )}
             </div>
 
+            <hr className="border-slate-200" />
+
             {/* Product Type Boost Slider */}
-            <div className="glass-card p-6">
-              <div>
-                <h3 className="text-lg font-semibold text-xtal-navy">
-                  Product Type Boost
-                </h3>
-                <p className="text-sm text-slate-500 mt-1">
-                  When a shopper searches for a specific product (e.g.,
-                  &ldquo;ties for a wedding&rdquo;), this boosts actual ties above
-                  related but different products. Higher values mean stronger
-                  preference for the correct product type.
-                </p>
-              </div>
+            <div>
+              <h3 className="text-lg font-semibold text-xtal-navy">
+                Product Type Boost
+              </h3>
+              <p className="text-sm text-slate-500 mt-1">
+                When a shopper searches for a specific product (e.g.,
+                &ldquo;ties for a wedding&rdquo;), this boosts actual ties above
+                related but different products. Higher values mean stronger
+                preference for the correct product type.
+              </p>
               <div className="mt-4 max-w-full sm:max-w-md">
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-medium text-slate-400 shrink-0">
@@ -849,6 +845,323 @@ export default function SearchTuningPage() {
                 <div className="mt-3 text-xs text-slate-500 bg-slate-50 rounded px-3 py-2">
                   Product type boost is off — all products ranked purely by
                   relevance score.
+                </div>
+              )}
+            </div>
+
+            <hr className="border-slate-200" />
+
+            {/* Auto-Optimize */}
+            <div>
+              <h3 className="text-lg font-semibold text-xtal-navy">
+                Optimize for My Store
+              </h3>
+              <p className="text-sm text-slate-500 mt-1">
+                Automatically tests different weight combinations against your
+                catalog and recent searches, then recommends the best settings.
+              </p>
+
+              <div className="mt-4">
+                <button
+                  onClick={runOptimization}
+                  disabled={optimizing || settingsSaving}
+                  className="px-4 py-2 bg-xtal-navy text-white rounded-lg text-sm font-medium
+                    hover:bg-xtal-navy/90 disabled:opacity-50 disabled:cursor-not-allowed
+                    transition-colors"
+                >
+                  {optimizing ? (
+                    <span className="flex items-center gap-2">
+                      <svg
+                        className="animate-spin h-4 w-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                        />
+                      </svg>
+                      Analyzing your catalog...
+                    </span>
+                  ) : (
+                    "Optimize Settings"
+                  )}
+                </button>
+                {optimizing && (
+                  <div className="mt-3 space-y-2">
+                    <div className="flex items-center gap-3 text-sm text-slate-600">
+                      <span className="font-medium">
+                        {optimizeStage === "gathering_context" && "Analyzing your catalog and recent searches..."}
+                        {optimizeStage === "proposing_configs" && "Claude is designing 30 test configurations..."}
+                        {optimizeStage === "executing_searches" && "Testing 360 search combinations across your catalog..."}
+                        {optimizeStage === "evaluating_results" && "Claude is evaluating results and picking a winner..."}
+                        {(!optimizeStage || optimizeStage === "starting") && "Connecting to optimization service..."}
+                      </span>
+                      {optimizeElapsed > 0 && (
+                        <span className="text-xs text-slate-400 tabular-nums">
+                          {Math.round(optimizeElapsed)}s
+                        </span>
+                      )}
+                    </div>
+                    <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className="bg-xtal-navy h-full rounded-full transition-all duration-1000 ease-out"
+                        style={{
+                          width: `${Math.max(5, (
+                            optimizeStage === "gathering_context" ? 5 :
+                            optimizeStage === "proposing_configs" ? 15 :
+                            optimizeStage === "executing_searches" ? 45 :
+                            optimizeStage === "evaluating_results" ? 85 :
+                            2
+                          ))}%`
+                        }}
+                      />
+                    </div>
+                    <p className="text-xs text-slate-400">
+                      This typically takes about 5 minutes. Testing 30 configurations
+                      across 12 queries to find your optimal search settings.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {optimizeError && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                  {optimizeError}
+                </div>
+              )}
+
+              {optimizationResult && (
+                <div className="mt-6 space-y-4">
+                  {/* Config comparison */}
+                  <div className="border border-slate-200 rounded-lg overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-slate-50">
+                          <th className="text-left px-4 py-2 font-medium text-slate-500">
+                            Setting
+                          </th>
+                          <th className="text-center px-4 py-2 font-medium text-slate-500">
+                            Current
+                          </th>
+                          <th className="text-center px-4 py-2 font-medium text-xtal-navy">
+                            Recommended
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        <tr>
+                          <td className="px-4 py-2 text-slate-600">
+                            AI Query Rewriting
+                          </td>
+                          <td className="px-4 py-2 text-center">
+                            {optimizationResult.current_config
+                              .query_enhancement_enabled
+                              ? "On"
+                              : "Off"}
+                          </td>
+                          <td className="px-4 py-2 text-center font-medium">
+                            {optimizationResult.recommended_config
+                              .query_enhancement_enabled
+                              ? "On"
+                              : "Off"}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="px-4 py-2 text-slate-600">
+                            Marketing Influence
+                          </td>
+                          <td className="px-4 py-2 text-center font-mono">
+                            {optimizationResult.current_config.merch_rerank_strength.toFixed(
+                              2
+                            )}
+                          </td>
+                          <td className="px-4 py-2 text-center font-mono font-medium">
+                            {optimizationResult.recommended_config.merch_rerank_strength.toFixed(
+                              2
+                            )}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="px-4 py-2 text-slate-600">
+                            Keyword Match Priority
+                          </td>
+                          <td className="px-4 py-2 text-center font-mono">
+                            {optimizationResult.current_config.bm25_weight.toFixed(
+                              1
+                            )}
+                          </td>
+                          <td className="px-4 py-2 text-center font-mono font-medium">
+                            {optimizationResult.recommended_config.bm25_weight.toFixed(
+                              1
+                            )}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="px-4 py-2 text-slate-600">
+                            Product Type Boost
+                          </td>
+                          <td className="px-4 py-2 text-center font-mono">
+                            {optimizationResult.current_config.keyword_rerank_strength.toFixed(
+                              1
+                            )}
+                          </td>
+                          <td className="px-4 py-2 text-center font-mono font-medium">
+                            {optimizationResult.recommended_config.keyword_rerank_strength.toFixed(
+                              1
+                            )}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Reasoning */}
+                  <div className="bg-xtal-ice/50 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-xtal-navy mb-1">
+                      Why this recommendation
+                    </h4>
+                    <p className="text-sm text-slate-600 whitespace-pre-line">
+                      {optimizationResult.reasoning}
+                    </p>
+                  </div>
+
+                  {/* Weirdest Results */}
+                  {optimizationResult.weirdest_results && (
+                    <div className="border border-amber-200 bg-amber-50/50 rounded-lg p-4">
+                      <h4 className="text-sm font-semibold text-amber-700 mb-3">
+                        Weirdest Results
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                        <div>
+                          <p className="font-medium text-slate-500 mb-1">Current config</p>
+                          <p className="text-slate-700 font-medium">
+                            &ldquo;{optimizationResult.weirdest_results.current.query}&rdquo;
+                          </p>
+                          <p className="text-amber-800 mt-1">
+                            {optimizationResult.weirdest_results.current.product}
+                          </p>
+                          <p className="text-slate-500 mt-1 italic">
+                            {optimizationResult.weirdest_results.current.reason}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="font-medium text-xtal-navy mb-1">Recommended config</p>
+                          <p className="text-slate-700 font-medium">
+                            &ldquo;{optimizationResult.weirdest_results.recommended.query}&rdquo;
+                          </p>
+                          <p className="text-amber-800 mt-1">
+                            {optimizationResult.weirdest_results.recommended.product}
+                          </p>
+                          <p className="text-slate-500 mt-1 italic">
+                            {optimizationResult.weirdest_results.recommended.reason}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Sample comparisons */}
+                  {optimizationResult.sample_comparisons.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-semibold text-slate-500 mb-2">
+                        Sample before / after
+                      </h4>
+                      <div className="space-y-3">
+                        {optimizationResult.sample_comparisons.map((comp, i) => {
+                          const isExpanded = expandedComparisons.has(i)
+                          const currentItems = isExpanded
+                            ? (comp.current_results?.length ? comp.current_results : comp.current_top_5.map(t => ({ title: t })))
+                            : comp.current_top_5.map(t => ({ title: t }))
+                          const recommendedItems = isExpanded
+                            ? (comp.recommended_results?.length ? comp.recommended_results : comp.recommended_top_5.map(t => ({ title: t })))
+                            : comp.recommended_top_5.map(t => ({ title: t }))
+                          const hasMore = (comp.current_results?.length || 0) > 5 || (comp.recommended_results?.length || 0) > 5
+
+                          return (
+                            <div
+                              key={i}
+                              className="border border-slate-200 rounded-lg p-3"
+                            >
+                              <p className="text-sm font-medium text-xtal-navy mb-2">
+                                &ldquo;{comp.query}&rdquo;
+                              </p>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                <div>
+                                  <p className="font-medium text-slate-400 mb-1">
+                                    Current
+                                  </p>
+                                  <ol className="list-decimal list-inside space-y-0.5 text-slate-600">
+                                    {currentItems.map((item, j) => (
+                                      <li key={j} className="truncate" title={"title" in item ? item.title : String(item)}>
+                                        {"title" in item ? item.title : String(item)}
+                                        {"price" in item && item.price ? ` — $${Number(item.price).toFixed(2)}` : ""}
+                                      </li>
+                                    ))}
+                                  </ol>
+                                </div>
+                                <div>
+                                  <p className="font-medium text-xtal-navy mb-1">
+                                    Recommended
+                                  </p>
+                                  <ol className="list-decimal list-inside space-y-0.5 text-slate-600">
+                                    {recommendedItems.map((item, j) => (
+                                      <li key={j} className="truncate" title={"title" in item ? item.title : String(item)}>
+                                        {"title" in item ? item.title : String(item)}
+                                        {"price" in item && item.price ? ` — $${Number(item.price).toFixed(2)}` : ""}
+                                      </li>
+                                    ))}
+                                  </ol>
+                                </div>
+                              </div>
+                              {hasMore && (
+                                <button
+                                  onClick={() => toggleComparisonExpand(i)}
+                                  className="mt-2 text-xs text-xtal-navy hover:underline"
+                                >
+                                  {isExpanded ? "Show top 5" : `Show all ${Math.max(comp.current_results?.length || 0, comp.recommended_results?.length || 0)} results`}
+                                </button>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Meta */}
+                  <p className="text-xs text-slate-400">
+                    Tested {optimizationResult.configs_tested} configurations
+                    across {optimizationResult.queries_tested} queries in{" "}
+                    {optimizationResult.optimization_time.toFixed(1)}s
+                  </p>
+
+                  {/* Actions */}
+                  <div className="flex gap-3">
+                    <button
+                      onClick={applyRecommendation}
+                      disabled={settingsSaving}
+                      className="px-4 py-2 bg-xtal-navy text-white rounded-lg text-sm font-medium
+                        hover:bg-xtal-navy/90 disabled:opacity-50 transition-colors"
+                    >
+                      Apply Recommended Settings
+                    </button>
+                    <button
+                      onClick={() => setOptimizationResult(null)}
+                      className="px-4 py-2 text-slate-500 hover:text-slate-700 text-sm transition-colors"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -944,329 +1257,6 @@ export default function SearchTuningPage() {
             placeholder="System prompt for generating discovery chips. Use {store_type} — it will be replaced with the Store Type value above."
             history={aspectsHistory}
           />
-        </div>
-
-        {/* Auto-Optimize Section */}
-        <div>
-          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
-            Auto-Optimize
-          </h2>
-
-          <div className="glass-card p-6">
-            <div>
-              <h3 className="text-lg font-semibold text-xtal-navy">
-                Optimize for My Store
-              </h3>
-              <p className="text-sm text-slate-500 mt-1">
-                Automatically tests different weight combinations against your
-                catalog and recent searches, then recommends the best settings.
-              </p>
-            </div>
-
-            <div className="mt-4">
-              <button
-                onClick={runOptimization}
-                disabled={optimizing || settingsSaving}
-                className="px-4 py-2 bg-xtal-navy text-white rounded-lg text-sm font-medium
-                  hover:bg-xtal-navy/90 disabled:opacity-50 disabled:cursor-not-allowed
-                  transition-colors"
-              >
-                {optimizing ? (
-                  <span className="flex items-center gap-2">
-                    <svg
-                      className="animate-spin h-4 w-4"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                      />
-                    </svg>
-                    Analyzing your catalog...
-                  </span>
-                ) : (
-                  "Optimize Settings"
-                )}
-              </button>
-              {optimizing && (
-                <div className="mt-3 space-y-2">
-                  <div className="flex items-center gap-3 text-sm text-slate-600">
-                    <span className="font-medium">
-                      {optimizeStage === "gathering_context" && "Analyzing your catalog and recent searches..."}
-                      {optimizeStage === "proposing_configs" && "Claude is designing 30 test configurations..."}
-                      {optimizeStage === "executing_searches" && "Testing 360 search combinations across your catalog..."}
-                      {optimizeStage === "evaluating_results" && "Claude is evaluating results and picking a winner..."}
-                      {(!optimizeStage || optimizeStage === "starting") && "Connecting to optimization service..."}
-                    </span>
-                    {optimizeElapsed > 0 && (
-                      <span className="text-xs text-slate-400 tabular-nums">
-                        {Math.round(optimizeElapsed)}s
-                      </span>
-                    )}
-                  </div>
-                  <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
-                    <div
-                      className="bg-xtal-navy h-full rounded-full transition-all duration-1000 ease-out"
-                      style={{
-                        width: `${Math.max(5, (
-                          optimizeStage === "gathering_context" ? 5 :
-                          optimizeStage === "proposing_configs" ? 15 :
-                          optimizeStage === "executing_searches" ? 45 :
-                          optimizeStage === "evaluating_results" ? 85 :
-                          2
-                        ))}%`
-                      }}
-                    />
-                  </div>
-                  <p className="text-xs text-slate-400">
-                    This typically takes about 5 minutes. Testing 30 configurations
-                    across 12 queries to find your optimal search settings.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {optimizeError && (
-              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-                {optimizeError}
-              </div>
-            )}
-
-            {optimizationResult && (
-              <div className="mt-6 space-y-4">
-                {/* Config comparison */}
-                <div className="border border-slate-200 rounded-lg overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="bg-slate-50">
-                        <th className="text-left px-4 py-2 font-medium text-slate-500">
-                          Setting
-                        </th>
-                        <th className="text-center px-4 py-2 font-medium text-slate-500">
-                          Current
-                        </th>
-                        <th className="text-center px-4 py-2 font-medium text-xtal-navy">
-                          Recommended
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      <tr>
-                        <td className="px-4 py-2 text-slate-600">
-                          AI Query Rewriting
-                        </td>
-                        <td className="px-4 py-2 text-center">
-                          {optimizationResult.current_config
-                            .query_enhancement_enabled
-                            ? "On"
-                            : "Off"}
-                        </td>
-                        <td className="px-4 py-2 text-center font-medium">
-                          {optimizationResult.recommended_config
-                            .query_enhancement_enabled
-                            ? "On"
-                            : "Off"}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="px-4 py-2 text-slate-600">
-                          Marketing Influence
-                        </td>
-                        <td className="px-4 py-2 text-center font-mono">
-                          {optimizationResult.current_config.merch_rerank_strength.toFixed(
-                            2
-                          )}
-                        </td>
-                        <td className="px-4 py-2 text-center font-mono font-medium">
-                          {optimizationResult.recommended_config.merch_rerank_strength.toFixed(
-                            2
-                          )}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="px-4 py-2 text-slate-600">
-                          Keyword Match Priority
-                        </td>
-                        <td className="px-4 py-2 text-center font-mono">
-                          {optimizationResult.current_config.bm25_weight.toFixed(
-                            1
-                          )}
-                        </td>
-                        <td className="px-4 py-2 text-center font-mono font-medium">
-                          {optimizationResult.recommended_config.bm25_weight.toFixed(
-                            1
-                          )}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="px-4 py-2 text-slate-600">
-                          Product Type Boost
-                        </td>
-                        <td className="px-4 py-2 text-center font-mono">
-                          {optimizationResult.current_config.keyword_rerank_strength.toFixed(
-                            1
-                          )}
-                        </td>
-                        <td className="px-4 py-2 text-center font-mono font-medium">
-                          {optimizationResult.recommended_config.keyword_rerank_strength.toFixed(
-                            1
-                          )}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Reasoning */}
-                <div className="bg-xtal-ice/50 rounded-lg p-4">
-                  <h4 className="text-sm font-semibold text-xtal-navy mb-1">
-                    Why this recommendation
-                  </h4>
-                  <p className="text-sm text-slate-600 whitespace-pre-line">
-                    {optimizationResult.reasoning}
-                  </p>
-                </div>
-
-                {/* Weirdest Results */}
-                {optimizationResult.weirdest_results && (
-                  <div className="border border-amber-200 bg-amber-50/50 rounded-lg p-4">
-                    <h4 className="text-sm font-semibold text-amber-700 mb-3">
-                      Weirdest Results
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                      <div>
-                        <p className="font-medium text-slate-500 mb-1">Current config</p>
-                        <p className="text-slate-700 font-medium">
-                          &ldquo;{optimizationResult.weirdest_results.current.query}&rdquo;
-                        </p>
-                        <p className="text-amber-800 mt-1">
-                          {optimizationResult.weirdest_results.current.product}
-                        </p>
-                        <p className="text-slate-500 mt-1 italic">
-                          {optimizationResult.weirdest_results.current.reason}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="font-medium text-xtal-navy mb-1">Recommended config</p>
-                        <p className="text-slate-700 font-medium">
-                          &ldquo;{optimizationResult.weirdest_results.recommended.query}&rdquo;
-                        </p>
-                        <p className="text-amber-800 mt-1">
-                          {optimizationResult.weirdest_results.recommended.product}
-                        </p>
-                        <p className="text-slate-500 mt-1 italic">
-                          {optimizationResult.weirdest_results.recommended.reason}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Sample comparisons */}
-                {optimizationResult.sample_comparisons.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-semibold text-slate-500 mb-2">
-                      Sample before / after
-                    </h4>
-                    <div className="space-y-3">
-                      {optimizationResult.sample_comparisons.map((comp, i) => {
-                        const isExpanded = expandedComparisons.has(i)
-                        const currentItems = isExpanded
-                          ? (comp.current_results?.length ? comp.current_results : comp.current_top_5.map(t => ({ title: t })))
-                          : comp.current_top_5.map(t => ({ title: t }))
-                        const recommendedItems = isExpanded
-                          ? (comp.recommended_results?.length ? comp.recommended_results : comp.recommended_top_5.map(t => ({ title: t })))
-                          : comp.recommended_top_5.map(t => ({ title: t }))
-                        const hasMore = (comp.current_results?.length || 0) > 5 || (comp.recommended_results?.length || 0) > 5
-
-                        return (
-                          <div
-                            key={i}
-                            className="border border-slate-200 rounded-lg p-3"
-                          >
-                            <p className="text-sm font-medium text-xtal-navy mb-2">
-                              &ldquo;{comp.query}&rdquo;
-                            </p>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                              <div>
-                                <p className="font-medium text-slate-400 mb-1">
-                                  Current
-                                </p>
-                                <ol className="list-decimal list-inside space-y-0.5 text-slate-600">
-                                  {currentItems.map((item, j) => (
-                                    <li key={j} className="truncate" title={"title" in item ? item.title : String(item)}>
-                                      {"title" in item ? item.title : String(item)}
-                                      {"price" in item && item.price ? ` — $${Number(item.price).toFixed(2)}` : ""}
-                                    </li>
-                                  ))}
-                                </ol>
-                              </div>
-                              <div>
-                                <p className="font-medium text-xtal-navy mb-1">
-                                  Recommended
-                                </p>
-                                <ol className="list-decimal list-inside space-y-0.5 text-slate-600">
-                                  {recommendedItems.map((item, j) => (
-                                    <li key={j} className="truncate" title={"title" in item ? item.title : String(item)}>
-                                      {"title" in item ? item.title : String(item)}
-                                      {"price" in item && item.price ? ` — $${Number(item.price).toFixed(2)}` : ""}
-                                    </li>
-                                  ))}
-                                </ol>
-                              </div>
-                            </div>
-                            {hasMore && (
-                              <button
-                                onClick={() => toggleComparisonExpand(i)}
-                                className="mt-2 text-xs text-xtal-navy hover:underline"
-                              >
-                                {isExpanded ? "Show top 5" : `Show all ${Math.max(comp.current_results?.length || 0, comp.recommended_results?.length || 0)} results`}
-                              </button>
-                            )}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* Meta */}
-                <p className="text-xs text-slate-400">
-                  Tested {optimizationResult.configs_tested} configurations
-                  across {optimizationResult.queries_tested} queries in{" "}
-                  {optimizationResult.optimization_time.toFixed(1)}s
-                </p>
-
-                {/* Actions */}
-                <div className="flex gap-3">
-                  <button
-                    onClick={applyRecommendation}
-                    disabled={settingsSaving}
-                    className="px-4 py-2 bg-xtal-navy text-white rounded-lg text-sm font-medium
-                      hover:bg-xtal-navy/90 disabled:opacity-50 transition-colors"
-                  >
-                    Apply Recommended Settings
-                  </button>
-                  <button
-                    onClick={() => setOptimizationResult(null)}
-                    className="px-4 py-2 text-slate-500 hover:text-slate-700 text-sm transition-colors"
-                  >
-                    Dismiss
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Optimization History — collapsed by default */}
