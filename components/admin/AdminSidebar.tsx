@@ -14,6 +14,7 @@ import {
   X,
 } from "lucide-react"
 import { useCollection } from "@/lib/admin/CollectionContext"
+import UserMenu from "@/components/admin/UserMenu"
 
 const NAV_ITEMS = [
   { href: "/admin/dashboard", label: "Dashboard", icon: BarChart3 },
@@ -23,11 +24,18 @@ const NAV_ITEMS = [
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ]
 
-function SidebarContent({ collection, setCollection, collections, pathname }: {
+interface UserInfo {
+  name?: string | null
+  email?: string | null
+  image?: string | null
+}
+
+function SidebarContent({ collection, setCollection, collections, pathname, user }: {
   collection: string
   setCollection: (v: string) => void
   collections: { id: string; label: string }[]
   pathname: string
+  user?: UserInfo
 }) {
   return (
     <>
@@ -84,10 +92,11 @@ function SidebarContent({ collection, setCollection, collections, pathname }: {
         })}
       </nav>
 
-      <div className="p-4 border-t border-white/10">
+      <div className="p-4 border-t border-white/10 space-y-3">
+        {user && <UserMenu name={user.name} email={user.email} image={user.image} />}
         <Link
           href="/"
-          className="text-xs text-white/40 hover:text-white/70 transition-colors"
+          className="text-xs text-white/40 hover:text-white/70 transition-colors block"
         >
           &larr; Back to site
         </Link>
@@ -96,7 +105,7 @@ function SidebarContent({ collection, setCollection, collections, pathname }: {
   )
 }
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ user }: { user?: UserInfo }) {
   const pathname = usePathname()
   const { collection, setCollection, collections } = useCollection()
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -136,6 +145,7 @@ export default function AdminSidebar() {
           setCollection={setCollection}
           collections={collections}
           pathname={pathname}
+          user={user}
         />
       </aside>
 
@@ -168,6 +178,7 @@ export default function AdminSidebar() {
           setCollection={setCollection}
           collections={collections}
           pathname={pathname}
+          user={user}
         />
       </aside>
     </>

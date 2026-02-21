@@ -19,6 +19,7 @@
     "lucide-react": "^0.563.0",
     "nanoid": "^5.1.6",
     "next": "^14.2.0",
+    "next-auth": "^5.0.0-beta.25",
     "playwright": "^1.58.2",
     "playwright-core": "^1.58.2",
     "react": "^18.3.0",
