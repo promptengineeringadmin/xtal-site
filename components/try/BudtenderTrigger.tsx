@@ -1,15 +1,17 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { Sparkles } from "lucide-react"
-import BudtenderDrawer from "./BudtenderDrawer"
+import BudtenderQuiz from "./BudtenderQuiz"
 
 interface BudtenderTriggerProps {
   collection: string
+  onProSearch?: () => void
 }
 
-export default function BudtenderTrigger({ collection }: BudtenderTriggerProps) {
+export default function BudtenderTrigger({ collection, onProSearch }: BudtenderTriggerProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const handleClose = useCallback(() => setIsOpen(false), [])
 
   return (
     <>
@@ -25,11 +27,12 @@ export default function BudtenderTrigger({ collection }: BudtenderTriggerProps) 
         <span className="text-sm font-medium">Ask the Budtender</span>
       </button>
 
-      {/* Drawer */}
-      <BudtenderDrawer
+      {/* Quiz modal */}
+      <BudtenderQuiz
         isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={handleClose}
         collection={collection}
+        onProSearch={onProSearch}
       />
     </>
   )
