@@ -26,6 +26,11 @@ export const COLLECTIONS: CollectionConfig[] = [
     label: "Best Buy",
     description: "xtalsearch.com/bestbuy",
   },
+  {
+    id: "goldcanna",
+    label: "Gold Canna",
+    description: "xtalsearch.com/goldcanna",
+  },
 ]
 
 export const DEFAULT_COLLECTION = "xtaldemo"

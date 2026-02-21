@@ -15,10 +15,14 @@ const FACET_LABELS: Record<string, string> = {
   proof: "Proof",
   region: "Region",
   size: "Size",
+  terpene: "Terpene",
+  effect: "Effect",
+  "strain-type": "Strain Type",
+  format: "Format",
 }
 
 // Facets that are expanded by default (by priority order)
-const DEFAULT_EXPANDED = ["product-subcategory", "brand", "vendor"]
+const DEFAULT_EXPANDED = ["product-subcategory", "brand", "vendor", "strain-type", "terpene", "effect", "format"]
 
 const INITIALLY_VISIBLE = 5
 

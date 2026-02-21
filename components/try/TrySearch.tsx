@@ -308,6 +308,10 @@ function MobileFilterContent({
     "product-subcategory": "Category",
     brand: "Brand",
     vendor: "Vendor",
+    terpene: "Terpene",
+    effect: "Effect",
+    "strain-type": "Strain Type",
+    format: "Format",
   }
 
   function humanize(prefix: string) {

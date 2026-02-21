@@ -25,6 +25,7 @@ const HARDCODED_IDS = new Set(COLLECTIONS.map((c) => c.id))
 const STATIC_ROUTES: Record<string, string> = {
   xtaldemo: "/try",
   willow: "/willow",
+  goldcanna: "/goldcanna",
 }
 
 function demoUrl(id: string) {
