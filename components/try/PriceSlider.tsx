@@ -90,7 +90,7 @@ export default function PriceSlider({
             <button
               key={preset.label}
               onClick={() => handlePreset(preset)}
-              className={`text-[11px] px-2 py-0.5 rounded-full transition-colors ${
+              className={`text-[11px] px-2 py-1 rounded-full transition-colors ${
                 isActive
                   ? "bg-xtal-navy text-white"
                   : "border border-slate-200 text-slate-500 hover:border-xtal-navy hover:text-xtal-navy"

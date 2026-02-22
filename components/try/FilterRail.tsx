@@ -15,10 +15,14 @@ const FACET_LABELS: Record<string, string> = {
   proof: "Proof",
   region: "Region",
   size: "Size",
+  terpene: "Terpene",
+  effect: "Effect",
+  "strain-type": "Strain Type",
+  format: "Format",
 }
 
 // Facets that are expanded by default (by priority order)
-const DEFAULT_EXPANDED = ["product-subcategory", "brand", "vendor"]
+const DEFAULT_EXPANDED = ["product-subcategory", "brand", "vendor", "strain-type", "terpene", "effect", "format"]
 
 const INITIALLY_VISIBLE = 5
 
@@ -60,11 +64,11 @@ export default function FilterRail({
   )
   const [showMore, setShowMore] = useState<Record<string, boolean>>({})
 
-  // Derive price range from results (prices stored in cents, convert to dollars)
+  // Derive price range from results (prices stored in dollars)
   const priceStats = useMemo(() => {
     const prices = results.flatMap((p) => {
-      if (Array.isArray(p.price)) return p.price.map(v => v / 100)
-      if (typeof p.price === "number") return [p.price / 100]
+      if (Array.isArray(p.price)) return p.price
+      if (typeof p.price === "number") return [p.price]
       return []
     })
     if (prices.length === 0) return { min: 0, max: 1000 }

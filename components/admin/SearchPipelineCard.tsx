@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { ChevronDown, ChevronRight, ArrowRight, Check } from "lucide-react"
-import type { SearchEventData } from "@/lib/admin/types"
+import type { SearchEventData, ProxyTiming } from "@/lib/admin/types"
 
 interface SearchPipelineCardProps {
   event: {
@@ -58,6 +58,62 @@ function StepCard({
   )
 }
 
+function LatencyBar({
+  timing,
+  queryTime,
+}: {
+  timing: ProxyTiming
+  queryTime: number // backend self-reported, in seconds
+}) {
+  const backendProcessingMs = Math.round(queryTime * 1000)
+  const networkOverheadMs = Math.max(0, timing.backend_ms - backendProcessingMs)
+  const redisMs = timing.redis_ms
+  const totalMs = timing.total_ms || 1 // avoid division by zero
+
+  const segments = [
+    ...(redisMs > 0
+      ? [{ label: "Redis config", ms: redisMs, color: "bg-amber-400" }]
+      : []),
+    ...(networkOverheadMs > 0
+      ? [{ label: "Network", ms: networkOverheadMs, color: "bg-blue-400" }]
+      : []),
+    { label: "Backend", ms: backendProcessingMs, color: "bg-green-400" },
+  ]
+
+  return (
+    <div>
+      <div className="flex h-2.5 rounded-full overflow-hidden bg-slate-200">
+        {segments.map((seg, i) => (
+          <div
+            key={i}
+            className={`${seg.color} transition-all`}
+            style={{ width: `${Math.max((seg.ms / totalMs) * 100, 2)}%` }}
+            title={`${seg.label}: ${Math.round(seg.ms)}ms`}
+          />
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-3 mt-1.5">
+        {segments.map((seg, i) => (
+          <div key={i} className="flex items-center gap-1.5">
+            <div className={`w-2 h-2 rounded-sm ${seg.color}`} />
+            <span className="text-[11px] text-slate-600">
+              {seg.label}: <span className="font-medium">{Math.round(seg.ms)}ms</span>
+            </span>
+          </div>
+        ))}
+        <span className="text-[11px] text-slate-500 font-medium ml-auto">
+          Total: {Math.round(timing.total_ms)}ms
+        </span>
+        {timing.aspects_failed && (
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-red-600">
+            Aspects failed
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function SearchPipelineCard({
   event,
   aspectsGenerated,
@@ -97,14 +153,30 @@ export default function SearchPipelineCard({
         <span className="text-xs text-slate-500 whitespace-nowrap">
           {d.results_count} results
         </span>
-        <span className="text-xs text-slate-400 whitespace-nowrap">
-          {d.query_time.toFixed(2)}s
-        </span>
+        {d.proxy_timing ? (
+          <span className="text-xs text-slate-400 whitespace-nowrap">
+            {Math.round(d.proxy_timing.total_ms)}ms
+          </span>
+        ) : (
+          <span className="text-xs text-slate-400 whitespace-nowrap">
+            {d.query_time.toFixed(2)}s
+          </span>
+        )}
       </button>
 
       {/* Expanded pipeline view */}
       {expanded && (
         <div className="px-4 pb-4 pt-1 border-t border-slate-100">
+          {/* Latency breakdown */}
+          {d.proxy_timing && (
+            <div className="mb-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+              <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-2">
+                Latency Breakdown
+              </p>
+              <LatencyBar timing={d.proxy_timing} queryTime={d.query_time} />
+            </div>
+          )}
+
           {/* Step 1 - Original Query */}
           <StepCard
             stepNumber={1}
@@ -230,6 +302,9 @@ export default function SearchPipelineCard({
               </span>
               <span className="text-xs text-slate-400">
                 in {d.query_time.toFixed(2)}s
+                {d.proxy_timing && (
+                  <> ({Math.round(d.proxy_timing.total_ms)}ms total)</>
+                )}
               </span>
               <span
                 className={`inline-block px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide rounded-full ${

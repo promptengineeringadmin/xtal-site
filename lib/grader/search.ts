@@ -26,12 +26,26 @@ export interface SearchProgress {
   result?: QueryResult
 }
 
-// ─── Execute search on a Shopify store via API ──────────────
+// ─── Execute search on a Shopify store ───────────────────────
+// Primary: scrape the full search page (/search?q=) which is what
+// shoppers actually see.  Fallback: the /search/suggest.json
+// predictive API (fast + structured, but much stricter matching).
 
 async function searchShopify(
   origin: string,
   query: string
 ): Promise<{ results: SearchResult[]; count: number }> {
+  // 1. Try the full search page (matches what shoppers actually see)
+  try {
+    const htmlResults = await searchViaUrl(`${origin}/search?q=`, query)
+    if (htmlResults.results.length > 0 || htmlResults.count > 0) {
+      return htmlResults
+    }
+  } catch {
+    // Fall through to suggest API
+  }
+
+  // 2. Fallback to Shopify's predictive search / suggest API
   const url = `${origin}/search/suggest.json?q=${encodeURIComponent(query)}&resources[type]=product&resources[limit]=10`
 
   const res = await fetch(url, {
@@ -116,48 +130,78 @@ async function searchViaUrl(
 
   const html = await res.text()
 
-  // Try to extract product titles from the search results HTML.
-  // Strategy: first try to isolate the search results container,
-  // then apply high-confidence class-based patterns.
-  // Only fall back to URL-based patterns on the scoped HTML to avoid
-  // matching navigation/menu links that appear across the whole page.
+  // Extract result count first — if the page explicitly says "0 results",
+  // skip title extraction to avoid false positives from navigation links.
+  const countPatterns = [
+    /(\d+)\s*results?\s*(?:found|for)/i,
+    /showing\s*\d+\s*(?:–|-)\s*\d+\s*of\s*(\d+)/i,
+    /(\d+)\s*products?\s*found/i,
+    /showing\s+(?:all\s+)?(\d+)\s+results?/i,
+    /\((\d+)\s*items?\)/i,
+    /(\d+)\s*(?:items?|products?)\s*$/im,
+  ]
+  let explicitCount: number | null = null
+  for (const cp of countPatterns) {
+    const m = html.match(cp)
+    if (m) {
+      explicitCount = parseInt(m[1], 10)
+      break
+    }
+  }
+
+  // If the page explicitly reports 0 results, trust it
+  if (explicitCount === 0) {
+    return { results: [], count: 0 }
+  }
+
+  // Extract product titles from the search results HTML.
+  // Strategy: isolate the search results container, then apply
+  // high-confidence class-based patterns. Only fall back to
+  // URL-based patterns on scoped HTML.
 
   const results: SearchResult[] = []
 
-  // Attempt to extract just the search results section of the page
+  // First: try Schema.org Product structured data on FULL HTML
+  // (self-scoping via itemtype check — doesn't need container scoping)
+  const schemaPattern = /itemtype="[^"]*Product[^"]*"[\s\S]{0,300}?itemprop="name"\s+content="([^"]{3,100})"/gi
+  for (const match of Array.from(html.matchAll(schemaPattern))) {
+    const title = decodeEntities(match[1].trim())
+    if (title && title.length > 2 && !results.some((r) => r.title === title)) {
+      results.push({ title })
+    }
+    if (results.length >= 10) break
+  }
+
+  // Fall back to scoped HTML patterns if Schema.org didn't find anything
   const scopedHtml = extractSearchResultsSection(html) ?? html
   const isScoped = scopedHtml !== html
 
-  // High-confidence patterns: class-based selectors specific to search results
   const highConfidencePatterns = [
     /class="[^"]*product[_-]?title[^"]*"[^>]*>([^<]{3,100})</gi,
     /class="[^"]*product[_-]?name[^"]*"[^>]*>([^<]{3,100})</gi,
     /class="[^"]*card[_-]?title[^"]*"[^>]*>([^<]{3,100})</gi,
     /class="[^"]*search[_-]?result[_-]?title[^"]*"[^>]*>([^<]{3,100})</gi,
     /<h[2-4][^>]*class="[^"]*title[^"]*"[^>]*>([^<]{3,100})</gi,
-    // Elementor/WP: entry titles (class-based, reasonably specific)
     /class="[^"]*entry[_-]?title[^"]*"[^>]*>\s*<a[^>]*>([^<]{3,100})</gi,
   ]
 
-  // Low-confidence patterns: URL-based, match product links anywhere on page.
-  // Only safe to use on scoped HTML (search results section).
   const lowConfidencePatterns = [
     /href="[^"]*\/product\/[^"]*"[^>]*>([^<]{3,100})</gi,
     /href="[^"]*\/products?\/[^"]*"[^>]*>([^<]{3,100})</gi,
   ]
 
-  // First pass: high-confidence patterns on scoped HTML
-  for (const pattern of highConfidencePatterns) {
-    for (const match of Array.from(scopedHtml.matchAll(pattern))) {
-      const title = decodeEntities(match[1].trim())
-      if (title && title.length > 2 && !results.some((r) => r.title === title)) {
-        results.push({ title })
+  if (results.length === 0) {
+    for (const pattern of highConfidencePatterns) {
+      for (const match of Array.from(scopedHtml.matchAll(pattern))) {
+        const title = decodeEntities(match[1].trim())
+        if (title && title.length > 2 && !results.some((r) => r.title === title)) {
+          results.push({ title })
+        }
       }
+      if (results.length >= 10) break
     }
-    if (results.length >= 10) break
   }
 
-  // Second pass: if no results yet, try low-confidence patterns on SCOPED html only
   if (results.length === 0 && isScoped) {
     for (const pattern of lowConfidencePatterns) {
       for (const match of Array.from(scopedHtml.matchAll(pattern))) {
@@ -170,25 +214,7 @@ async function searchViaUrl(
     }
   }
 
-  // Try to extract result count
-  let count = results.length
-  const countPatterns = [
-    /(\d+)\s*results?\s*(?:found|for)/i,
-    /showing\s*\d+\s*(?:–|-)\s*\d+\s*of\s*(\d+)/i,
-    /(\d+)\s*products?\s*found/i,
-    // WooCommerce: "Showing all X results" or "Showing 1–12 of X results"
-    /showing\s+(?:all\s+)?(\d+)\s+results?/i,
-    // Generic: "X items" or "X products"
-    /(\d+)\s*(?:items?|products?)\s*$/im,
-  ]
-  for (const cp of countPatterns) {
-    const m = html.match(cp)
-    if (m) {
-      count = parseInt(m[1], 10)
-      break
-    }
-  }
-
+  const count = explicitCount ?? results.length
   return { results: results.slice(0, 10), count }
 }
 
@@ -207,7 +233,7 @@ export async function runSingleQuery(
     let searchResults: { results: SearchResult[]; count: number }
 
     if (platform === "shopify") {
-      // Use Shopify's predictive search API (most reliable)
+      // Full search page first, suggest API fallback
       searchResults = await searchShopify(origin, testQuery.text)
     } else if (searchUrl) {
       // Use known search URL for this platform

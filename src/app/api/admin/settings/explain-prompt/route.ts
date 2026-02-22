@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server"
 import {
-  getExplainPrompt,
-  saveExplainPrompt,
+  getExplainPromptPool,
+  saveExplainPromptPool,
   getExplainPromptHistory,
-  DEFAULT_EXPLAIN_SYSTEM_PROMPT,
+  DEFAULT_EXPLAIN_PROMPTS,
+  computePromptHash,
+  type ExplainPromptEntry,
 } from "@/lib/admin/explain-prompt"
 
 export async function GET(request: Request) {
@@ -13,29 +15,37 @@ export async function GET(request: Request) {
     const wantDefault = searchParams.get("default") === "true"
 
     if (wantDefault) {
-      return NextResponse.json({ content: DEFAULT_EXPLAIN_SYSTEM_PROMPT })
+      return NextResponse.json({
+        pool: DEFAULT_EXPLAIN_PROMPTS.map((p) => ({
+          ...p,
+          prompt_hash: computePromptHash(p.content),
+        })),
+      })
     }
 
-    const content = await getExplainPrompt()
+    const pool = await getExplainPromptPool()
+    const poolWithHashes = pool.map((p) => ({
+      ...p,
+      prompt_hash: computePromptHash(p.content),
+    }))
 
     let history: Awaited<ReturnType<typeof getExplainPromptHistory>> = []
     if (includeHistory) {
       try {
         history = await getExplainPromptHistory()
       } catch {
-        // Redis unavailable for history — still return the prompt content
+        // Redis unavailable for history
       }
     }
 
     return NextResponse.json({
-      content,
-      defaultContent: DEFAULT_EXPLAIN_SYSTEM_PROMPT,
+      pool: poolWithHashes,
       history,
     })
   } catch (error) {
     console.error("Explain prompt GET error:", error)
     return NextResponse.json(
-      { error: "Failed to fetch explain prompt" },
+      { error: "Failed to fetch explain prompts" },
       { status: 500 }
     )
   }
@@ -44,30 +54,40 @@ export async function GET(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json()
-    const { content } = body as { content: string }
+    const { pool } = body as { pool: ExplainPromptEntry[] }
 
-    if (!content || typeof content !== "string") {
+    if (!pool || !Array.isArray(pool)) {
       return NextResponse.json(
-        { error: "Content is required" },
+        { error: "Pool array is required" },
         { status: 400 }
       )
     }
 
+    // Validate each entry
+    for (const entry of pool) {
+      if (!entry.id || !entry.name || !entry.content || typeof entry.enabled !== "boolean") {
+        return NextResponse.json(
+          { error: `Invalid entry: ${entry.id || "unknown"} — all fields required` },
+          { status: 400 }
+        )
+      }
+    }
+
     try {
-      await saveExplainPrompt(content)
+      await saveExplainPromptPool(pool)
       return NextResponse.json({ success: true })
     } catch (redisErr) {
-      console.error("Explain prompt Redis save failed:", redisErr)
+      console.error("Explain prompt pool Redis save failed:", redisErr)
       return NextResponse.json({
         success: false,
-        warning: "Failed to persist prompt — storage is unreachable",
+        warning: "Failed to persist prompt pool — storage is unreachable",
         error: redisErr instanceof Error ? redisErr.message : "Unknown error",
       })
     }
   } catch (error) {
     console.error("Explain prompt PUT error:", error)
     return NextResponse.json(
-      { error: "Failed to save explain prompt" },
+      { error: "Failed to save explain prompts" },
       { status: 500 }
     )
   }

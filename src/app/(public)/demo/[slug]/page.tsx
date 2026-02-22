@@ -2,9 +2,13 @@ import { notFound } from "next/navigation"
 import { getAllCollections } from "@/lib/admin/demo-collections"
 import Navbar from "@/components/Navbar"
 import TrySearch from "@/components/try/TrySearch"
+import { serverSearch } from "@/lib/server-search"
+import { getResultsPerPage } from "@/lib/admin/admin-settings"
+import { getShowcaseQueries, getExtraSuggestions, fetchShowcaseData } from "@/lib/showcase"
 
 interface Props {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ q?: string }>
 }
 
 export async function generateMetadata({ params }: Props) {
@@ -18,18 +22,39 @@ export async function generateMetadata({ params }: Props) {
   }
 }
 
-export default async function DemoPage({ params }: Props) {
-  const { slug } = await params
-  const collections = await getAllCollections()
+export default async function DemoPage({ params, searchParams }: Props) {
+  const [{ slug }, { q }, collections] = await Promise.all([
+    params,
+    searchParams,
+    getAllCollections(),
+  ])
   const demo = collections.find((c) => c.id === slug)
 
   if (!demo) notFound()
+
+  const resultsPerPage = await getResultsPerPage(slug)
+  const initialSearchData = q ? await serverSearch(q, slug, resultsPerPage) : null
+
+  let showcaseData = null
+  if (!q) {
+    const queries = getShowcaseQueries(slug, demo.suggestions)
+    if (queries) showcaseData = await fetchShowcaseData(queries, slug)
+  }
+  const extraSuggestions = getExtraSuggestions(slug, demo.suggestions)
 
   return (
     <>
       <Navbar />
       <main className="pt-20 min-h-screen bg-[#FCFDFF]">
-        <TrySearch collection={slug} suggestions={demo.suggestions} />
+        <TrySearch
+          collection={slug}
+          suggestions={demo.suggestions}
+          initialQuery={q}
+          initialSearchData={initialSearchData}
+          defaultResultsPerPage={resultsPerPage}
+          showcaseData={showcaseData}
+          extraSuggestions={extraSuggestions}
+        />
       </main>
     </>
   )

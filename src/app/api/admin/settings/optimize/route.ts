@@ -16,23 +16,27 @@ export async function POST(request: Request) {
       {
         method: "POST",
         body: JSON.stringify(body),
+        signal: AbortSignal.timeout(25_000),
       }
     )
 
     if (!res.ok) {
       const text = await res.text()
-      return NextResponse.json(
-        { error: text || `Backend returned ${res.status}` },
-        { status: res.status }
-      )
+      const isHtml = text.trim().startsWith("<")
+      const errorMsg = isHtml
+        ? `Backend returned ${res.status} (service may be unavailable)`
+        : text || `Backend returned ${res.status}`
+      return NextResponse.json({ error: errorMsg }, { status: res.status })
     }
 
     const data = await res.json()
     return NextResponse.json(data)
   } catch (error) {
-    console.error("Optimize proxy error:", error)
+    const err = error instanceof Error ? error : new Error(String(error))
+    console.error(`Optimize proxy error [${err.name}]: ${err.message}`)
+    const detail = err.name === "TimeoutError" ? "Request timed out" : err.message
     return NextResponse.json(
-      { error: "Failed to reach optimization service" },
+      { error: `Failed to reach optimization service: ${detail}` },
       { status: 502 }
     )
   }
@@ -52,23 +56,26 @@ export async function GET(request: Request) {
 
     const res = await adminFetch(
       `/api/vendor/settings/optimize/${jobId}`,
-      { method: "GET" }
+      { method: "GET", signal: AbortSignal.timeout(25_000) }
     )
 
     if (!res.ok) {
       const text = await res.text()
-      return NextResponse.json(
-        { error: text || `Backend returned ${res.status}` },
-        { status: res.status }
-      )
+      const isHtml = text.trim().startsWith("<")
+      const errorMsg = isHtml
+        ? `Backend returned ${res.status} (service may be unavailable)`
+        : text || `Backend returned ${res.status}`
+      return NextResponse.json({ error: errorMsg }, { status: res.status })
     }
 
     const data = await res.json()
     return NextResponse.json(data)
   } catch (error) {
-    console.error("Optimize poll error:", error)
+    const err = error instanceof Error ? error : new Error(String(error))
+    console.error(`Optimize poll error [${err.name}]: ${err.message}`)
+    const detail = err.name === "TimeoutError" ? "Request timed out" : err.message
     return NextResponse.json(
-      { error: "Failed to reach optimization service" },
+      { error: `Failed to poll optimization service: ${detail}` },
       { status: 502 }
     )
   }

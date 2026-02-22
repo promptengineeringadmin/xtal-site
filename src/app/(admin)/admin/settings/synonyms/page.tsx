@@ -96,7 +96,7 @@ export default function SynonymsPage() {
 
   return (
     <div>
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <SubPageHeader
           backHref="/admin/settings"
           backLabel="Settings"
@@ -208,7 +208,7 @@ export default function SynonymsPage() {
             <h3 className="text-sm font-medium text-slate-700 mb-3">
               Add Synonym Group
             </h3>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <div className="flex-1">
                 <label className="block text-xs text-slate-500 mb-1">
                   Canonical value

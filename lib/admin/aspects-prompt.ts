@@ -35,18 +35,22 @@ interface AspectsPromptHistoryEntry {
   timestamp: string
 }
 
-// ─── Keys ───────────────────────────────────────────────────
+// ─── Keys (scoped by collection) ────────────────────────────
 
-const KEY_CURRENT = "aspects:prompt:system"
-const KEY_HISTORY = "aspects:prompt:history:system"
+function currentKey(collection: string) {
+  return `aspects:prompt:${collection}:system`
+}
+function historyKey(collection: string) {
+  return `aspects:prompt:history:${collection}:system`
+}
 const MAX_HISTORY = 50
 
 // ─── Get prompt (Redis override or default) ─────────────────
 
-export async function getAspectsPrompt(): Promise<string> {
+export async function getAspectsPrompt(collection: string): Promise<string> {
   try {
     const kv = getRedis()
-    const stored = await kv.get<string>(KEY_CURRENT)
+    const stored = await kv.get<string>(currentKey(collection))
     if (stored) return stored
   } catch {
     // Redis unavailable, fall back to default
@@ -56,27 +60,27 @@ export async function getAspectsPrompt(): Promise<string> {
 
 // ─── Save prompt ────────────────────────────────────────────
 
-export async function saveAspectsPrompt(content: string): Promise<void> {
+export async function saveAspectsPrompt(collection: string, content: string): Promise<void> {
   const kv = getRedis()
   const timestamp = new Date().toISOString()
 
   // Save current version
-  await kv.set(KEY_CURRENT, content)
+  await kv.set(currentKey(collection), content)
 
   // Push history entry
   const entry: AspectsPromptHistoryEntry = { content, timestamp }
-  await kv.lpush(KEY_HISTORY, JSON.stringify(entry))
+  await kv.lpush(historyKey(collection), JSON.stringify(entry))
 
   // Keep only last N versions
-  await kv.ltrim(KEY_HISTORY, 0, MAX_HISTORY - 1)
+  await kv.ltrim(historyKey(collection), 0, MAX_HISTORY - 1)
 }
 
 // ─── Get prompt history ─────────────────────────────────────
 
-export async function getAspectsPromptHistory(): Promise<
+export async function getAspectsPromptHistory(collection: string): Promise<
   AspectsPromptHistoryEntry[]
 > {
   const kv = getRedis()
-  const entries = await kv.lrange<string>(KEY_HISTORY, 0, MAX_HISTORY - 1)
+  const entries = await kv.lrange<string>(historyKey(collection), 0, MAX_HISTORY - 1)
   return entries.map((e) => (typeof e === "string" ? JSON.parse(e) : e))
 }

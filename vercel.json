@@ -15,8 +15,32 @@
     "src/app/api/grader/report/*/pdf/route.ts": {
       "maxDuration": 30,
       "memory": 1024
+    },
+    "src/app/api/admin/settings/optimize/route.ts": {
+      "maxDuration": 30
+    },
+    "src/app/api/xtal/search/route.ts": {
+      "maxDuration": 15
+    },
+    "src/app/api/xtal/aspects/route.ts": {
+      "maxDuration": 10
+    },
+    "src/app/api/xtal/explain/route.ts": {
+      "maxDuration": 10
+    },
+    "src/app/api/xtal/feedback/route.ts": {
+      "maxDuration": 5
+    },
+    "src/app/api/xtal/search-full/route.ts": {
+      "maxDuration": 15
     }
   },
+  "crons": [
+    {
+      "path": "/api/cron/warm-showcase",
+      "schedule": "0 0 * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

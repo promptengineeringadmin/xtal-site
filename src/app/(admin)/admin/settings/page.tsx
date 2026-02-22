@@ -44,7 +44,7 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2">
         {SETTINGS_PAGES.map(({ href, label, description, icon: Icon }) => (
           <Link
             key={href}

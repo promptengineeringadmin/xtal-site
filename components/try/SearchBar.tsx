@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Search } from "lucide-react"
 
 const DEFAULT_SUGGESTIONS = [
@@ -17,10 +17,15 @@ interface SearchBarProps {
   initialQuery?: string
   hasSearched?: boolean
   suggestions?: string[]
+  showSuggestions?: boolean
 }
 
-export default function SearchBar({ onSearch, loading, initialQuery = "", hasSearched = false, suggestions }: SearchBarProps) {
+export default function SearchBar({ onSearch, loading, initialQuery = "", hasSearched = false, suggestions, showSuggestions = true }: SearchBarProps) {
   const [value, setValue] = useState(initialQuery)
+
+  useEffect(() => {
+    setValue(initialQuery)
+  }, [initialQuery])
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -46,7 +51,7 @@ export default function SearchBar({ onSearch, loading, initialQuery = "", hasSea
             type="text"
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            placeholder="Describe what a customer is looking for..."
+            placeholder="Describe what you're looking for..."
             className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 bg-white text-sm
                        focus:outline-none focus:ring-2 focus:ring-xtal-navy/30 focus:border-xtal-navy
                        transition-colors"
@@ -63,8 +68,8 @@ export default function SearchBar({ onSearch, loading, initialQuery = "", hasSea
         </button>
       </form>
 
-      {!hasSearched && (
-        <div className="mt-3 flex flex-wrap gap-2">
+      {!hasSearched && showSuggestions && (
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-1 md:flex-wrap md:overflow-visible md:pb-0 scrollbar-none">
           <span className="text-xs text-slate-400 py-1">Example queries:</span>
           {(suggestions ?? DEFAULT_SUGGESTIONS).map((s) => (
             <button

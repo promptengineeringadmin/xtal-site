@@ -10,11 +10,14 @@ import FilterRail from "./FilterRail"
 import MobileFilterDrawer from "./MobileFilterDrawer"
 import AppliedFilters from "./AppliedFilters"
 import PriceSlider from "./PriceSlider"
+import ColdStartPanel from "./ColdStartPanel"
+import ColdStartHero from "./ColdStartHero"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { formatFacetValue } from "@/lib/facet-utils"
-import type { PriceRange } from "@/lib/xtal-types"
+import type { PriceRange, SearchResponse, ShowcaseRow } from "@/lib/xtal-types"
+import { useOnboardingState } from "@/lib/use-onboarding-state"
 
-export default function TrySearch({ collection, suggestions }: { collection?: string; suggestions?: string[] } = {}) {
+export default function TrySearch({ collection, suggestions, extraSuggestions, initialQuery, initialSearchData, defaultResultsPerPage, showcaseData }: { collection?: string; suggestions?: string[]; extraSuggestions?: string[]; initialQuery?: string; initialSearchData?: SearchResponse | null; defaultResultsPerPage?: number; showcaseData?: ShowcaseRow[] | null } = {}) {
   const {
     query,
     sortedResults,
@@ -32,6 +35,8 @@ export default function TrySearch({ collection, suggestions }: { collection?: st
     relevanceScores,
     sortBy,
     setSortBy,
+    resultsPerPage,
+    changeResultsPerPage,
     results,
     search,
     selectAspect,
@@ -41,7 +46,12 @@ export default function TrySearch({ collection, suggestions }: { collection?: st
     clearAllFilters,
     explain,
     reportIrrelevant,
-  } = useXtalSearch(collection)
+    reportWellPut,
+  } = useXtalSearch(collection, initialQuery, initialSearchData, defaultResultsPerPage)
+
+  const { isFirstSearch, hasUsedExplain, incrementSearchCount, markExplainUsed } = useOnboardingState()
+  const showColdStart = !query && !isSearching
+  const hasShowcaseData = showcaseData && showcaseData.length > 0
 
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
@@ -54,14 +64,15 @@ export default function TrySearch({ collection, suggestions }: { collection?: st
   // Build a quick summary of what's actually in the results (vendors, types, sample titles)
   const resultsSummary = useMemo(() => {
     if (sortedResults.length === 0) return ""
-    const vendors = Array.from(new Set(sortedResults.map((p) => p.vendor).filter(Boolean)))
-    const types = Array.from(new Set(sortedResults.map((p) => p.product_type).filter(Boolean)))
-    // Interleave vendors and types for variety, cap at 4 items
+    const isClean = (s: string) => s.length <= 60 && !s.includes(". ")
+    const vendors = Array.from(new Set(sortedResults.map((p) => p.vendor).filter(Boolean).filter(isClean)))
+    const types = Array.from(new Set(sortedResults.map((p) => p.product_type).filter(Boolean).filter(isClean)))
     const items: string[] = []
-    let vi = 0, ti = 0
-    while (items.length < 4 && (vi < vendors.length || ti < types.length)) {
-      if (vi < vendors.length) items.push(vendors[vi++])
-      if (items.length < 4 && ti < types.length) items.push(types[ti++])
+    // Types first — they describe what's in the results
+    for (let i = 0; i < types.length && items.length < 4; i++) items.push(types[i])
+    // Add vendors only if there are multiple (single vendor is redundant)
+    if (vendors.length > 1) {
+      for (let i = 0; i < vendors.length && items.length < 4; i++) items.push(vendors[i])
     }
     if (items.length === 0) {
       // Fallback: sample a few product titles
@@ -81,10 +92,34 @@ export default function TrySearch({ collection, suggestions }: { collection?: st
     return count
   }, [activeFacetFilters, priceRange])
 
+  // Wrap search to track onboarding state
+  function handleSearch(q: string, previewProducts?: import("@/lib/xtal-types").Product[]) {
+    incrementSearchCount()
+    search(q, previewProducts)
+  }
+
+  // Wrap explain to track onboarding state
+  async function handleExplain(productId: string, score?: number) {
+    markExplainUsed()
+    return explain(productId, score)
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Search bar — full width above grid */}
-      <SearchBar onSearch={search} loading={loading} initialQuery={query} hasSearched={!!query} suggestions={suggestions} />
+      {showColdStart ? (
+        <>
+          {/* Cold start: hero heading + prominent search bar */}
+          <ColdStartHero onSearch={handleSearch} loading={loading} />
+          <ColdStartPanel showcaseData={showcaseData ?? null} onSearch={handleSearch} suggestions={suggestions} extraSuggestions={extraSuggestions} />
+        </>
+      ) : (
+        <>
+          {/* Post-search: compact search bar, sticky on mobile */}
+          <div className="sticky top-[80px] z-20 bg-[#FCFDFF] -mx-4 px-4 pt-2 pb-2 md:static md:mx-0 md:px-0 md:pt-0 md:pb-0 md:bg-transparent">
+            <SearchBar onSearch={handleSearch} loading={loading} initialQuery={query} hasSearched={!!query} suggestions={suggestions} />
+          </div>
+        </>
+      )}
 
       {/* Error */}
       {error && (
@@ -101,68 +136,116 @@ export default function TrySearch({ collection, suggestions }: { collection?: st
             selectedAspects={selectedAspects}
             onSelect={selectAspect}
             onRemove={removeAspect}
+            showLabel={isFirstSearch}
           />
         </div>
       )}
 
       {/* Info bar: filter toggle + results count + sort — grid-aligned */}
       {query && !isSearching && !isFiltering && (sortedResults.length > 0 || hasActiveFilters) && (
-        <div
-          className={`mt-5 mb-2 grid ${
-            showFilters
-              ? "grid-cols-[260px_1fr] gap-10"
-              : hasFilterRail
-                ? "grid-cols-[auto_1fr] gap-4"
-                : ""
-          }`}
-        >
-          {/* Left: toggle icon + Filters label */}
-          {hasFilterRail && (
-            <div className="hidden md:flex items-center gap-2">
-              <button
-                onClick={() => setFiltersOpen(!filtersOpen)}
-                title={filtersOpen ? "Hide filters" : "Show filters"}
-                className="flex items-center justify-center w-7 h-7 rounded-md border border-slate-200
-                           text-slate-500 hover:border-xtal-navy hover:text-xtal-navy transition-colors"
-              >
-                <SlidersHorizontal size={14} />
-              </button>
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                Filters
-              </span>
-            </div>
-          )}
-
-          {/* Right: results count + sort */}
-          <div className="flex items-baseline justify-between gap-4">
-            <p className="text-[13px] whitespace-nowrap overflow-hidden">
-              <span className="font-medium text-slate-700">
-                {total} results for &ldquo;{query}&rdquo;
-              </span>
-              {resultsSummary && (
-                <span key={query} className="animate-wipe-tail text-slate-400">
-                  {" "}&mdash; {resultsSummary}{total > sortedResults.length ? ", and more" : ""}
+        <>
+          {/* Desktop info bar */}
+          <div
+            className={`mt-5 mb-2 hidden md:grid ${
+              showFilters
+                ? "grid-cols-[260px_1fr] gap-10"
+                : hasFilterRail
+                  ? "grid-cols-[auto_1fr] gap-4"
+                  : ""
+            }`}
+          >
+            {/* Left: toggle icon + Filters label */}
+            {hasFilterRail && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setFiltersOpen(!filtersOpen)}
+                  title={filtersOpen ? "Hide filters" : "Show filters"}
+                  className="flex items-center justify-center w-7 h-7 rounded-md border border-slate-200
+                             text-slate-500 hover:border-xtal-navy hover:text-xtal-navy transition-colors"
+                >
+                  <SlidersHorizontal size={14} />
+                </button>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                  Filters
                 </span>
-              )}
+              </div>
+            )}
+
+            {/* Right: results count + sort */}
+            <div className="flex items-baseline justify-between gap-4">
+              <p className="text-[13px] whitespace-nowrap overflow-hidden text-ellipsis min-w-0">
+                <span className="font-medium text-slate-700">
+                  {total} results for &ldquo;{query}&rdquo;
+                </span>
+                {resultsSummary && (
+                  <span key={query} className="animate-wipe-tail text-slate-400">
+                    {" "}&mdash; {resultsSummary}{total > sortedResults.length ? ", and more" : ""}
+                  </span>
+                )}
+              </p>
+              <div className="flex items-baseline gap-3 shrink-0">
+                <select
+                  value={resultsPerPage}
+                  onChange={(e) => changeResultsPerPage(parseInt(e.target.value, 10))}
+                  className="text-xs text-slate-600 bg-transparent border border-slate-200 rounded px-2 py-1
+                             focus:outline-none focus:ring-2 focus:ring-xtal-navy/30 focus:border-xtal-navy
+                             cursor-pointer"
+                >
+                  <option value={24}>24 per page</option>
+                  <option value={48}>48 per page</option>
+                  <option value={96}>96 per page</option>
+                  <option value={120}>120 per page</option>
+                </select>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                  className="text-xs text-slate-600 bg-transparent border border-slate-200 rounded px-2 py-1
+                             focus:outline-none focus:ring-2 focus:ring-xtal-navy/30 focus:border-xtal-navy
+                             cursor-pointer"
+                >
+                  <option value="relevance">AI Relevance</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                </select>
+                <span className="text-xs text-slate-400">
+                  {queryTime.toFixed(2)}s
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile info bar — results count + sort */}
+          <div className="mt-4 mb-2 flex items-baseline justify-between gap-2 md:hidden">
+            <p className="text-[13px] text-slate-700 font-medium truncate">
+              {total} result{total !== 1 ? "s" : ""}
             </p>
-            <div className="flex items-baseline gap-3 shrink-0">
+            <div className="flex items-baseline gap-2 shrink-0">
+              <select
+                value={resultsPerPage}
+                onChange={(e) => changeResultsPerPage(parseInt(e.target.value, 10))}
+                className="text-xs text-slate-600 bg-transparent border border-slate-200 rounded px-2 py-1.5
+                           focus:outline-none focus:ring-2 focus:ring-xtal-navy/30 focus:border-xtal-navy
+                           cursor-pointer"
+              >
+                <option value={24}>24</option>
+                <option value={48}>48</option>
+                <option value={96}>96</option>
+                <option value={120}>120</option>
+              </select>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                className="text-xs text-slate-600 bg-transparent border border-slate-200 rounded px-2 py-1
+                className="text-xs text-slate-600 bg-transparent border border-slate-200 rounded px-2 py-1.5
                            focus:outline-none focus:ring-2 focus:ring-xtal-navy/30 focus:border-xtal-navy
                            cursor-pointer"
               >
                 <option value="relevance">AI Relevance</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
+                <option value="price-asc">Price: Low-High</option>
+                <option value="price-desc">Price: High-Low</option>
               </select>
-              <span className="text-xs text-slate-400">
-                {queryTime.toFixed(2)}s
-              </span>
             </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Main grid: filter rail + product grid */}
@@ -193,8 +276,11 @@ export default function TrySearch({ collection, suggestions }: { collection?: st
           isSearching={isSearching}
           isFiltering={isFiltering}
           query={query}
-          onExplain={explain}
+          onExplain={handleExplain}
           onReportIrrelevant={reportIrrelevant}
+          isFirstSearch={isFirstSearch}
+          showExplainNudge={isFirstSearch && !hasUsedExplain}
+          onWellPut={reportWellPut}
           wideLayout={!showFilters}
         />
       </div>
@@ -254,14 +340,18 @@ function MobileFilterContent({
     "product-subcategory": "Category",
     brand: "Brand",
     vendor: "Vendor",
+    terpene: "Terpene",
+    effect: "Effect",
+    "strain-type": "Strain Type",
+    format: "Format",
   }
 
   function humanize(prefix: string) {
     return FACET_LABELS[prefix] || prefix.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")
   }
 
-  // Price stats from results (prices stored in cents, convert to dollars)
-  const prices = results.flatMap(p => Array.isArray(p.price) ? p.price.map(v => v / 100) : typeof p.price === "number" ? [p.price / 100] : [])
+  // Price stats from results (prices stored in dollars)
+  const prices = results.flatMap(p => Array.isArray(p.price) ? p.price : typeof p.price === "number" ? [p.price] : [])
   const priceMin = prices.length > 0 ? Math.floor(Math.min(...prices)) : 0
   const priceMax = prices.length > 0 ? Math.ceil(Math.max(...prices)) : 1000
 

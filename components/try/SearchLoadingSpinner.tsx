@@ -1,35 +1,38 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Sparkles } from "lucide-react"
+import { detectQuerySignal } from "@/lib/query-signals"
 
-const TIPS = [
-  "Analyzing shopping intent and matching product attributes\u2026",
-  "XTAL understands natural language \u2014 try \u2018lightweight jacket for spring hiking\u2019",
-  "Try: \u2018gift for a coffee lover under $50\u2019",
-  "XTAL searches by meaning, not just keywords",
-  "Refine your results with filters and price ranges after searching",
-]
+interface SearchLoadingSpinnerProps {
+  query?: string
+  isFirstSearch?: boolean
+}
 
-export default function SearchLoadingSpinner() {
-  const [tipIndex, setTipIndex] = useState(0)
+export default function SearchLoadingSpinner({ query, isFirstSearch }: SearchLoadingSpinnerProps) {
+  const processDescription = query ? detectQuerySignal(query) : "Understanding your intent and finding matches"
+  const displayQuery = query && query.length > 80 ? query.slice(0, 77) + "…" : query
+
+  // Live stopwatch: starts at 0 on mount, ticks every 50ms
+  const [elapsed, setElapsed] = useState(0)
+  const startRef = useRef(performance.now())
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTipIndex((prev) => (prev + 1) % TIPS.length)
-    }, 3500)
-    return () => clearInterval(interval)
+    const id = setInterval(() => {
+      setElapsed(performance.now() - startRef.current)
+    }, 50)
+    return () => clearInterval(id)
   }, [])
 
   return (
     <div
-      className="flex flex-col items-center justify-center py-24 px-6"
+      className="flex flex-col items-center justify-center py-16 md:py-20 px-6"
       role="status"
       aria-live="polite"
       aria-label="Searching for products"
     >
-      {/* Spinner */}
-      <div className="relative mb-8 w-20 h-20">
+      {/* Zone A: Spinner */}
+      <div className="relative mb-4 w-20 h-20">
         <div className="absolute inset-0 border-4 border-xtal-ice rounded-full" />
         <div className="absolute inset-0 border-4 border-transparent border-t-xtal-navy rounded-full animate-spin" />
         <div className="absolute inset-0 flex items-center justify-center">
@@ -37,23 +40,29 @@ export default function SearchLoadingSpinner() {
         </div>
       </div>
 
-      {/* Rotating tip */}
-      <div className="max-w-md text-center">
-        <p key={tipIndex} className="text-sm text-slate-600 leading-relaxed animate-fadeIn">
-          {TIPS[tipIndex]}
+      {/* Zone A-1: Live elapsed timer */}
+      <p className="text-xs text-slate-400 mb-4 tabular-nums" aria-hidden="true">
+        {(elapsed / 1000).toFixed(2)}s
+      </p>
+
+      {/* Zone B + C: Query echo + process description */}
+      <div className="max-w-[280px] sm:max-w-sm md:max-w-md text-center">
+        {displayQuery && (
+          <p className="text-sm md:text-base text-slate-700 italic leading-relaxed">
+            &ldquo;{displayQuery}&rdquo;
+          </p>
+        )}
+
+        <p className="text-sm text-slate-400 mt-3 leading-relaxed">
+          {processDescription}
         </p>
 
-        {/* Dot indicators */}
-        <div className="flex items-center justify-center gap-1.5 mt-6">
-          {TIPS.map((_, i) => (
-            <div
-              key={i}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                i === tipIndex ? "w-6 bg-xtal-navy" : "w-1.5 bg-slate-300"
-              }`}
-            />
-          ))}
-        </div>
+        {/* Zone D: Conditional first-search hint */}
+        {isFirstSearch && (
+          <p className="text-xs text-slate-300 mt-4">
+            You&rsquo;ll be able to refine by category and price when ready
+          </p>
+        )}
       </div>
     </div>
   )

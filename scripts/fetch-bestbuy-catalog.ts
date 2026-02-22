@@ -3,6 +3,9 @@
  * Paginates through all pages (100 products per page) and writes
  * a single JSONL file (one JSON object per line) for easy streaming ingestion.
  *
+ * Prices are stored in dollars (matching Qdrant convention).
+ * The Best Buy API returns prices in dollars — no conversion needed.
+ *
  * Usage:
  *   npx tsx scripts/fetch-bestbuy-catalog.ts
  *
@@ -77,7 +80,15 @@ const OUT_FILE = path.join(OUT_DIR, "bestbuy-catalog.jsonl");
 interface BBProduct {
   sku: number;
   name: string;
+  regularPrice?: number;
+  salePrice?: number;
+  shippingCost?: number;
   [key: string]: unknown;
+}
+
+/** Pass through product — prices already in dollars, no conversion needed. */
+function transformProduct(raw: BBProduct): BBProduct {
+  return { ...raw };
 }
 
 interface BBResponse {
@@ -122,7 +133,7 @@ async function main() {
   // Write first page
   let written = 0;
   for (const p of first.products) {
-    ws.write(JSON.stringify(p) + "\n");
+    ws.write(JSON.stringify(transformProduct(p)) + "\n");
     written++;
   }
   console.log(`Page 1/${totalPages} — ${written} products written`);
@@ -142,7 +153,7 @@ async function main() {
       const results = await Promise.all(batch.map((p) => fetchPage(p)));
       for (const result of results) {
         for (const p of result.products) {
-          ws.write(JSON.stringify(p) + "\n");
+          ws.write(JSON.stringify(transformProduct(p)) + "\n");
           written++;
         }
       }

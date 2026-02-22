@@ -1,40 +1,41 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { HelpCircle, X, ThumbsDown } from "lucide-react"
+import { HelpCircle, X, ThumbsDown, ThumbsUp } from "lucide-react"
 import type { Product } from "@/lib/xtal-types"
 
 interface ProductCardProps {
   product: Product
   score?: number
   query: string
-  onExplain: (productId: string, score?: number) => Promise<string>
-  onReportIrrelevant?: (productId: string, score?: number) => void
+  onExplain: (productId: string, score?: number) => Promise<{ explanation: string; prompt_hash: string }>
+  onReportIrrelevant?: (product: Product, score?: number) => void
+  onWellPut?: (product: Product, score?: number) => void
+  showExplainNudge?: boolean
 }
 
 function formatPrice(price: number | number[]): string {
   if (Array.isArray(price)) {
-    const sorted = [...price].map(p => p / 100).sort((a, b) => a - b)
+    const sorted = [...price].sort((a, b) => a - b)
     if (sorted.length === 0) return "N/A"
     if (sorted.length === 1 || sorted[0] === sorted[sorted.length - 1]) {
       return `$${sorted[0].toFixed(2)}`
     }
     return `$${sorted[0].toFixed(2)} – $${sorted[sorted.length - 1].toFixed(2)}`
   }
-  return `$${(price / 100).toFixed(2)}`
+  return `$${price.toFixed(2)}`
 }
 
-function getAccentStyle(score?: number) {
-  if (!score || score < 0.55) return ""
-  if (score >= 0.85) return "border-t-2 border-amber-400"
-  return "border-t-2 border-amber-200"
+function isHighConfidence(score?: number): boolean {
+  return !!score && score >= 0.85
 }
 
-export default function ProductCard({ product, score, query, onExplain, onReportIrrelevant }: ProductCardProps) {
+export default function ProductCard({ product, score, query, onExplain, onReportIrrelevant, onWellPut, showExplainNudge }: ProductCardProps) {
   const [explainOpen, setExplainOpen] = useState(false)
   const [explanation, setExplanation] = useState<string | null>(null)
   const [explainLoading, setExplainLoading] = useState(false)
   const [dismissed, setDismissed] = useState(false)
+  const [wellPutSent, setWellPutSent] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
 
   const imageUrl = product.image_url || product.featured_image || product.images?.[0]?.src
@@ -47,8 +48,8 @@ export default function ProductCard({ product, score, query, onExplain, onReport
     setExplainOpen(true)
     if (!explanation) {
       setExplainLoading(true)
-      const text = await onExplain(product.id, score)
-      setExplanation(text)
+      const result = await onExplain(product.id, score)
+      setExplanation(result.explanation)
       setExplainLoading(false)
     }
   }
@@ -56,14 +57,20 @@ export default function ProductCard({ product, score, query, onExplain, onReport
   function handleReportIrrelevant() {
     setDismissed(true)
     setTimeout(() => {
-      onReportIrrelevant?.(product.id, score)
+      onReportIrrelevant?.(product, score)
     }, 300)
+  }
+
+  function handleWellPut() {
+    setWellPutSent(true)
+    onWellPut?.(product, score)
   }
 
   return (
     <div
       ref={cardRef}
-      className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col ${getAccentStyle(score)} ${dismissed ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}
+      aria-label={isHighConfidence(score) ? "High relevance match" : undefined}
+      className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col ${dismissed ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}
     >
       {/* Image */}
       <div className="aspect-square bg-slate-50 relative overflow-hidden">
@@ -80,6 +87,9 @@ export default function ProductCard({ product, score, query, onExplain, onReport
           </div>
         )}
       </div>
+
+      {/* Relevance indicator — internal divider */}
+      {isHighConfidence(score) && <div className="h-[2px] bg-amber-400" />}
 
       {/* Content */}
       <div className="p-3 flex flex-col flex-1">
@@ -103,7 +113,9 @@ export default function ProductCard({ product, score, query, onExplain, onReport
           <button
             onClick={handleExplain}
             title="Why this result?"
-            className="p-1 rounded-md text-slate-400 hover:text-xtal-navy hover:bg-slate-50 transition-colors"
+            className={`p-2 rounded-md text-slate-400 hover:text-xtal-navy hover:bg-slate-50 transition-colors${
+              showExplainNudge && !explainOpen ? " animate-nudge-once" : ""
+            }`}
           >
             {explainOpen ? <X size={16} /> : <HelpCircle size={16} />}
           </button>
@@ -120,15 +132,31 @@ export default function ProductCard({ product, score, query, onExplain, onReport
             ) : (
               <>
                 {explanation}
-                {onReportIrrelevant && (
-                  <button
-                    onClick={handleReportIrrelevant}
-                    className="flex items-center gap-1 mt-2 text-[10px] text-slate-400 hover:text-red-500 transition-colors"
-                  >
-                    <ThumbsDown size={10} />
-                    Not relevant
-                  </button>
-                )}
+                <div className="flex items-center gap-3 mt-2">
+                  {onWellPut && (
+                    <button
+                      onClick={handleWellPut}
+                      disabled={wellPutSent}
+                      className={`flex items-center gap-1 text-[10px] transition-colors ${
+                        wellPutSent
+                          ? "text-green-500"
+                          : "text-slate-400 hover:text-green-600"
+                      }`}
+                    >
+                      <ThumbsUp size={10} />
+                      {wellPutSent ? "Thanks!" : "Well put!"}
+                    </button>
+                  )}
+                  {onReportIrrelevant && (
+                    <button
+                      onClick={handleReportIrrelevant}
+                      className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-red-500 transition-colors"
+                    >
+                      <ThumbsDown size={10} />
+                      Not relevant
+                    </button>
+                  )}
+                </div>
               </>
             )}
           </div>

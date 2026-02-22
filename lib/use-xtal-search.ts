@@ -15,23 +15,23 @@ type LoadingState =
   | { type: "searching" }
   | { type: "filtering" }
 
-export function useXtalSearch(collection?: string) {
-  const [query, setQuery] = useState("")
-  const [results, setResults] = useState<Product[]>([])
-  const [total, setTotal] = useState(0)
+export function useXtalSearch(collection?: string, initialQuery?: string, initialSearchData?: SearchResponse | null, defaultResultsPerPage?: number) {
+  const [query, setQuery] = useState(initialQuery || "")
+  const [results, setResults] = useState<Product[]>(initialSearchData?.results || [])
+  const [total, setTotal] = useState(initialSearchData?.total || 0)
   const [loadingState, setLoadingState] = useState<LoadingState>({ type: "idle" })
   const [error, setError] = useState<string | null>(null)
-  const [queryTime, setQueryTime] = useState(0)
+  const [queryTime, setQueryTime] = useState(initialSearchData?.query_time || 0)
 
   // search_context — cached from first response, sent back on filter-in-place
-  const [searchContext, setSearchContext] = useState<SearchContext | null>(null)
+  const [searchContext, setSearchContext] = useState<SearchContext | null>(initialSearchData?.search_context || null)
 
   // Aspects
   const [aspects, setAspects] = useState<string[]>([])
   const [selectedAspects, setSelectedAspects] = useState<string[]>([])
 
   // Facets (from computed_facets) — populated in M2
-  const [computedFacets, setComputedFacets] = useState<Record<string, Record<string, number>> | null>(null)
+  const [computedFacets, setComputedFacets] = useState<Record<string, Record<string, number>> | null>(initialSearchData?.computed_facets || null)
   const [activeFacetFilters, setActiveFacetFilters] = useState<Record<string, string[]>>({})
 
   // Expansion map: canonical facet value → original backend values (for synonym normalization)
@@ -56,19 +56,22 @@ export function useXtalSearch(collection?: string) {
   const [priceRange, setPriceRange] = useState<PriceRange | null>(null)
 
   // Relevance scores
-  const [relevanceScores, setRelevanceScores] = useState<Record<string, number>>({})
+  const [relevanceScores, setRelevanceScores] = useState<Record<string, number>>(initialSearchData?.relevance_scores || {})
 
   // Sort
   const [sortBy, setSortBy] = useState<"relevance" | "price-asc" | "price-desc">("relevance")
 
+  // Results per page
+  const [resultsPerPage, setResultsPerPage] = useState<number>(defaultResultsPerPage || 48)
+
   // Abort controller for cancelling in-flight requests
   const abortRef = useRef<AbortController | null>(null)
 
-  // Explain cache: query::productId → explanation text
-  const explainCache = useRef<Map<string, string>>(new Map())
+  // Explain cache: query::productId → { explanation, prompt_hash }
+  const explainCache = useRef<Map<string, { explanation: string; prompt_hash: string }>>(new Map())
 
   // --- Full search (new query) ---
-  const search = useCallback(async (newQuery: string) => {
+  const search = useCallback(async (newQuery: string, previewResults?: Product[]) => {
     const trimmed = newQuery.trim()
     if (!trimmed) return
 
@@ -77,9 +80,9 @@ export function useXtalSearch(collection?: string) {
     const controller = new AbortController()
     abortRef.current = controller
 
-    // Full reset
+    // Full reset — if previewResults provided, show them instantly instead of empty
     setQuery(trimmed)
-    setResults([])
+    setResults(previewResults || [])
     setTotal(0)
     setError(null)
     setLoadingState({ type: "searching" })
@@ -104,7 +107,7 @@ export function useXtalSearch(collection?: string) {
         fetch("/api/xtal/search", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query: trimmed, ...(collection && { collection }) }),
+          body: JSON.stringify({ query: trimmed, limit: resultsPerPage, ...(collection && { collection }) }),
           signal: controller.signal,
         }),
         fetch("/api/xtal/aspects", {
@@ -123,7 +126,7 @@ export function useXtalSearch(collection?: string) {
       }
 
       const searchData: SearchResponse = await searchRes.json()
-      const aspectsData: AspectsResponse = aspectsRes.ok ? await aspectsRes.json() : { aspects: [] }
+      const aspectsData: AspectsResponse & { aspects_enabled?: boolean } = aspectsRes.ok ? await aspectsRes.json() : { aspects: [] }
 
       if (controller.signal.aborted) return
 
@@ -141,7 +144,7 @@ export function useXtalSearch(collection?: string) {
       }
       setNormalizedFacets(searchData.computed_facets || null)
 
-      setAspects(aspectsData.aspects || [])
+      setAspects(aspectsData.aspects_enabled !== false ? (aspectsData.aspects || []) : [])
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return
       console.error("Search error:", err)
@@ -151,7 +154,7 @@ export function useXtalSearch(collection?: string) {
         setLoadingState({ type: "idle" })
       }
     }
-  }, [collection])
+  }, [collection, resultsPerPage])
 
   // --- Filter-in-place (shared helper) ---
   const filterInPlace = useCallback(async (
@@ -178,11 +181,11 @@ export function useXtalSearch(collection?: string) {
     const expandedFacets = expandFilters(facetsToSend, facetExpansionMap.current)
     const hasActiveFacets = Object.values(expandedFacets).some(v => v.length > 0)
 
-    // Convert user-facing dollar price range back to cents for the backend
-    const priceRangeInCents = priceToSend
+    // Price range — slider values are already in dollars, same as Qdrant
+    const priceRangeForApi = priceToSend
       ? {
-          min: priceToSend.min != null ? Math.round(priceToSend.min * 100) : null,
-          max: priceToSend.max != null ? Math.round(priceToSend.max * 100) : null,
+          min: priceToSend.min,
+          max: priceToSend.max,
         }
       : undefined
 
@@ -195,7 +198,8 @@ export function useXtalSearch(collection?: string) {
           search_context: searchContext,
           selected_aspects: aspectsToSend.length > 0 ? aspectsToSend : undefined,
           facet_filters: hasActiveFacets ? expandedFacets : undefined,
-          price_range: priceRangeInCents,
+          price_range: priceRangeForApi,
+          limit: resultsPerPage,
           ...(collection && { collection }),
         }),
         signal: controller.signal,
@@ -227,7 +231,7 @@ export function useXtalSearch(collection?: string) {
         setLoadingState({ type: "idle" })
       }
     }
-  }, [query, searchContext, selectedAspects, activeFacetFilters, priceRange, collection])
+  }, [query, searchContext, selectedAspects, activeFacetFilters, priceRange, resultsPerPage, collection])
 
   // --- Aspect selection ---
   const selectAspect = useCallback(async (aspect: string) => {
@@ -278,8 +282,70 @@ export function useXtalSearch(collection?: string) {
     })
   }, [filterInPlace])
 
+  // --- Change results per page ---
+  const changeResultsPerPage = useCallback(async (value: number) => {
+    setResultsPerPage(value)
+    // Re-search with new limit if we have an active search
+    if (searchContext) {
+      // We need to manually trigger filterInPlace since resultsPerPage state
+      // won't have updated yet in this callback's closure
+      abortRef.current?.abort()
+      const controller = new AbortController()
+      abortRef.current = controller
+
+      setLoadingState({ type: "filtering" })
+      setError(null)
+
+      const expandedFacets = expandFilters(activeFacetFilters, facetExpansionMap.current)
+      const hasActiveFacets = Object.values(expandedFacets).some(v => v.length > 0)
+      const priceRangeForApi = priceRange
+        ? { min: priceRange.min, max: priceRange.max }
+        : undefined
+
+      try {
+        const res = await fetch("/api/xtal/search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query,
+            search_context: searchContext,
+            selected_aspects: selectedAspects.length > 0 ? selectedAspects : undefined,
+            facet_filters: hasActiveFacets ? expandedFacets : undefined,
+            price_range: priceRangeForApi,
+            limit: value,
+            ...(collection && { collection }),
+          }),
+          signal: controller.signal,
+        })
+
+        if (controller.signal.aborted) return
+        if (!res.ok) {
+          setError("Filter failed. Please try again.")
+          return
+        }
+
+        const data: SearchResponse = await res.json()
+        if (controller.signal.aborted) return
+
+        setResults(data.results || [])
+        setTotal(data.total || 0)
+        setQueryTime(data.query_time || 0)
+        setRelevanceScores(data.relevance_scores || {})
+        setNormalizedFacets(data.computed_facets || null)
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return
+        console.error("Results per page change error:", err)
+        setError("Failed to update results. Please try again.")
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoadingState({ type: "idle" })
+        }
+      }
+    }
+  }, [query, searchContext, selectedAspects, activeFacetFilters, priceRange, collection])
+
   // --- Explain (on-demand, cached) ---
-  const explain = useCallback(async (productId: string, score?: number): Promise<string> => {
+  const explain = useCallback(async (productId: string, score?: number): Promise<{ explanation: string; prompt_hash: string }> => {
     const cacheKey = `${query}::${productId}`
     const cached = explainCache.current.get(cacheKey)
     if (cached) return cached
@@ -293,61 +359,118 @@ export function useXtalSearch(collection?: string) {
       if (!res.ok) {
         const errBody = await res.text()
         console.error(`Explain API error ${res.status}:`, errBody)
-        return `Explanation unavailable (${res.status}).`
+        return { explanation: `Explanation unavailable (${res.status}).`, prompt_hash: "" }
       }
       const data = await res.json()
-      const explanation = data.explanation || "No explanation available."
-      explainCache.current.set(cacheKey, explanation)
-      return explanation
+      const result = {
+        explanation: data.explanation || "No explanation available.",
+        prompt_hash: data.prompt_hash || "",
+      }
+      explainCache.current.set(cacheKey, result)
+      return result
     } catch (err) {
       console.error("Explain fetch error:", err)
-      return "Failed to load explanation."
+      return { explanation: "Failed to load explanation.", prompt_hash: "" }
     }
   }, [query, collection])
 
   // --- Report irrelevant (fire-and-forget + remove from results) ---
-  const reportIrrelevant = useCallback((productId: string, score?: number) => {
+  const reportIrrelevant = useCallback((product: Product, score?: number) => {
     // Remove from results immediately
-    setResults((prev) => prev.filter((p) => p.id !== productId))
+    setResults((prev) => prev.filter((p) => p.id !== product.id))
     setTotal((prev) => Math.max(0, prev - 1))
 
-    // Fire-and-forget feedback POST
+    // Get prompt_hash from explain cache if available
+    const cacheKey = `${query}::${product.id}`
+    const cached = explainCache.current.get(cacheKey)
+
+    // Fire-and-forget feedback POST (enriched payload for search quality log)
     fetch("/api/xtal/feedback", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         query,
-        product_id: productId,
+        product_id: product.id,
+        product_title: product.title,
+        product_vendor: product.vendor,
+        product_type: product.product_type,
+        product_tags: product.tags,
+        product_price: product.price,
+        product_image_url: product.image_url || product.featured_image || product.images?.[0]?.src || null,
+        augmented_query: searchContext?.augmented_query || null,
         score,
         action: "irrelevant",
+        ...(cached?.prompt_hash && { prompt_hash: cached.prompt_hash }),
         ...(collection && { collection }),
       }),
     }).catch((err) => console.error("Feedback submission error:", err))
-  }, [query, collection])
+  }, [query, collection, searchContext])
+
+  // --- Report well put (fire-and-forget, card stays visible) ---
+  const reportWellPut = useCallback((product: Product, score?: number) => {
+    const cacheKey = `${query}::${product.id}`
+    const cached = explainCache.current.get(cacheKey)
+
+    fetch("/api/xtal/feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query,
+        product_id: product.id,
+        product_title: product.title,
+        product_vendor: product.vendor,
+        product_type: product.product_type,
+        product_tags: product.tags,
+        product_price: product.price,
+        product_image_url: product.image_url || product.featured_image || product.images?.[0]?.src || null,
+        augmented_query: searchContext?.augmented_query || null,
+        score,
+        action: "well_put",
+        ...(cached?.prompt_hash && { prompt_hash: cached.prompt_hash }),
+        ...(collection && { collection }),
+      }),
+    }).catch((err) => console.error("Feedback submission error:", err))
+  }, [query, collection, searchContext])
 
   // --- Load synonym groups + auto-search from URL on mount ---
   useEffect(() => {
-    async function init() {
-      // Load synonyms (non-blocking — falls back to empty if unavailable)
-      try {
-        const res = await fetch("/api/admin/synonyms")
-        if (res.ok) {
-          const data = await res.json()
-          synonymGroups.current = data.groups || []
-        }
-      } catch {
-        // Synonyms unavailable — normalization proceeds without merging
+    // Fire synonyms fetch (non-blocking — only needed for facet normalization)
+    const synonymsReady = fetch("/api/admin/synonyms")
+      .then((res) => (res.ok ? res.json() : { groups: [] }))
+      .then((data) => { synonymGroups.current = data.groups || [] })
+      .catch(() => {})
+
+    if (initialSearchData) {
+      // SSR data — fire aspects immediately (no dependency on synonyms)
+      if (initialQuery) {
+        fetch("/api/xtal/aspects", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: initialQuery, ...(collection && { collection }) }),
+        })
+          .then((res) => (res.ok ? res.json() : { aspects: [] }))
+          .then((data) => setAspects(data.aspects_enabled !== false ? (data.aspects || []) : []))
+          .catch(() => {})
       }
 
-      // Auto-search from URL
-      const params = new URLSearchParams(window.location.search)
-      const q = params.get("q")
-      if (q) {
-        search(q)
+      // Normalize facets once synonyms are loaded (needs synonym groups for merging)
+      if (initialSearchData.computed_facets) {
+        synonymsReady.then(() => {
+          setNormalizedFacets(initialSearchData.computed_facets!)
+        })
       }
+    } else {
+      // No SSR data — wait for synonyms then auto-search from URL
+      synonymsReady.then(() => {
+        const params = new URLSearchParams(window.location.search)
+        const q = params.get("q")
+        if (q) {
+          search(q)
+        }
+      })
     }
-    init()
-  }, [search])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const loading = loadingState.type !== "idle"
   const isSearching = loadingState.type === "searching"
@@ -382,6 +505,8 @@ export function useXtalSearch(collection?: string) {
     relevanceScores,
     sortBy,
     setSortBy,
+    resultsPerPage,
+    changeResultsPerPage,
     search,
     selectAspect,
     removeAspect,
@@ -390,5 +515,6 @@ export function useXtalSearch(collection?: string) {
     clearAllFilters,
     explain,
     reportIrrelevant,
+    reportWellPut,
   }
 }

@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -7,25 +8,41 @@ import {
   Boxes,
   Activity,
   Gauge,
+  Flag,
   Settings,
+  KeyRound,
   ChevronDown,
+  Menu,
+  X,
 } from "lucide-react"
 import { useCollection } from "@/lib/admin/CollectionContext"
+import UserMenu from "@/components/admin/UserMenu"
 
 const NAV_ITEMS = [
   { href: "/admin/dashboard", label: "Dashboard", icon: BarChart3 },
   { href: "/admin/activity", label: "Activity", icon: Activity },
   { href: "/admin/demos", label: "Demos", icon: Boxes },
   { href: "/admin/grader", label: "Grader", icon: Gauge },
+  { href: "/admin/search-quality", label: "Search Quality", icon: Flag },
+  { href: "/admin/api-keys", label: "API Keys", icon: KeyRound },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ]
 
-export default function AdminSidebar() {
-  const pathname = usePathname()
-  const { collection, setCollection, collections } = useCollection()
+interface UserInfo {
+  name?: string | null
+  email?: string | null
+  image?: string | null
+}
 
+function SidebarContent({ collection, setCollection, collections, pathname, user }: {
+  collection: string
+  setCollection: (v: string) => void
+  collections: { id: string; label: string }[]
+  pathname: string
+  user?: UserInfo
+}) {
   return (
-    <aside className="fixed left-0 top-0 h-full w-60 bg-xtal-navy flex flex-col z-30">
+    <>
       <div className="p-6 pb-4">
         <Link href="/admin/dashboard" className="block">
           <span className="text-lg font-bold text-white tracking-wide">
@@ -79,14 +96,95 @@ export default function AdminSidebar() {
         })}
       </nav>
 
-      <div className="p-4 border-t border-white/10">
+      <div className="p-4 border-t border-white/10 space-y-3">
+        {user && <UserMenu name={user.name} email={user.email} image={user.image} />}
         <Link
           href="/"
-          className="text-xs text-white/40 hover:text-white/70 transition-colors"
+          className="text-xs text-white/40 hover:text-white/70 transition-colors block"
         >
           &larr; Back to site
         </Link>
       </div>
-    </aside>
+    </>
+  )
+}
+
+export default function AdminSidebar({ user }: { user?: UserInfo }) {
+  const pathname = usePathname()
+  const { collection, setCollection, collections } = useCollection()
+  const [mobileOpen, setMobileOpen] = useState(false)
+
+  // Close mobile sidebar on navigation
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [pathname])
+
+  // Body scroll lock when mobile sidebar is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = ""
+    }
+    return () => {
+      document.body.style.overflow = ""
+    }
+  }, [mobileOpen])
+
+  return (
+    <>
+      {/* Mobile hamburger button */}
+      <button
+        onClick={() => setMobileOpen(true)}
+        className="md:hidden fixed top-4 left-4 z-40 p-2 bg-xtal-navy text-white rounded-lg shadow-lg"
+        aria-label="Open navigation"
+      >
+        <Menu size={20} />
+      </button>
+
+      {/* Desktop sidebar — always visible at md+ */}
+      <aside className="hidden md:flex fixed left-0 top-0 h-full w-60 bg-xtal-navy flex-col z-30">
+        <SidebarContent
+          collection={collection}
+          setCollection={setCollection}
+          collections={collections}
+          pathname={pathname}
+          user={user}
+        />
+      </aside>
+
+      {/* Mobile backdrop */}
+      <div
+        className={`fixed inset-0 bg-black/50 z-40 transition-opacity md:hidden ${
+          mobileOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setMobileOpen(false)}
+      />
+
+      {/* Mobile sidebar — slides from left */}
+      <aside
+        className={`fixed left-0 top-0 h-full w-60 bg-xtal-navy flex flex-col z-50
+                    shadow-2xl transform transition-transform md:hidden ${
+                      mobileOpen ? "translate-x-0" : "-translate-x-full"
+                    }`}
+      >
+        {/* Close button */}
+        <button
+          onClick={() => setMobileOpen(false)}
+          className="absolute top-4 right-3 p-2 text-white/60 hover:text-white transition-colors"
+          aria-label="Close navigation"
+        >
+          <X size={20} />
+        </button>
+
+        <SidebarContent
+          collection={collection}
+          setCollection={setCollection}
+          collections={collections}
+          pathname={pathname}
+          user={user}
+        />
+      </aside>
+    </>
   )
 }

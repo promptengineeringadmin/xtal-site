@@ -17,6 +17,14 @@ export interface MetricsSummary {
   period_end: string
 }
 
+export interface ProxyTiming {
+  redis_ms: number
+  backend_ms: number
+  total_ms: number
+  route: "search" | "search-full"
+  aspects_failed?: boolean
+}
+
 export interface SearchEventData {
   user_query: string
   enriched_query: string
@@ -30,6 +38,8 @@ export interface SearchEventData {
   facet_filters: Record<string, string[]> | null
   product_keyword?: string | null
   search_mode?: string | null
+  /** Proxy-level timing breakdown (enriched at read time from Redis) */
+  proxy_timing?: ProxyTiming
 }
 
 export interface MetricEvent {

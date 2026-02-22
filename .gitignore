@@ -53,3 +53,7 @@ desktop.ini
 
 .vercel
 nul
+.env*.local
+
+# Client library build output
+public/client/

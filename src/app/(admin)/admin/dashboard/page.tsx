@@ -32,7 +32,11 @@ export default function DashboardPage() {
       const res = await fetch(
         `/api/admin/analytics/dashboard?days=${days}&collection=${encodeURIComponent(collection)}`
       )
-      if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`)
+      if (!res.ok) {
+        const body = await res.json().catch(() => null)
+        const detail = body?.detail || body?.error || `Status ${res.status}`
+        throw new Error(`Failed to fetch: ${detail}`)
+      }
       const json: AnalyticsDashboard = await res.json()
       setData(json)
     } catch (err) {
@@ -51,7 +55,7 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
         <TimeRangeSelector value={days} onChange={setDays} />
       </div>
