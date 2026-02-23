@@ -47,6 +47,7 @@ export interface XtalConfig {
     html: string
     css: string
   }
+  productUrlPattern?: string
 }
 
 export class XtalAPI {

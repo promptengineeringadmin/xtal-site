@@ -51,6 +51,9 @@ function snippetDisplayModeKey(collection: string) {
 function cardTemplateKey(collection: string) {
   return `admin:settings:${collection}:card_template`
 }
+function productUrlPatternKey(collection: string) {
+  return `admin:settings:${collection}:product_url_pattern`
+}
 
 // ─── Query Enhancement ─────────────────────────────────────
 
@@ -306,4 +309,25 @@ export async function saveCardTemplate(
 ): Promise<void> {
   const kv = getRedis()
   await kv.set(cardTemplateKey(collection), template)
+}
+
+// ─── Product URL Pattern ────────────────────────────────
+
+export async function getProductUrlPattern(collection: string): Promise<string> {
+  try {
+    const kv = getRedis()
+    const stored = await kv.get<string>(productUrlPatternKey(collection))
+    if (stored) return stored
+  } catch {
+    // Redis unavailable
+  }
+  return "" // default: empty (use product_url as-is)
+}
+
+export async function saveProductUrlPattern(
+  collection: string,
+  pattern: string
+): Promise<void> {
+  const kv = getRedis()
+  await kv.set(productUrlPatternKey(collection), pattern)
 }

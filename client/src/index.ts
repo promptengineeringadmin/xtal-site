@@ -5,6 +5,8 @@ import { renderAspectChips } from "./ui/filters"
 import { attachInterceptor } from "./interceptor"
 import type { CardHandlers, CardTemplate } from "./ui/template"
 import { appendUtm } from "./utm"
+import { detectCartAdapter } from "./cart/detect"
+import { showToast, dismissToast } from "./ui/toast"
 
 function boot() {
   try {
@@ -52,38 +54,71 @@ function boot() {
         const cardTemplate: CardTemplate | null = config.cardTemplate ?? null
         const overlay = new XtalOverlay(cardTemplate?.css)
 
+        // Cart adapter — detects platform once at boot
+        let lastQuery = ""
+        const cartAdapter = detectCartAdapter(shopId, () => lastQuery)
+        console.log(`[xtal.js] Cart adapter: ${cartAdapter.name}`)
+
+        /** Resolve product URL — use pattern if configured, else siteUrl prefix */
+        function resolveProductUrl(product: Product): string {
+          // Pattern-based URL construction (e.g. "https://example.com/shop/{sku}")
+          if (config.productUrlPattern) {
+            const sku = product.variants?.[0]?.sku || ""
+            if (sku) {
+              return config.productUrlPattern
+                .replace("{sku}", encodeURIComponent(sku))
+                .replace("{id}", product.id || "")
+            }
+          }
+          const rawUrl = product.product_url || "#"
+          if (!rawUrl || rawUrl === "#") return "#"
+          if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://")) return rawUrl
+          if (config.siteUrl) return config.siteUrl.replace(/\/$/, "") + rawUrl
+          return rawUrl
+        }
+
         const cardHandlers: CardHandlers = {
           onViewProduct(product) {
-            const url = appendUtm(product.product_url || "#", {
+            const url = appendUtm(resolveProductUrl(product), {
               shopId: shopId!,
               productId: product.id,
               query: lastQuery,
             })
             window.open(url, "_blank", "noopener,noreferrer")
           },
-          onAddToCart(product) {
-            // On a real Shopify store, call the cart API
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            if ((window as any).Shopify && product.variants?.[0]?.id) {
-              fetch("/cart/add.js", {
+          async onAddToCart(product) {
+            const loadingToast = showToast(
+              overlay.getShadowRoot(),
+              "Adding to cart...",
+              "loading"
+            )
+
+            const result = await cartAdapter.addToCart(product)
+            dismissToast(loadingToast)
+
+            showToast(
+              overlay.getShadowRoot(),
+              result.message,
+              result.success ? "success" : "error"
+            )
+
+            if (result.success) {
+              // Fire analytics event (fire and forget)
+              fetch(`${apiBase}/api/xtal/events`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                  id: product.variants[0].id,
-                  quantity: 1,
+                  product_id: product.id,
+                  action: "add_to_cart",
+                  collection: shopId,
+                  query: lastQuery,
                 }),
-              })
-                .then(() => console.log("[xtal.js] Added to cart:", product.id))
-                .catch((err) => console.warn("[xtal.js] Cart error:", err))
-            } else {
-              // Demo/sandbox: navigate to product page
-              cardHandlers.onViewProduct(product)
+              }).catch(() => {})
             }
           },
         }
 
         let selectedAspects = new Set<string>()
-        let lastQuery = ""
         let lastResponse: SearchFullResponse | null = null
         let cleanupInterceptor: (() => void) | null = null
 

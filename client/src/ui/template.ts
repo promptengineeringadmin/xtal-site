@@ -2,7 +2,7 @@ import type { Product } from "../api"
 import { appendUtm } from "../utm"
 
 export interface CardHandlers {
-  onAddToCart: (product: Product) => void
+  onAddToCart: (product: Product) => void | Promise<void>
   onViewProduct: (product: Product) => void
 }
 
@@ -141,10 +141,23 @@ export function renderTemplatedCard(
   // Wire data-xtal-action="add-to-cart" elements
   el.querySelectorAll<HTMLElement>('[data-xtal-action="add-to-cart"]').forEach(
     (node) => {
-      node.addEventListener("click", (e) => {
+      node.addEventListener("click", async (e) => {
         e.preventDefault()
         e.stopPropagation()
-        handlers.onAddToCart(product)
+
+        // Button loading state
+        const originalText = node.textContent
+        node.textContent = "Adding..."
+        node.style.opacity = "0.7"
+        node.style.pointerEvents = "none"
+
+        try {
+          await handlers.onAddToCart(product)
+        } finally {
+          node.textContent = originalText
+          node.style.opacity = ""
+          node.style.pointerEvents = ""
+        }
       })
     }
   )

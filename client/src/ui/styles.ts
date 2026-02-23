@@ -226,6 +226,46 @@ export function generateCSS(additionalCSS?: string): string {
       border-top: 1px solid var(--xtal-border);
     }
 
+    /* Toast notifications */
+    .xtal-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      opacity: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: var(--xtal-font);
+      color: #ffffff;
+      z-index: 10;
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+    }
+    .xtal-toast-show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .xtal-toast-success { background: #16a34a; }
+    .xtal-toast-error { background: #dc2626; }
+    .xtal-toast-loading { background: #475569; }
+    .xtal-toast-icon {
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .xtal-toast-spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: xtal-spin 0.6s linear infinite;
+    }
+
     @media (max-width: 768px) {
       .xtal-backdrop {
         padding-top: 0;

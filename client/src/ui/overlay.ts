@@ -68,6 +68,10 @@ export class XtalOverlay {
     return this.visible
   }
 
+  getShadowRoot(): ShadowRoot {
+    return this.shadow
+  }
+
   setContent(el: HTMLElement) {
     this.contentRoot.innerHTML = ""
     this.contentRoot.appendChild(el)

@@ -7,6 +7,7 @@ import {
   getSnippetDisplayMode,
   getSnippetSiteUrl,
   getCardTemplate,
+  getProductUrlPattern,
 } from "@/lib/admin/admin-settings"
 
 export async function OPTIONS() {
@@ -24,13 +25,14 @@ export async function GET(request: Request) {
     )
   }
 
-  const [enabled, searchSelector, displayMode, siteUrl, cardTemplate] =
+  const [enabled, searchSelector, displayMode, siteUrl, cardTemplate, productUrlPattern] =
     await Promise.all([
       getSnippetEnabled(shopId),
       getSnippetSearchSelector(shopId),
       getSnippetDisplayMode(shopId),
       getSnippetSiteUrl(shopId),
       getCardTemplate(shopId),
+      getProductUrlPattern(shopId),
     ])
 
   return NextResponse.json(
@@ -41,6 +43,7 @@ export async function GET(request: Request) {
       siteUrl,
       features: { aspects: true, explain: true },
       ...(cardTemplate ? { cardTemplate } : {}),
+      ...(productUrlPattern ? { productUrlPattern } : {}),
     },
     {
       headers: {
