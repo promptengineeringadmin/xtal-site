@@ -6,6 +6,7 @@ import {
   getSnippetSearchSelector,
   getSnippetDisplayMode,
   getSnippetSiteUrl,
+  getCardTemplate,
 } from "@/lib/admin/admin-settings"
 
 export async function OPTIONS() {
@@ -23,12 +24,14 @@ export async function GET(request: Request) {
     )
   }
 
-  const [enabled, searchSelector, displayMode, siteUrl] = await Promise.all([
-    getSnippetEnabled(shopId),
-    getSnippetSearchSelector(shopId),
-    getSnippetDisplayMode(shopId),
-    getSnippetSiteUrl(shopId),
-  ])
+  const [enabled, searchSelector, displayMode, siteUrl, cardTemplate] =
+    await Promise.all([
+      getSnippetEnabled(shopId),
+      getSnippetSearchSelector(shopId),
+      getSnippetDisplayMode(shopId),
+      getSnippetSiteUrl(shopId),
+      getCardTemplate(shopId),
+    ])
 
   return NextResponse.json(
     {
@@ -37,6 +40,7 @@ export async function GET(request: Request) {
       displayMode,
       siteUrl,
       features: { aspects: true, explain: true },
+      ...(cardTemplate ? { cardTemplate } : {}),
     },
     {
       headers: {

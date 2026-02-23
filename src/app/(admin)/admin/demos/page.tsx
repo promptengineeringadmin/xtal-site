@@ -436,11 +436,23 @@ function CreateDemoForm({
       }
 
       const data = await res.json()
-      setTaskId(data.task_id)
 
-      // Start polling
-      pollRef.current = setInterval(() => pollTask(data.task_id), 1500)
-      pollTask(data.task_id)
+      if (data.task_id) {
+        // Legacy async path — start polling
+        setTaskId(data.task_id)
+        pollRef.current = setInterval(() => pollTask(data.task_id), 1500)
+        pollTask(data.task_id)
+      } else if (data.status === "completed") {
+        // New sync path — immediately show completion
+        setTaskId("sync")
+        setTaskStatus({
+          id: "sync",
+          status: "completed",
+          progress: 100,
+          message: data.message || `Ingested ${data.products_processed} products`,
+        })
+        setTimeout(onCreated, 1500)
+      }
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Failed to start ingestion")
       setSubmitting(false)

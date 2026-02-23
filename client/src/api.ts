@@ -12,7 +12,15 @@ export interface Product {
   description?: string
   featured_image?: string
   images: { src: string; alt_text?: string }[]
-  variants: { price: number; compare_at_price?: number }[]
+  variants: {
+    price: number
+    compare_at_price?: number
+    id?: string | number
+    title?: string
+    sku?: string
+    inventory_quantity?: number
+    inventory_policy?: "deny" | "continue"
+  }[]
   available: boolean
 }
 
@@ -35,6 +43,10 @@ export interface XtalConfig {
   displayMode: string
   siteUrl: string
   features: { aspects: boolean; explain: boolean }
+  cardTemplate?: {
+    html: string
+    css: string
+  }
 }
 
 export class XtalAPI {

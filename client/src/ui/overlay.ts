@@ -7,7 +7,7 @@ export class XtalOverlay {
   private visible = false
   private onHideCallback: (() => void) | null = null
 
-  constructor() {
+  constructor(additionalCSS?: string) {
     this.host = document.createElement("div")
     this.host.setAttribute("data-xtal-host", "true")
     this.host.style.position = "fixed"
@@ -19,7 +19,7 @@ export class XtalOverlay {
 
     // Inject styles
     const style = document.createElement("style")
-    style.textContent = generateCSS()
+    style.textContent = generateCSS(additionalCSS)
     this.shadow.appendChild(style)
 
     // Content container

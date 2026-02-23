@@ -23,6 +23,7 @@ export interface SearchRequest {
   price_range?: PriceRange
   geo_country?: string
   geo_region?: string
+  sort_by?: string
 }
 
 export interface SearchResponse {
@@ -32,6 +33,8 @@ export interface SearchResponse {
   relevance_scores?: Record<string, number>
   search_context?: SearchContext
   computed_facets?: Record<string, Record<string, number>>
+  agent_reasoning?: string
+  search_mode?: string
 }
 
 export interface AspectsRequest {
@@ -135,4 +138,6 @@ export interface Product {
   images: { src: string; alt_text?: string }[]
   variants: { price: number; compare_at_price?: number }[]
   available: boolean
+  ui_tags?: string[]
+  category?: string
 }

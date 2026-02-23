@@ -1,5 +1,6 @@
 import type { Product } from "../api"
 import { appendUtm } from "../utm"
+import { renderTemplatedCard, type CardHandlers, type CardTemplate } from "./template"
 
 // Same logic as components/try/ProductCard.tsx:17-27 — prices are dollars
 function formatPrice(price: number | number[]): string {
@@ -17,8 +18,14 @@ function formatPrice(price: number | number[]): string {
 export function renderProductCard(
   product: Product,
   query: string,
-  shopId: string
+  shopId: string,
+  template?: CardTemplate | null,
+  handlers?: CardHandlers
 ): HTMLElement {
+  if (template && handlers) {
+    return renderTemplatedCard(template.html, product, query, shopId, handlers)
+  }
+
   const imageUrl =
     product.image_url || product.featured_image || (product.images && product.images[0]?.src)
 
@@ -77,13 +84,15 @@ export function renderProductCard(
 export function renderResultsGrid(
   products: Product[],
   query: string,
-  shopId: string
+  shopId: string,
+  template?: CardTemplate | null,
+  handlers?: CardHandlers
 ): HTMLElement {
   const grid = document.createElement("div")
   grid.className = "xtal-grid"
 
   for (const product of products) {
-    grid.appendChild(renderProductCard(product, query, shopId))
+    grid.appendChild(renderProductCard(product, query, shopId, template, handlers))
   }
 
   return grid

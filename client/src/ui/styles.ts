@@ -1,4 +1,4 @@
-export function generateCSS(): string {
+export function generateCSS(additionalCSS?: string): string {
   return `
     :host {
       --xtal-bg: #ffffff;
@@ -243,5 +243,5 @@ export function generateCSS(): string {
         padding: 12px;
       }
     }
-  `
+  ` + (additionalCSS ? `\n${additionalCSS}` : "")
 }

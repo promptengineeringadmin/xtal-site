@@ -184,9 +184,9 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
     // Price range — slider values are already in dollars, same as Qdrant
     const priceRangeForApi = priceToSend
       ? {
-          min: priceToSend.min,
-          max: priceToSend.max,
-        }
+        min: priceToSend.min,
+        max: priceToSend.max,
+      }
       : undefined
 
     try {
@@ -432,13 +432,28 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
     }).catch((err) => console.error("Feedback submission error:", err))
   }, [query, collection, searchContext])
 
+  // --- Report storefront events (fire-and-forget) ---
+  const reportStorefrontEvent = useCallback((action: "click" | "add_to_cart", productId: string, extraData?: Record<string, any>) => {
+    fetch("/api/xtal/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action,
+        product_id: productId,
+        ...(query && { query }),
+        ...(collection && { collection }),
+        ...(extraData || {}),
+      }),
+    }).catch((err) => console.error("Storefront event submission error:", err))
+  }, [query, collection])
+
   // --- Load synonym groups + auto-search from URL on mount ---
   useEffect(() => {
     // Fire synonyms fetch (non-blocking — only needed for facet normalization)
     const synonymsReady = fetch("/api/admin/synonyms")
       .then((res) => (res.ok ? res.json() : { groups: [] }))
       .then((data) => { synonymGroups.current = data.groups || [] })
-      .catch(() => {})
+      .catch(() => { })
 
     if (initialSearchData) {
       // SSR data — fire aspects immediately (no dependency on synonyms)
@@ -450,7 +465,7 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
         })
           .then((res) => (res.ok ? res.json() : { aspects: [] }))
           .then((data) => setAspects(data.aspects_enabled !== false ? (data.aspects || []) : []))
-          .catch(() => {})
+          .catch(() => { })
       }
 
       // Normalize facets once synonyms are loaded (needs synonym groups for merging)
@@ -469,7 +484,7 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
         }
       })
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const loading = loadingState.type !== "idle"
@@ -516,5 +531,6 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
     explain,
     reportIrrelevant,
     reportWellPut,
+    reportStorefrontEvent,
   }
 }

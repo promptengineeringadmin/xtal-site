@@ -3,6 +3,8 @@ import { XtalOverlay } from "./ui/overlay"
 import { renderResultsGrid, renderLoading, renderEmpty } from "./ui/results"
 import { renderAspectChips } from "./ui/filters"
 import { attachInterceptor } from "./interceptor"
+import type { CardHandlers, CardTemplate } from "./ui/template"
+import { appendUtm } from "./utm"
 
 function boot() {
   try {
@@ -46,7 +48,40 @@ function boot() {
           return
         }
 
-        const overlay = new XtalOverlay()
+        // Template system
+        const cardTemplate: CardTemplate | null = config.cardTemplate ?? null
+        const overlay = new XtalOverlay(cardTemplate?.css)
+
+        const cardHandlers: CardHandlers = {
+          onViewProduct(product) {
+            const url = appendUtm(product.product_url || "#", {
+              shopId: shopId!,
+              productId: product.id,
+              query: lastQuery,
+            })
+            window.open(url, "_blank", "noopener,noreferrer")
+          },
+          onAddToCart(product) {
+            // On a real Shopify store, call the cart API
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if ((window as any).Shopify && product.variants?.[0]?.id) {
+              fetch("/cart/add.js", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  id: product.variants[0].id,
+                  quantity: 1,
+                }),
+              })
+                .then(() => console.log("[xtal.js] Added to cart:", product.id))
+                .catch((err) => console.warn("[xtal.js] Cart error:", err))
+            } else {
+              // Demo/sandbox: navigate to product page
+              cardHandlers.onViewProduct(product)
+            }
+          },
+        }
+
         let selectedAspects = new Set<string>()
         let lastQuery = ""
         let lastResponse: SearchFullResponse | null = null
@@ -117,7 +152,7 @@ function boot() {
           // Results
           if (lastResponse.results.length > 0) {
             container.appendChild(
-              renderResultsGrid(lastResponse.results, lastQuery, shopId!)
+              renderResultsGrid(lastResponse.results, lastQuery, shopId!, cardTemplate, cardHandlers)
             )
           } else {
             container.appendChild(renderEmpty(lastQuery))

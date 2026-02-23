@@ -57,3 +57,6 @@ nul
 
 # Client library build output
 public/client/
+
+# Scraped site clones (local dev only)
+public/sandbox/
