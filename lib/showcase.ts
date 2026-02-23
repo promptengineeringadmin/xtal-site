@@ -27,6 +27,11 @@ const SHOWCASE_QUERIES: Record<string, ShowcaseQueryDef[]> = {
     { query: "strains with limonene and citrus flavor", label: "terpene + flavor" },
     { query: "energizing sativa for daytime", label: "energy + time" },
   ],
+  dennis: [
+    { query: "cozy gift for someone who is always cold", label: "gift + warmth" },
+    { query: "hosting a dinner party this weekend", label: "occasion" },
+    { query: "make my bathroom feel like a spa", label: "vibe + space" },
+  ],
 }
 
 export const EXTRA_SUGGESTIONS: Record<string, string[]> = {
@@ -45,6 +50,10 @@ export const EXTRA_SUGGESTIONS: Record<string, string[]> = {
   goldcanna: [
     "myrcene terpene for sleep",
     "hybrid concentrate",
+  ],
+  dennis: [
+    "dainty jewelry for everyday wear",
+    "setting up a home cocktail bar",
   ],
 }
 

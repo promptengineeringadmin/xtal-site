@@ -31,6 +31,11 @@ export const COLLECTIONS: CollectionConfig[] = [
     label: "Gold Canna",
     description: "xtalsearch.com/goldcanna",
   },
+  {
+    id: "dennis",
+    label: "Dennis Playground",
+    description: "xtalsearch.com/dennis",
+  },
 ]
 
 export const DEFAULT_COLLECTION = "xtaldemo"
