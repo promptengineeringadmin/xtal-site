@@ -182,7 +182,7 @@ ${product.product_type ? `Type: ${product.product_type}` : ""}
 ${product.body_html ? `Description: ${product.body_html.slice(0, 500)}` : ""}`
 
   const response = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: "claude-sonnet-4-6",
     max_tokens: 256,
     system: systemPrompt,
     messages: [{ role: "user", content: userMessage }],

@@ -153,7 +153,7 @@ Return ONLY a JSON array of numbers (one score per query, in order). Example: [8
 
   try {
     const message = await client.messages.create({
-      model: "claude-sonnet-4-5-20250929",
+      model: "claude-sonnet-4-6",
       max_tokens: 200,
       messages: [{ role: "user", content: prompt }],
     })

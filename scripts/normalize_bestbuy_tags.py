@@ -220,7 +220,7 @@ def cmd_normalize(args):
     with open(INVENTORY_PATH) as f:
         inventory = json.load(f)
 
-    model = getattr(args, "model", "claude-sonnet-4-20250514")
+    model = getattr(args, "model", "claude-sonnet-4-6")
     llm_client = anthropic.Anthropic()
 
     all_mappings: dict[str, dict[str, str]] = {}
@@ -375,14 +375,14 @@ def main():
     # run (full pipeline)
     p_run = subparsers.add_parser("run", help="Run full pipeline: extract → normalize → apply")
     p_run.add_argument("--dry-run", action="store_true", help="Preview apply step without writing")
-    p_run.add_argument("--model", default="claude-sonnet-4-20250514", help="Anthropic model")
+    p_run.add_argument("--model", default="claude-sonnet-4-6", help="Anthropic model")
 
     # extract
     subparsers.add_parser("extract", help="Scan Qdrant and build tag inventory")
 
     # normalize
     p_norm = subparsers.add_parser("normalize", help="Use LLM to generate UI groupings")
-    p_norm.add_argument("--model", default="claude-sonnet-4-20250514", help="Anthropic model")
+    p_norm.add_argument("--model", default="claude-sonnet-4-6", help="Anthropic model")
 
     # apply
     p_apply = subparsers.add_parser("apply", help="Apply mapping to Qdrant (add ui_tags)")
