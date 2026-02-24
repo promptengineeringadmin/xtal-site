@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       modifiedTime: post.updated || post.date,
       authors: [post.author],
       url: `https://xtalsearch.com/blog/${post.slug}`,
-      images: post.image ? [{ url: post.image }] : [],
+      images: post.image ? [{ url: `https://xtalsearch.com${post.image}`, width: 1200, height: 630 }] : [],
     },
     twitter: {
       card: 'summary_large_image',
@@ -67,7 +67,7 @@ export default async function BlogPostPage({ params }: Props) {
       url: 'https://xtalsearch.com',
     },
     mainEntityOfPage: `https://xtalsearch.com/blog/${post.slug}`,
-    image: post.image,
+    image: post.image ? `https://xtalsearch.com${post.image}` : undefined,
   };
 
   const breadcrumbLd = {
