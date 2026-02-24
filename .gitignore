@@ -58,5 +58,8 @@ nul
 # Client library build output
 public/client/
 
-# Scraped site clones (local dev only)
-public/sandbox/
+# Scraped site clones — keep serving files, ignore dev artifacts
+public/sandbox/**/*-screenshot.png
+public/sandbox/**/compare-*.png
+public/sandbox/**/extracted-styles.json
+public/sandbox/**/card-template.json

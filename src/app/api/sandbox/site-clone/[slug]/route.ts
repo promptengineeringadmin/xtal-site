@@ -57,6 +57,7 @@ export async function GET(
         "Content-Type": "text/html; charset=utf-8",
         "X-Frame-Options": "SAMEORIGIN",
         "Cache-Control": "no-store",
+        "X-Robots-Tag": "noindex, nofollow",
       },
     });
   }
@@ -96,6 +97,7 @@ export async function GET(
       "Content-Type": "text/html; charset=utf-8",
       "X-Frame-Options": "SAMEORIGIN",
       "Cache-Control": "no-store",
+      "X-Robots-Tag": "noindex, nofollow",
     },
   });
 }

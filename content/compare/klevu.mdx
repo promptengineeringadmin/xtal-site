@@ -1,0 +1,154 @@
+---
+title: "XTAL Search vs Klevu"
+description: "A head-to-head comparison of XTAL Search and Klevu for ecommerce — AI capabilities, Shopify Plus support, pricing, and product discovery features."
+competitor: "Klevu"
+date: "2026-02-19"
+updated: "2026-02-19"
+draft: false
+faqItems:
+  - question: "Is Klevu better than XTAL for Shopify Plus?"
+    answer: "Klevu has deeper native Shopify Plus integration with features specifically designed for the platform. XTAL works on Shopify Plus via its embeddable snippet and offers stronger AI-native search capabilities that aren't platform-dependent."
+  - question: "How does pricing compare?"
+    answer: "Klevu's pricing started around $449-499/month for small stores. Following the January 2025 merger that formed Athos Commerce, standalone Klevu pricing tiers are no longer publicly available — all new contracts go through Athos Commerce sales. XTAL offers more accessible pricing for small-to-mid-size merchants."
+  - question: "Does XTAL have Klevu's Smart Recommendations?"
+    answer: "XTAL's aspects and reasoning features provide AI-powered product discovery based on semantic understanding. The approach differs from Klevu's collaborative filtering recommendations, but achieves similar outcomes for helping shoppers find relevant products."
+  - question: "Can I try XTAL before switching from Klevu?"
+    answer: "Yes. You can run XTAL's Site Search Grader on your store for free to see how your current search performs, and request a demo to see XTAL's results side-by-side with your existing setup."
+  - question: "Which has better analytics?"
+    answer: "Klevu offered detailed search analytics dashboards with revenue attribution. XTAL provides search quality logging and click-through analytics, with a philosophy of using AI to automatically improve results rather than requiring manual analysis of dashboards."
+  - question: "Does Klevu use AI like XTAL?"
+    answer: "Klevu used machine learning for NLP and personalization, which it called KlevuAI. Following the Athos Commerce merger, Klevu's AI capabilities are being integrated into the unified platform. XTAL is AI-native from the ground up, using large language models for query understanding, product reasoning, and dynamic aspect generation — a fundamentally different architectural approach from ML-based relevance tuning."
+---
+
+If you're evaluating ecommerce search platforms as a Shopify Plus merchant in 2026, you've likely had Klevu on your shortlist — or currently on your invoice. There's a reason for that: Klevu earned a legitimate reputation for AI search at a mid-market price point, and its Shopify integration was among the most mature available.
+
+There's also a significant context shift to understand before you sign anything. In January 2025, Klevu merged with Searchspring and Intelligent Reach to form Athos Commerce. The Klevu product name still appears in marketing, but new contracts are under the Athos Commerce umbrella. Standalone Klevu pricing tiers are no longer publicly listed.
+
+This page breaks down how XTAL Search compares to Klevu's approach — both as it was and as it's evolving under Athos Commerce.
+
+---
+
+## TL;DR
+
+- Klevu merged with Searchspring in January 2025 to form **Athos Commerce**. Klevu continues as a product brand, but new pricing and contracts are through Athos.
+- Klevu's strength was **deep Shopify Plus integration** with ML-based NLP — solid, proven, and widely adopted.
+- XTAL uses **LLM-based query reasoning** — a different AI architecture that understands intent rather than matching learned patterns.
+- For Shopify Plus merchants specifically: Klevu's native integrations are more mature today; XTAL's AI pipeline is more capable at understanding complex or long-tail queries.
+
+---
+
+## Feature Comparison
+
+<ComparisonTable
+  headers={["Feature", "XTAL Search", "Klevu / Athos Commerce"]}
+  rows={[
+    { feature: "AI-Native Search (LLM in query pipeline)", values: [true, false] },
+    { feature: "Semantic / Intent-Based Search", values: [true, "Yes — ML-based NLP (KlevuAI)"] },
+    { feature: "Smart Recommendations / Collaborative Filtering", values: [false, "Yes — behavioral ML"] },
+    { feature: "Shopify Plus Native Integration", values: ["Via snippet + app", "Deep native — Shopify Flow, Markets, Hydrogen"] },
+    { feature: "Shopify Markets Support", values: [true, true] },
+    { feature: "Headless / Hydrogen Compatible", values: [true, true] },
+    { feature: "Dynamic Aspect Extraction", values: ["LLM-generated per query", "Configured facets"] },
+    { feature: "Merchandising Controls", values: ["AI-guided via prompts", "Rule-based boost/bury, banners"] },
+    { feature: "Personalization Engine", values: [false, "Yes — in higher tiers"] },
+    { feature: "Self-Service Setup", values: [true, true] },
+    { feature: "Transparent Public Pricing", values: [false, false] },
+    { feature: "Multi-Language Support", values: ["LLM handles naturally", "Multi-lingual NLP, 30+ languages"] },
+  ]}
+/>
+
+---
+
+## Pricing Comparison
+
+**Klevu's** pre-merger pricing started around $449–$499/month for the base AI Search tier, covering up to 50,000 SKUs and 5 store views. Personalization and more advanced merchandising features required higher tiers — combined packages ran toward $1,600/month and above. That pricing structure is no longer publicly listed. Post-Athos Commerce merger, all pricing is custom-quoted through the Athos sales team.
+
+**XTAL Search** pricing is catalog-size based, without per-search metering. You're not paying for traffic spikes. [Contact us](/contact) for a direct quote — you'll get a number, not a discovery call prerequisite.
+
+The structural difference beyond the dollar amounts: XTAL doesn't gate its core AI features at higher tiers. The LLM pipeline that runs semantic query understanding runs on every search, at every plan level. With Klevu, semantic search and personalization were features you unlocked by upgrading.
+
+---
+
+## Setup Complexity
+
+**Klevu** offered a range of integration paths. For Shopify, installation was straightforward via the app store. For Shopify Plus, it provided deeper access through APIs and JavaScript SDKs for custom storefront control. For Hydrogen (headless Shopify), Klevu had documented integration paths. The trade-off: configuring merchandising zones, setting up synonyms and redirects, and integrating Shopify Flow automation required meaningful time investment.
+
+**XTAL Search** deploys via a single `<script>` tag — an embeddable snippet that intercepts your existing search input and renders results in an overlay. No theme modifications. No schema changes. No Shopify theme code to maintain. For Shopify specifically, a native app install is available alongside the snippet option. Most stores are live within a day.
+
+The flip side: XTAL doesn't deeply hook into Shopify's native search results pages or collection pages the way Klevu can. XTAL's primary surface is the search overlay. If your merchandising strategy is heavily built around category page optimization with lift-and-sort controls, Klevu's (now Athos') tooling is more mature there.
+
+---
+
+## AI Capabilities
+
+This is the most technically meaningful part of the comparison, and it's worth being precise about what "AI search" means for each platform.
+
+**Klevu's AI approach (KlevuAI)** was built on machine learning models trained on ecommerce behavioral data. It used NLP to interpret queries — handling synonyms, intent inference, and multi-language understanding without manual synonym management. The ML layer improved over time with behavioral signals: clicks, purchases, add-to-carts. For most Shopify Plus merchants, this worked well. User reviews consistently praised KlevuAI's out-of-the-box relevance quality.
+
+The limitations that surfaced in practice: KlevuAI's NLP sometimes returned zero or irrelevant results when queries were phrased in unusual ways. The model had learned from observed ecommerce patterns, so it handled common queries confidently but could struggle at the long tail. The analytics dashboard was also frequently cited as lacking depth for teams that wanted to understand why results ranked the way they did.
+
+**XTAL's AI approach** starts with a different foundation: large language models. Before retrieval happens, the query runs through a two-stage LLM pipeline — first augmented with brand context (what kind of store is this, what's the product vocabulary), then re-ranked through a marketing lens after retrieval. The LLM understands natural language semantically, not by pattern-matching against learned queries. "Something for sensitive skin that isn't greasy" resolves to the right product category without you building synonym rules for every skin type variant.
+
+XTAL also generates dynamic aspects from query context — the filter options presented to the shopper adapt to what they're actually asking about, not a static configured facet set.
+
+<Callout type="insight">
+  Klevu's NLP limitation — relevance degrading on unusual or long-tail queries — is structural. An ML model trained on ecommerce patterns handles the 80th percentile of queries confidently and degrades at the edges. XTAL's LLM handles the edges the same way it handles common queries: by reasoning about intent, not pattern-matching against learned data.
+</Callout>
+
+<InlineCTA
+  title="See whether your current search handles long-tail queries"
+  body="The XTAL Site Search Grader tests your store's search quality across eight dimensions — including how well it handles semantic and natural language queries your shoppers are actually typing. Free, no account required."
+  cta="Grade your store's search"
+  href="/grade"
+/>
+
+---
+
+## Who Should Choose Which
+
+**Klevu / Athos Commerce is the stronger choice if:**
+
+- You're already on Klevu and your implementation is mature — rebuilding a working system has real cost
+- Your Shopify Plus store has complex category merchandising needs: lift-and-sort on PLPs, automated Shopify Flow boosting, banner placements
+- You need personalized recommendations integrated with search, not just search on its own
+- You want deep Hydrogen/headless documentation and SDK support for a custom Shopify frontend
+- You're planning to eventually adopt a full Athos Commerce suite (search + personalization + feed management) and want to start on a platform that will consolidate
+
+**XTAL Search is the stronger choice if:**
+
+- You're evaluating new vendors post-Klevu merger and want to understand your options before committing to Athos Commerce pricing
+- Your store gets significant long-tail, natural language, or problem-based queries — "what should I use for X" style searches that ML NLP handles inconsistently
+- You need fast deployment with minimal engineering involvement: snippet-based, not theme-integrated
+- You're on a custom or headless storefront where an embeddable snippet is cleaner than a platform-specific connector
+- You want search quality driven by AI prompting rather than ML pattern-matching over behavioral data — particularly useful for newer stores without rich behavioral history to train on
+- You're a Shopify merchant on a tighter budget and Athos Commerce's post-merger pricing has moved above what you were paying for standalone Klevu
+
+The core trade-off: Klevu/Athos has more depth in the Shopify Plus ecosystem and a more mature personalization layer. XTAL has a more capable AI foundation for understanding complex search intent. For most mid-market Shopify Plus merchants, both would deliver a meaningful improvement over Shopify's native search — the question is whether you need the ML personalization layer or the LLM intent layer more.
+
+---
+
+## FAQ
+
+### Is Klevu better than XTAL for Shopify Plus?
+
+Klevu has deeper native Shopify Plus integration — Shopify Flow automation, Shopify Markets support, Hydrogen/headless SDKs, and a more mature merchandising layer for category pages. XTAL works well on Shopify Plus via its snippet and native app, and offers stronger AI capabilities for handling complex or unusual queries. Which is "better" depends on whether Shopify-native depth or AI-native search quality is your priority.
+
+### How does pricing compare?
+
+Klevu's pre-merger pricing started around $449–$499/month for base tiers. Under Athos Commerce, pricing is now custom-quoted — standalone Klevu tiers are no longer publicly available. XTAL's pricing is catalog-size based without per-search metering. [Contact us](/contact) for a direct quote.
+
+### Does XTAL have Klevu's Smart Recommendations?
+
+XTAL focuses on search quality rather than collaborative filtering recommendations. Its aspects and reasoning features surface contextually relevant products through semantic search, but it doesn't have a behavioral ML recommendation module the way Klevu did. If product recommendations beyond search results are critical to your strategy, factor that into your evaluation.
+
+### Can I try XTAL before switching from Klevu?
+
+Yes. Run the [XTAL Site Search Grader](/grade) on your store for free — it benchmarks your current search quality across eight dimensions. You can also request a demo to see XTAL's results on your own catalog alongside your current setup.
+
+### Which has better analytics?
+
+Klevu offered revenue-attributed analytics dashboards. XTAL provides search quality logging and click-through analytics, oriented around identifying degraded results rather than reporting on attributed revenue. XTAL's philosophy is that AI should reduce the need for constant analytical intervention — the pipeline adjusts through prompt tuning rather than dashboard-driven manual optimization.
+
+### Does Klevu use AI like XTAL?
+
+Klevu used machine learning (KlevuAI) for NLP and personalization — a genuine and capable AI layer, but architecturally different from XTAL's LLM-based approach. ML models learn from behavioral patterns; LLMs reason from language. The practical difference shows up most on novel, long-tail, or problem-based queries that ML hasn't seen enough examples of to pattern-match confidently.

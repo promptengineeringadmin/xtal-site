@@ -1,0 +1,150 @@
+---
+title: "XTAL Search vs Searchspring (Athos Commerce)"
+description: "How XTAL Search compares to Searchspring (now Athos Commerce) — features, pricing, and what the merger means for your store's search."
+competitor: "Searchspring"
+date: "2026-02-21"
+updated: "2026-02-21"
+draft: false
+faqItems:
+  - question: "What happened to Searchspring?"
+    answer: "Searchspring merged with Klevu and Intelligent Reach in January 2025 to form Athos Commerce. The Searchspring product name continues as a division brand within Athos, but pricing, contracts, and feature roadmaps have been consolidated under the new parent company."
+  - question: "Should existing Searchspring customers switch to XTAL?"
+    answer: "If your current Searchspring setup is working well and you're comfortable with Athos Commerce's roadmap, there may not be an urgent reason to switch. Consider XTAL if you want AI-native search capabilities, simpler pricing, or are concerned about post-merger product direction and integration timelines."
+  - question: "How does XTAL's pricing compare to Searchspring?"
+    answer: "Searchspring's pricing was previously quote-based starting around $599/month, and under Athos Commerce it remains custom-enterprise only. XTAL offers transparent, catalog-size-based pricing that tends to be more accessible for small-to-mid-size merchants."
+  - question: "Can I migrate from Searchspring to XTAL?"
+    answer: "Yes. XTAL indexes your product catalog directly from your ecommerce platform, so migration doesn't depend on exporting data from Searchspring. Most stores can switch in a single day."
+  - question: "Does XTAL support merchandising rules like Searchspring?"
+    answer: "XTAL takes a different approach — instead of manual merchandising rules, it uses AI-powered ranking that adapts to shopper intent automatically. You can still influence results through brand and marketing prompts, which guide the LLM without requiring rule-by-rule maintenance."
+  - question: "Which platforms does XTAL support compared to Searchspring?"
+    answer: "Both support Shopify and major ecommerce platforms. Searchspring has deep BigCommerce and Magento integration historically, while XTAL offers a universal embeddable snippet that works on any platform without theme modifications."
+---
+
+If you've been a Searchspring customer since before January 2025, you're navigating something genuinely disruptive: the platform you contracted with has been absorbed into a new company called Athos Commerce, formed from the merger of Searchspring, Klevu, and Intelligent Reach. The product still works. The roadmap has changed. And the question of whether to stay, wait, or switch is more complex than it was a year ago.
+
+This page is intended to give you an honest look at where XTAL Search fits into that picture — not to pressure you into a switch, but to give you the information you need to make a clear-eyed decision.
+
+---
+
+## TL;DR
+
+- Searchspring merged with Klevu in January 2025 to form **Athos Commerce**. The Searchspring brand continues as a division, but contracts and roadmap are now centralized under Athos.
+- Athos Commerce targets **enterprise and mid-market** retailers with custom-quoted pricing. If you need transparent, affordable pricing, that's a gap XTAL fills.
+- XTAL Search is **AI-native from the ground up** — LLM reasoning runs in every search request, not as a bolt-on to keyword retrieval.
+- Migration from Searchspring to XTAL is **same-day** — XTAL indexes directly from your platform, no Searchspring export required.
+
+---
+
+## Feature Comparison
+
+<ComparisonTable
+  headers={["Feature", "XTAL Search", "Searchspring / Athos Commerce"]}
+  rows={[
+    { feature: "AI-Native Search Pipeline (LLM in retrieval)", values: [true, false] },
+    { feature: "Semantic / Intent-Based Query Understanding", values: [true, "Partial — ML-based NLP, not LLM-native"] },
+    { feature: "Merchandising Controls", values: ["AI-guided via prompts", "Rule-based boost/bury, banners, landing pages"] },
+    { feature: "Personalization Engine", values: [false, "Yes — ML-based, behavioral signals"] },
+    { feature: "Category Page Optimization", values: [false, "Yes — core feature"] },
+    { feature: "Product Feed Management", values: [false, "Yes — via Intelligent Reach division"] },
+    { feature: "Embeddable Snippet (any storefront)", values: [true, false] },
+    { feature: "Shopify Native Integration", values: [true, true] },
+    { feature: "BigCommerce / Magento Integration", values: ["Via snippet", "Deep native integration"] },
+    { feature: "Transparent Public Pricing", values: [false, false] },
+    { feature: "Self-Service Setup", values: [true, false] },
+    { feature: "Analytics Dashboard", values: ["Search quality logging, click-through", "Unified analytics with revenue attribution"] },
+  ]}
+/>
+
+---
+
+## Pricing Comparison
+
+Pricing transparency is one of the most meaningful differences between the two platforms right now.
+
+**Searchspring / Athos Commerce** has moved to fully custom-enterprise pricing. Before the merger, Searchspring quoted starting around $599/month for smaller catalogs. Under Athos Commerce, all pricing requires a sales conversation. The new unified platform is being positioned for mid-market to enterprise retailers — and pricing reflects that ambition.
+
+**XTAL Search** pricing is based on catalog size. It's not per-search metered. You're not paying for query volume spikes during Black Friday, and you're not penalized for growing traffic. For teams coming off Searchspring who are running the numbers on what Athos Commerce will cost them post-contract renewal, XTAL's model is a meaningfully different structure.
+
+Neither platform publishes a full public pricing page, but [contact us](/contact) for XTAL pricing and you'll get a number, not a seven-step qualification process.
+
+---
+
+## Setup Complexity
+
+**Searchspring / Athos Commerce** implementations are sales-assisted. You'll work with an implementation team, configure merchandising zones, build synonyms libraries, and integrate with your storefront templates. For a large Magento or BigCommerce store with complex category pages, that white-glove approach has real value. For a Shopify store that needs search fixed in a week, it's overhead.
+
+**XTAL Search** deploys as a `<script>` tag. You add one line to your storefront — or install the Shopify app — and the overlay intercepts your existing search input. There's no theme rewrite, no API integration sprint, no dedicated implementation manager required. Most stores are live in under a day. The trade-off is that XTAL doesn't deeply modify your category navigation pages the way Searchspring can; its primary surface is the search overlay.
+
+---
+
+## AI Capabilities
+
+This is where the architectural difference matters most.
+
+**Searchspring / Athos Commerce** uses machine learning for NLP, query interpretation, and personalization. It's genuinely capable at understanding natural language and surfacing relevant results. The ML models have been trained on ecommerce data and improve with behavioral signals over time. That said, the AI in Searchspring was always a layer on top of a fundamentally keyword-based retrieval architecture — the ML improves ranking, but the underlying index is keyword-structured.
+
+**XTAL Search** runs a two-stage LLM pipeline on every query before retrieval happens. Stage one augments the query with brand and product context; stage two applies a marketing-aware re-ranking lens to the results. The LLM understands semantic intent — "something for dry winter skin" resolves to moisturizers, not skin-themed winter apparel — without you building and maintaining synonym dictionaries. Dynamic aspects are extracted automatically from query context, so filters adapt to what the shopper is actually asking about.
+
+The practical difference: Searchspring lets you configure relevance. XTAL interprets intent.
+
+<Callout type="insight">
+  Athos Commerce's 2026 platform roadmap promises a unified AI layer across search, merchandising, and personalization. That's genuinely ambitious — but the platform won't reach full commercial availability until early 2026, and existing Searchspring customers are being migrated on a phased schedule. If your contract is up for renewal now, you're making a decision based on a product that isn't fully built yet.
+</Callout>
+
+<InlineCTA
+  title="See how AI-native search actually performs on your catalog"
+  body="The XTAL Site Search Grader evaluates your store's current search quality across eight dimensions — semantic understanding, NLP handling, zero-result rate, faceting, and more. Free, no account required, results in under two minutes."
+  cta="Grade your store's search"
+  href="/grade"
+/>
+
+---
+
+## Who Should Choose Which
+
+**Stay with Searchspring / Athos Commerce if:**
+
+- You're on a long-term contract and the transition risk isn't worth it right now
+- Your team relies on Searchspring's category page optimization features, which XTAL doesn't replicate
+- You have a BigCommerce or Magento store that benefits from deep native integrations
+- You want a single platform for search, merchandising, personalization, and product feed management — the full Athos suite is ambitious and may eventually deliver that
+- You need white-glove implementation support and have the budget for an enterprise engagement
+
+**Consider switching to XTAL if:**
+
+- You're coming up on a contract renewal and evaluating options before signing another multi-year enterprise deal
+- You want AI-native search — real LLM reasoning, not ML re-ranking layered on keyword retrieval
+- You need faster deployment: days, not months
+- Your store is on a custom or headless storefront where an embeddable snippet is a cleaner integration path than deep platform connectors
+- You're mid-market and Athos Commerce's pricing has moved out of your range post-merger
+- You want search quality that improves through prompt tuning rather than manual rule maintenance
+
+The merger has created a window where many Searchspring customers are re-evaluating their options. That doesn't mean XTAL is the right answer for everyone — but if your primary concern is AI search capability at a manageable price point with fast deployment, it's worth a side-by-side look.
+
+---
+
+## FAQ
+
+### What happened to Searchspring?
+
+Searchspring, Klevu, and Intelligent Reach merged in January 2025 to form Athos Commerce. The Searchspring brand continues as a division name, but the company is now Athos Commerce. The unified platform is being built on a modernized tech stack and is expected to reach full commercial launch in early 2026.
+
+### Should existing Searchspring customers switch to XTAL?
+
+If your current Searchspring setup is working well and you're comfortable with Athos Commerce's direction, there may not be an urgent reason to switch. Consider XTAL if you want AI-native search capabilities, simpler pricing, or are concerned about post-merger product timelines and what your contract renewal will look like under the new company.
+
+### How does XTAL's pricing compare to Searchspring?
+
+Searchspring previously started around $599/month on quoted contracts. Under Athos Commerce, pricing is custom-enterprise only. XTAL's pricing is catalog-size based, without per-search metering, and is generally more accessible for small-to-mid-size merchants. [Contact us](/contact) for a direct quote.
+
+### Can I migrate from Searchspring to XTAL?
+
+Yes. XTAL indexes your product catalog directly from your ecommerce platform (Shopify, etc.), not from a Searchspring export. Migration is platform-to-XTAL, not Searchspring-to-XTAL. Most stores complete the switch in a single day.
+
+### Does XTAL support merchandising rules like Searchspring?
+
+XTAL takes a different approach. Rather than rule-based boost/bury controls, it uses brand and marketing prompts to guide the LLM's ranking logic. You can influence what gets surfaced — emphasizing margin, newness, inventory — without maintaining individual product rules. For stores with complex category page merchandising needs, Athos Commerce's rule layer is more mature today.
+
+### Which platforms does XTAL support compared to Searchspring?
+
+Both support Shopify. Searchspring has deep native integrations for BigCommerce and Magento. XTAL's embeddable snippet works on any storefront — Shopify, headless, custom — without platform-specific connectors. For Shopify specifically, XTAL offers a native app install in addition to the snippet.

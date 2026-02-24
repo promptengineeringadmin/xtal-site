@@ -1,0 +1,156 @@
+@-webkit-keyframes CollectJSBounceOut {
+    20% {
+        -webkit-transform: translate3d(0, -10px, 0);
+        transform: translate3d(0, -10px, 0);
+    }
+
+    40%,
+    45% {
+        opacity: 1;
+        -webkit-transform: translate3d(0, 20px, 0);
+        transform: translate3d(0, 20px, 0);
+    }
+
+    to {
+        opacity: 0;
+        -webkit-transform: translate3d(0, -2000px, 0);
+        transform: translate3d(0, -2000px, 0);
+    }
+}
+
+@keyframes CollectJSBounceOut {
+    20% {
+        -webkit-transform: translate3d(0, -10px, 0);
+        transform: translate3d(0, -10px, 0);
+    }
+
+    40%,
+    45% {
+        opacity: 1;
+        -webkit-transform: translate3d(0, 20px, 0);
+        transform: translate3d(0, 20px, 0);
+    }
+
+    to {
+        opacity: 0;
+        -webkit-transform: translate3d(0, -2000px, 0);
+        transform: translate3d(0, -2000px, 0);
+    }
+}
+
+.CollectJSBounceOut {
+    -webkit-animation-name: CollectJSBounceOut;
+    animation: .66s CollectJSBounceOut;
+}
+
+@-webkit-keyframes CollectJSBounceIn {
+    from,
+    60%,
+    75%,
+    90%,
+    to {
+        -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+        animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+    }
+
+    0% {
+        opacity: 0;
+        -webkit-transform: translate3d(0, -3000px, 0);
+        transform: translate3d(0, -3000px, 0);
+    }
+
+    60% {
+        opacity: 1;
+        -webkit-transform: translate3d(0, 25px, 0);
+        transform: translate3d(0, 25px, 0);
+    }
+
+    75% {
+        -webkit-transform: translate3d(0, -10px, 0);
+        transform: translate3d(0, -10px, 0);
+    }
+
+    90% {
+        -webkit-transform: translate3d(0, 5px, 0);
+        transform: translate3d(0, 5px, 0);
+    }
+
+    to {
+        -webkit-transform: translate3d(0, 0, 0);
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes CollectJSBounceIn {
+    from,
+    60%,
+    75%,
+    90%,
+    to {
+        -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+        animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+    }
+
+    0% {
+        opacity: 0;
+        -webkit-transform: translate3d(0, -3000px, 0);
+        transform: translate3d(0, -3000px, 0);
+    }
+
+    60% {
+        opacity: 1;
+        -webkit-transform: translate3d(0, 25px, 0);
+        transform: translate3d(0, 25px, 0);
+    }
+
+    75% {
+        -webkit-transform: translate3d(0, -10px, 0);
+        transform: translate3d(0, -10px, 0);
+    }
+
+    90% {
+        -webkit-transform: translate3d(0, 5px, 0);
+        transform: translate3d(0, 5px, 0);
+    }
+
+    to {
+        -webkit-transform: translate3d(0, 0, 0);
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+.CollectJSBounceIn {
+    -webkit-animation-name: CollectJSBounceIn;
+    animation: .66s CollectJSBounceIn;
+}
+
+.CollectJSFade {
+    position: fixed;
+    z-index: 1099;
+    background-color: #525252;
+    opacity: 0;
+    transition: opacity .15s linear;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+#CollectJSIframe {
+    position: fixed;
+    z-index: 1100;
+    margin: auto;
+    display: none;
+    border: 3px solid;
+    border-radius: 6px;
+    box-shadow: 3px 3px 50px 1px #282828;
+    left: 0;
+    right: 0;
+    top: 30%;
+    max-width: 95%;
+    box-sizing: content-box;
+}
+
+.CollectJSInlineIframe {
+    border: none;
+}

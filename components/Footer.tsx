@@ -109,6 +109,12 @@ export default function Footer() {
         {/* Divider + Bottom Row */}
         <div className="border-t border-slate-700 mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-6 text-sm text-slate-500">
+            <Link href="/blog" className="hover:text-slate-300 transition-colors">
+              Blog
+            </Link>
+            <Link href="/compare" className="hover:text-slate-300 transition-colors">
+              Compare
+            </Link>
             <Link href="/privacy" className="hover:text-slate-300 transition-colors">
               Privacy Policy
             </Link>

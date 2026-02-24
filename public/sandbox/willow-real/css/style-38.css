@@ -1,0 +1,192 @@
+*, *:before, *:after {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+*:focus-visible {
+    box-shadow: 0 0 0 2px #858585 !important;
+}
+a {
+    text-decoration: underline;
+    cursor: pointer;
+}
+.slick-prev, .slick-next,
+.navigation nav.main ul li {
+    -webkit-transition: all 0.2s ease-in-out 0s;
+    -moz-transition: all 0.2s ease-in-out 0s;
+    -ms-transition: all 0.2s ease-in-out 0s;
+    transition: all 0.2s ease-in-out 0s;
+}
+
+@media (min-width: 1201px) {
+    .hidden-mobile-up {
+        display: none;
+    }
+}
+
+a.see_all {
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 11px;
+}
+
+a.close-button {
+    display: block;
+    width: 40px;
+    height: 40px;
+    position: relative;
+    float: right;
+    margin: 15px 15px 0 0;
+    opacity: 1;
+    -webkit-transition: all 0.2s ease-in-out 0s;
+    -moz-transition: all 0.2s ease-in-out 0s;
+    -ms-transition: all 0.2s ease-in-out 0s;
+    transition: all 0.2s ease-in-out 0s;
+}
+
+    a.close-button span {
+        display: block;
+        width: 40px;
+        height: 2px;
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+
+        a.close-button span.top {
+            -webkit-transform: rotate(45deg);
+            -moz-transform: rotate(45deg);
+            -ms-transform: rotate(45deg);
+            transform: rotate(45deg);
+        }
+
+        a.close-button span.bottom {
+            -webkit-transform: rotate(-45deg);
+            -moz-transform: rotate(-45deg);
+            -ms-transform: rotate(-45deg);
+            transform: rotate(-45deg);
+        }
+
+
+
+
+
+        
+
+
+/*	--------------------------------------------------
+	2.0 LISTS
+	-------------------------------------------------- */
+
+
+
+/* 	--------------------------------------------------
+	3.0 MISC
+	-------------------------------------------------- */
+
+img.usn {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+}
+
+@media (min-width:992px) {
+    /* IMAGE TRANSITIONS */
+    .image,
+    .image.video,
+    .banner .image,
+    .promo-pods .image,
+    .listing .image,
+    .gallery .image {
+        overflow: hidden;
+        padding: 0;
+    }
+
+        .image.video a img,
+        .banner .item a img,
+        .promo-pods .item a img {
+            -webkit-transition: transform 0.3s ease-in-out;
+            -moz-transition: transform 0.3s ease-in-out;
+            -ms-transition: transform 0.3s ease-in-out;
+            -o-transition: transform 0.3s ease-in-out;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .image.video a:hover img,
+        .banner .item a:hover img,
+        .promo-pods .item a:hover img {
+            -webkit-transform: scale(1.08);
+            -moz-transform: scale(1.08);
+            -ms-transform: scale(1.08);
+            -o-transform: scale(1.08);
+            transform: scale(1.08);
+        }
+}
+
+.slides { visibility: hidden; }
+.slides.slick-initialized { visibility: visible; }
+
+.slick-track .item.slick-slide { visibility: hidden; }
+.slick-track .item.slick-slide:first-child { visibility: visible; }
+.slick-track .item.slick-slide.slick-current.slick-active { visibility: visible; }
+
+/*	--------------------------------------------------
+	4.0 TYPOGRAPHY
+	-------------------------------------------------- */
+
+
+blockquote {
+    position: relative;
+    padding: 2em;
+    margin: auto;
+    border: 0 none;
+    font-size: 150%;
+    font-style: italic;
+    max-width: 40em;
+}
+
+    blockquote::before,
+    blockquote::after {
+        content: "\f347";
+        display: inline-block;
+        font-family: "Ionicons";
+        speak: none;
+        font-style: normal;
+        font-weight: normal;
+        font-variant: normal;
+        text-transform: none;
+        text-rendering: auto;
+        line-height: 1;
+        -webkit-font-smoothing: antialiased;
+        color: #212121;
+        color: rgb(65 99 109);
+        position: absolute;
+		font-size: 30px;
+    }
+
+    blockquote::before {
+        top: 1em;
+        left: .5em;
+    }
+
+    blockquote::after {
+        bottom: 1em;
+        right: .5em;
+        transform: rotate(-180deg);
+        -ms-transform: rotate(-180deg);
+        -webkit-transform: rotate(-180deg);
+        -moz-transform: rotate(-180deg);
+    }
+
+    blockquote cite {
+        font-size: 12px;
+    }
+
+
+
+
+
+/*	--------------------------------------------------
+	END
+	-------------------------------------------------- */

@@ -1,0 +1,240 @@
+---
+title: "Klevu vs Algolia vs XTAL: Honest Three-Way Comparison for Mid-Size Ecommerce"
+description: "A detailed three-way comparison of Klevu, Algolia, and XTAL Search for mid-size ecommerce stores — features, pricing, setup, and AI capabilities compared."
+date: "2026-02-06"
+author: "XTAL Team"
+authorTitle: "Search Platform Analysis"
+category: "Comparisons"
+tags: ["klevu", "algolia", "comparison", "mid-market", "ecommerce search"]
+draft: false
+---
+
+If you run a mid-size ecommerce store — somewhere between 10,000 and 100,000 SKUs, with annual revenue in the $1M–$50M range — you have probably shortlisted at least two of these three platforms. Klevu, Algolia, and XTAL occupy different positions in the market, but they all land in the same evaluation cycle for growing merchants who have outgrown native platform search.
+
+This article is a single, side-by-side resource. We cover features, pricing at the 50K searches/month tier, setup complexity, AI and NLP capabilities, and the specific scenarios where each platform wins. We will be honest about where Algolia and Klevu have real advantages — this is not a promotional piece for XTAL.
+
+For a broader survey of the search landscape, see [Algolia alternatives for ecommerce](/blog/algolia-alternatives-for-ecommerce). For deeper individual comparisons, see the [XTAL vs. Algolia](/compare/algolia) and [XTAL vs. Klevu](/compare/klevu) pages.
+
+---
+
+## Why These Three Platforms
+
+### Algolia: The Incumbent
+
+Algolia became the default ecommerce search platform for a generation of developers. Its indexing speed is genuinely fast, its API is well-documented, its InstantSearch UI libraries are mature, and it has 20 consecutive G2 Leader badges in the Enterprise E-Commerce Search Grid to show for it. For mid-market merchants with in-house engineering capacity, it became the safe, defensible choice.
+
+The challenge is that "safe and defensible" now costs real money. Algolia's AI features — NeuralSearch, dynamic re-ranking, advanced personalization — live behind Premium and Elevate tiers that require custom enterprise contracts. Teams who evaluated Algolia expecting AI search and discovered it was priced separately are often the ones running this comparison in 2026.
+
+### Klevu: The Shopify Plus Challenger
+
+Klevu occupies the space between Algolia and enterprise tools like Constructor. It was built explicitly for ecommerce merchandisers rather than developers, integrates natively with Shopify Plus and Magento, and includes genuine NLP and semantic search capabilities at non-enterprise pricing. Its customer base skews toward fashion, home goods, and specialty retail — merchants who need strong visual merchandising and category page control alongside search.
+
+Note that as of early 2025, Klevu merged with Searchspring to form Athos Commerce. The Klevu product continues under that umbrella, but the roadmap and pricing structure are still settling. Some existing customers have expressed uncertainty about long-term support and pricing direction — a fair consideration for a multi-year platform commitment.
+
+### XTAL: The AI-Native Newcomer
+
+XTAL is the newest of the three. Rather than starting with a keyword index and adding AI features over time, it built the pipeline around LLM reasoning from the start. Every search request runs through two LLM stages before retrieval: a query augmentation stage that enriches the user's query with brand context and semantic expansion, and a re-ranking stage that applies a marketing lens to final results. The platform deploys as an embeddable JavaScript snippet that overlays results on your existing storefront without requiring theme modifications.
+
+XTAL is the right platform to evaluate if you want AI-native search and are willing to be an early adopter in exchange for lower cost and faster deployment. If you need a platform with an established seven-year track record and 150+ integrations, look at the other two first.
+
+---
+
+## Feature Comparison
+
+<ComparisonTable
+  headers={["Feature", "XTAL Search", "Algolia", "Klevu"]}
+  rows={[
+    { feature: "AI-Native Architecture (LLM in pipeline)", values: [true, false, true] },
+    { feature: "Semantic / Intent-Based Search", values: [true, "Grow Plus / Premium tier", true] },
+    { feature: "NLP Query Understanding", values: [true, true, true] },
+    { feature: "Typo Tolerance", values: [true, true, true] },
+    { feature: "Automated Synonym Expansion", values: [true, true, true] },
+    { feature: "Merchandising Controls (pin, boost, bury)", values: [true, true, true] },
+    { feature: "A/B Testing for Merchandising Rules", values: [false, true, true] },
+    { feature: "Category Page Merchandising", values: [false, true, true] },
+    { feature: "Behavioral Personalization", values: [false, "Premium tier", true] },
+    { feature: "Real-Time Analytics Dashboard", values: [true, true, true] },
+    { feature: "Shopify Native Integration", values: [true, true, true] },
+    { feature: "Headless / Custom Storefront Support", values: [true, true, "API-only, higher effort"] },
+    { feature: "Embeddable Snippet (no theme edit required)", values: [true, false, false] },
+    { feature: "No Per-Search Metering", values: [true, false, false] },
+    { feature: "Transparent Public Pricing", values: [false, true, false] },
+    { feature: "Self-Service Setup (no sales call required)", values: [false, true, false] },
+  ]}
+/>
+
+---
+
+## Pricing Comparison: The Mid-Market Scenario
+
+For this section we use a representative mid-market scenario: **50,000 searches per month, 20,000 SKUs**.
+
+### Algolia
+
+Algolia's Grow plan is pay-as-you-go. The base plan includes 10,000 search requests per month and 100,000 records. For our scenario:
+
+- 40,000 additional searches × $0.50 per 1,000 = **$20/month** (Grow)
+- 40,000 additional searches × $1.75 per 1,000 = **$70/month** (Grow Plus, which adds AI Synonyms, AI Ranking, and advanced personalization)
+- Records: 20,000 SKUs fits inside the 100,000 record inclusion, so **$0 additional**
+
+At 50K searches/month, Algolia is relatively affordable — the Grow Plus tier with AI features comes to roughly **$70–$100/month** total, depending on record count and any recommendation requests.
+
+The ceiling risk is real though. At 500,000 searches/month, Grow Plus costs roughly $883/month in search alone, and teams at that volume typically need Premium with its custom contract pricing for full AI features. G2 reviewers consistently flag unexpected overage costs as a primary source of frustration — traffic spikes do not pause your bill.
+
+### Klevu
+
+Klevu does not publish granular per-search pricing publicly. Pricing scales on a combination of domains, sessions, and SKU count. Based on published third-party research and industry pricing surveys:
+
+- AI Search (starter tier): **approximately $499–$699/month** for typical mid-market catalogs
+- AI Search + Merchandising: **approximately $1,000–$1,600/month**
+- Enterprise / multi-domain: custom quotes
+
+For a single-domain store at 20K SKUs and 50K monthly searches, expect the entry-level AI tier to land around $500–700/month. Klevu's pricing is stable and not metered per-search, which makes monthly cost predictable — a meaningful advantage over Algolia if traffic is variable.
+
+### XTAL
+
+XTAL does not use a per-search pricing model. Contact [XTAL](/grade) for a quote. At the mid-market scale this article covers, XTAL typically underprices Klevu's merchandising tier while providing comparable or stronger AI capabilities.
+
+<Callout type="insight">
+  The real pricing story is not the base rate — it's the **AI feature gate**. Algolia's semantic search and AI ranking require upgrading to Grow Plus or Premium. Klevu includes semantic NLP in its standard AI Search tier. XTAL includes LLM-stage query augmentation at all tiers. If you need genuine intent-understanding search, factor that into your cost comparison, not just the headline number.
+</Callout>
+
+<InlineCTA
+  title="Not sure which platform is worth the investment?"
+  body="Find out where your current search is losing revenue before you buy anything. The XTAL Search Grader scores your store across eight quality dimensions in under two minutes — so you walk into vendor demos knowing exactly what you need."
+  cta="Grade your store's search free"
+  href="/grade"
+/>
+
+---
+
+## Setup Complexity and Time to Go Live
+
+### Algolia
+
+**Developer-first, medium-to-high effort.** Algolia provides excellent InstantSearch libraries for React, Vue, and vanilla JS, plus platform integrations for Shopify and commercetools. Getting basic keyword search live is achievable in a few days for an experienced developer. Getting semantic search, personalization, and well-tuned ranking live takes weeks to months of relevance work — custom ranking attributes, synonym dictionaries, rules, and boosting logic all require ongoing attention.
+
+Algolia does not offer a no-code merchandiser-facing tool that non-developers can use to tune relevance. The Algolia Dashboard allows some rule management, but it assumes technical familiarity. Teams without a dedicated search engineer will find themselves dependent on development sprints for any non-trivial configuration change.
+
+**Estimated time to go live (basic search):** 3–7 days
+**Estimated time to go live (well-tuned AI search):** 6–12 weeks
+
+### Klevu
+
+**Merchandiser-first, low-to-medium effort.** Klevu's native Shopify app installs in under an hour for standard Shopify stores. The Klevu Merchant Center is a purpose-built dashboard that lets marketing and merchandising teams manage boosting rules, banners, A/B tests, and category page configuration without touching code. For Shopify Plus stores, the integration covers PLP and PDP surfaces with minimal developer involvement.
+
+Headless or custom storefronts require more developer work via Klevu's APIs and JavaScript SDKs, and some users note that achieving the full feature set on custom builds can require significant back-end work. The support team is widely praised in reviews — Klevu's live support is faster and more proactive than most alternatives at this price tier.
+
+**Estimated time to go live (Shopify standard):** 1–3 days
+**Estimated time to go live (Shopify Plus / custom):** 1–4 weeks
+
+### XTAL
+
+**Snippet-first, fast deployment.** XTAL deploys as a single `<script>` tag. Drop it into your storefront's `<head>`, configure your shop ID and product URL pattern, and XTAL intercepts your existing search input and renders results in an overlay. For standard Shopify, BigCommerce, or custom storefronts, basic deployment is measured in hours. No theme modifications are required. No rebuilding the search results page.
+
+The tradeoff is that XTAL currently covers the search overlay use case well, but does not yet offer category page merchandising or the full visual PLP control that Klevu provides. If managing browse pages alongside search is a core requirement, note that gap.
+
+**Estimated time to go live (any storefront, search overlay):** Same day to 2 days
+**Estimated time to go live (advanced configuration):** Under 1 week
+
+---
+
+## AI and NLP Capabilities Deep Dive
+
+This is where the three platforms diverge most meaningfully. All three handle typo tolerance and basic synonyms — that has been table stakes for years. The question in 2026 is whether the platform understands *intent*, not just *keywords*.
+
+### Algolia
+
+Algolia's AI capabilities are real but tier-gated. The Grow tier offers standard keyword search with typo tolerance, fuzzy matching, and manually configured synonyms. Grow Plus adds AI Synonyms (automatically inferred), AI Ranking (behavioral re-ranking based on click/conversion signals), and advanced personalization rules.
+
+NeuralSearch — Algolia's vector/hybrid semantic search — is available in Premium and Elevate tiers. It combines keyword retrieval with vector embeddings for genuine semantic understanding. At those tiers, it is competitive with the best semantic search available. The issue is that most mid-market merchants at 50K searches/month are on Grow or Grow Plus, not Premium, and the semantic gap is significant.
+
+**Honest assessment:** Strong AI search at the top tiers. Meaningful capability gap at the price points most mid-market teams actually pay.
+
+### Klevu
+
+Klevu's AI is its core differentiator and has been since the platform launched. The search engine is trained on ecommerce-specific transactional data — it understands that "running shoes" means something different in an apparel context than in a fitness context, and it uses behavioral signals (clicks, conversions, add-to-carts) to continuously refine result ranking. NLP features include intent recognition, long-tail query handling, stop word processing, and multi-lingual support.
+
+Since the Athos Commerce merger, the AI roadmap now incorporates Searchspring's catalog intelligence — though this integration is still ongoing and the combined platform's capabilities are still being finalized.
+
+**Honest assessment:** Genuinely strong NLP, consistently rated above Algolia for out-of-the-box ecommerce relevance on G2 and Capterra. The merger creates some roadmap uncertainty, but the core search quality is proven.
+
+### XTAL
+
+XTAL's approach differs architecturally from both competitors. Rather than training a specialized ecommerce model or adding AI re-ranking to a keyword pipeline, XTAL runs two separate LLM stages before and after retrieval:
+
+1. **Query augmentation:** A large language model enriches the user's query with brand-specific context, semantic expansion, and intent classification before the vector retrieval step. This means a query like "something cozy for the bedroom" becomes a structured retrieval request that understands your catalog's relevant product categories.
+
+2. **Marketing re-ranking:** After retrieval, a second LLM pass evaluates candidates against your brand's marketing priorities and re-orders results accordingly.
+
+The practical result is that XTAL handles conversational and long-tail queries that trip up both Klevu and Algolia at lower tiers — not because the retrieval index is better, but because the query interpretation step is more sophisticated. The tradeoff is latency: LLM stages add processing time compared to pure vector or BM25 retrieval. XTAL uses streaming and async patterns to minimize perceived latency, but it is architecturally more complex than a keyword-plus-ranking approach.
+
+XTAL also does not require manual synonym management or boosting rules for most common scenarios. The LLM layer handles linguistic complexity that would otherwise require ongoing curation.
+
+**Honest assessment:** The strongest AI pipeline of the three for intent understanding and conversational search. Newer platform with less tuning data than Klevu's established ecommerce model. Best suited for merchants who are comfortable with AI-native tooling and want the latest approach rather than the most proven one.
+
+---
+
+## Which Platform Wins in Each Scenario
+
+### You have a Shopify Plus store and a merchandising team, not a search team.
+
+**Pick Klevu.** The Klevu Merchant Center gives non-technical merchandisers the control they need to manage boosting rules, A/B tests, banners, and category pages without engineering involvement. The Shopify integration is mature. The support team is fast and knowledgeable. This is exactly the use case Klevu was built for. See the [Klevu comparison page](/compare/klevu) for a full breakdown.
+
+### You have a headless or custom storefront and a strong frontend engineering team.
+
+**Pick Algolia.** Its InstantSearch libraries, extensive SDKs, and well-documented API make it the most developer-flexible platform of the three. Klevu's headless support requires more custom work and provides fewer pre-built UI components. XTAL's snippet approach works on custom storefronts but is less suited to fully custom search UIs. Algolia's Grow Plus tier gives you AI features at a reasonable entry price for this architecture. See the [Algolia comparison page](/compare/algolia) for more detail.
+
+### You need fast deployment with AI-quality search and you are not on a pure Shopify stack.
+
+**Pick XTAL.** If your storefront is a custom build, BigCommerce, Salesforce Commerce Cloud, or a hybrid setup, and you want to be live with AI-native search in days rather than weeks, XTAL's snippet model is the fastest path. The LLM pipeline delivers intent-aware results without requiring synonym curation or boosting rules. It is the best choice for teams who want the most current AI approach and are comfortable being an early adopter.
+
+### You need category page merchandising alongside search.
+
+**Pick Klevu or Algolia.** Both platforms offer visual merchandising tools for category/browse pages. XTAL currently focuses on search overlay and does not cover PLP merchandising. If managing product listing pages is as important as the search box, Klevu or Algolia are the appropriate choices for now.
+
+### You are on a tight budget and need predictable monthly cost.
+
+**Algolia at 50K searches/month is surprisingly affordable** — the Grow Plus tier with AI features comes in around $70–100/month for this scenario. If cost is the primary driver, Algolia's metered model actually works in your favor at lower search volumes. The risk is that cost scales with traffic, and a seasonal spike can produce unexpected overages.
+
+---
+
+## FAQ
+
+### Which is better for Klevu or Algolia for Shopify?
+
+For a standard Shopify merchant who wants search up and running quickly with minimal developer involvement, Klevu generally wins. Its native Shopify app is faster to install, the Merchant Center is designed for non-technical users, and the AI features are included at mid-tier pricing without requiring upgrades. Algolia on Shopify requires more developer work to configure well, but is the better choice if you have a headless Shopify setup or need deep customization. See our [full Klevu comparison](/compare/klevu) and [Algolia comparison](/compare/algolia) for platform-specific detail.
+
+### Is Klevu or Algolia more expensive for a mid-size store?
+
+At 50,000 searches per month, Algolia can actually be cheaper on paper — the Grow Plus tier with AI features costs roughly $70–100/month for that volume. Klevu's AI Search tier runs approximately $499–699/month with predictable flat pricing. The math reverses at high traffic: Klevu becomes more cost-effective at 200,000+ searches per month because it does not charge per search. Budget for both the base rate and traffic variability when comparing.
+
+### Does XTAL work on Shopify?
+
+Yes. XTAL deploys as a `<script>` tag on any storefront, including Shopify. It intercepts the existing search input and renders results in an overlay without modifying your theme files. The primary advantage over a native Shopify app is that no theme update is needed, and it works the same way across multiple storefronts. [Grade your store's search quality](/grade) to see where your current search stands before making a platform decision.
+
+### What happened to Klevu after the Searchspring merger?
+
+Klevu and Searchspring merged in early 2025 to form Athos Commerce. The Klevu product continues under the Athos umbrella. As of early 2026, the combined platform is still integrating the two product lines — the roadmap and pricing structure have not fully stabilized. Existing Klevu customers should evaluate whether their current contract terms are preserved and ask directly about the long-term product direction before committing to a new multi-year agreement.
+
+### Does Algolia have AI search, or is it just keyword search?
+
+Algolia has genuine AI features, but they are tiered. The base Grow plan is largely keyword-based with typo tolerance. Grow Plus adds AI Synonyms, AI Ranking, and behavioral personalization. True semantic / NeuralSearch (vector-based intent understanding) requires the Premium or Elevate tier, which requires a custom enterprise contract. For most mid-market teams on the Grow or Grow Plus tier, Algolia's AI layer is meaningful but not the same as a fully semantic pipeline.
+
+### How do I know which platform will actually improve my search results?
+
+The best starting point is a baseline measurement of your current search performance. The [XTAL Search Grader](/grade) evaluates your live storefront across eight dimensions — semantic understanding, NLP handling, typo tolerance, faceting, zero-result rate, and more — and returns a scored report in under two minutes. You can use that report with any vendor in your evaluation: it tells you exactly which capabilities you are missing so you can ask pointed questions rather than relying on demo environments.
+
+---
+
+## The Bottom Line
+
+All three platforms can serve a mid-market ecommerce store. The differences come down to what your team looks like, what platform you run on, and which AI capability matters most to you.
+
+- **Klevu** is the right default for Shopify Plus merchants with merchandising teams who want proven AI search and strong category page control. The Athos merger introduces some uncertainty, but the core product quality is well-established.
+
+- **Algolia** is the right default for teams with engineering capacity who are running headless or custom storefronts. Its AI features are gated behind higher tiers, but the developer experience and ecosystem depth are unmatched. At low search volumes, it is also the most affordable of the three.
+
+- **XTAL** is the right choice for teams who want the most current AI-native pipeline, fast deployment without theme engineering, and are comfortable being early adopters. It is the strongest option for intent-based and conversational search, and the snippet model makes it the easiest to deploy across any storefront architecture.
+
+Start the evaluation by knowing your baseline. [Grade your store's search quality for free](/grade) — it takes under two minutes and gives you a concrete score across eight search dimensions that you can use in every vendor conversation.

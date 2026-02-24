@@ -1,0 +1,143 @@
+/*!
+ * Yamm!3 - Yet another megamenu for Bootstrap 3
+ * http://geedmo.github.com/yamm3
+ * 
+ * @geedmo - Licensed under the MIT license
+ */
+
+
+.yamm .container {
+  position: relative;
+}
+
+.yamm .yamm-content {
+  padding: 20px 30px;
+}
+.yamm .dropdown.yamm-fw .dropdown-menu {
+  left: 0;
+  right: 0;
+}
+
+.yamm .dropdown-menu > li {
+    display: block;
+}
+
+
+
+
+@media screen and (min-width:1200px) {
+    .navbar-default.yamm {
+    border-color: transparent;
+    background-color: transparent;
+    background-color: transparent; 
+}
+
+
+
+
+
+
+
+/* YAMM MEGA MENU CUSTOM */
+
+@media (max-width: 767px) {
+	.grid-section [class^="col-md"] {
+    margin-bottom:0;
+	}
+
+/* END MIN WIDTH 768PX */
+.yamm .btn {
+	text-align:left;
+  border: none;
+}
+
+.yamm .btn.mega1st {
+	color:#585858;
+    font-weight: 600;
+}
+	
+
+
+.yamm .btn.mega3rd {
+	color: #5f5f5f;
+}
+
+
+
+.yamm .usn-sc-container {
+	padding:10px;
+}
+
+
+.yamm .dropdown .dropdown-menu {
+	border-radius:4px;	
+}
+@media (min-width: 1200px) {
+    .yamm .nav.navbar-nav .dropdown.yamm ul.dropdown-menu.yamm {
+        background-color: rgba(255, 255, 255, 0.97);
+    }
+}
+.yamm .nav.navbar-nav .dropdown.yamm ul.dropdown-menu.yamm {
+    right: 100%;
+    left: auto;
+    top: 0;
+  }
+  
+  .yamm .nav.navbar-nav .dropdown.yamm ul.dropdown-menu.yamm a {
+    background-color: transparent;
+  }
+  
+  .yamm .btn.mega1st {
+    color: #212121;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 500;
+
+
+  }
+  
+  .yamm .btn.mega2nd {
+    color: #585858;
+  }
+  
+  .yamm .dropdown-menu.yamm .dropdown.yamm .spc.umb-grid {
+    margin-bottom: 0;
+  }
+  
+  
+  
+  .yamm .btn.mega1st,
+  .yamm .btn.mega2nd,
+  .yamm .btn.mega3rd {
+    white-space: normal;
+  }
+  
+  .yamm .dropdown .dropdown-menu {
+    border-radius: 0;
+  }
+  /*---------------------------
+  YAMM NAV & #site > header
+---------------------------*/
+.navbar-default.yamm {
+    margin: 0;
+  }
+  
+  li.dropdown.yamm {
+    margin-bottom: 0;
+  }
+  
+  .yamm .spc.umb-grid {
+    margin: 0;
+  }
+  
+  .yamm .nav > li > a {
+    color: #797979;
+    font-size: 120%;
+    text-transform: uppercase;
+    font-weight: 600;
+    padding-bottom: 7px;
+  }
+  
+  .dropdown-menu.yamm > .dropdown.yamm [class*="col-"] {
+    width: auto !important;
+  }

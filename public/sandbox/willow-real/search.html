@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Willow Group | Search Results</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Manrope, serif;
+      background-color: rgb(248, 246, 242);
+      color: rgb(29, 29, 27);
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 20.8px;
+      letter-spacing: normal;
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      display: flex;
+      align-items: center;
+      padding: 22px 24px;
+      background: rgb(248, 246, 242);
+    }
+
+    .site-search {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      width: 240px;
+    }
+    .site-search form {
+      width: 100%;
+    }
+    .site-search .search-field {
+      display: flex;
+      width: 100%;
+      border: 1px solid rgb(180, 189, 206);
+      border-radius: 0;
+    }
+    .site-search .form-control {
+      flex: 1;
+      padding: 6px 16px;
+      border: none;
+      border-radius: 0;
+      font-family: Manrope, serif;
+      font-size: 14px;
+      font-weight: 400;
+      color: rgb(29, 29, 27);
+      line-height: 18.2px;
+      outline: none;
+      background: transparent;
+    }
+    .site-search .form-control::placeholder { color: rgb(160, 160, 160); }
+    .site-search .btn-primary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 12px;
+      color: rgb(29, 29, 27);
+      font-size: 14px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+    .control-label { display: none; }
+
+    .logo {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .logo a {
+      display: block;
+      width: 200px;
+      height: 55.8px;
+    }
+    .logo svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      flex-shrink: 0;
+    }
+    .header-right a {
+      display: flex;
+      align-items: center;
+      color: rgb(29, 29, 27);
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 400;
+      padding: 0 8px;
+      height: 42px;
+    }
+    .header-right a:hover { text-decoration: underline; }
+    .header-right .user-icon {
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      font-size: 18px;
+      color: rgb(29, 29, 27);
+      cursor: pointer;
+    }
+
+    /* ===== CATEGORY NAV ===== */
+    .nav {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      padding: 0 24px;
+      background: rgb(248, 246, 242);
+      border-bottom: 1px solid rgb(220, 220, 220);
+    }
+    .nav a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: rgb(29, 29, 27);
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 400;
+      padding: 16px 8px;
+      line-height: 20.8px;
+    }
+    .nav a:hover { text-decoration: underline; }
+    .nav a .fa-chevron-down {
+      font-size: 10px;
+      color: rgb(29, 29, 27);
+    }
+
+    /* ===== CONTROLS ROW ===== */
+    .controls {
+      display: flex;
+      align-items: center;
+      padding: 10px 24px;
+      background: rgb(248, 246, 242);
+    }
+    .controls-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .hide-filters {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: rgb(29, 29, 27);
+      font-size: 16px;
+      font-weight: 400;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: inherit;
+      padding: 0;
+    }
+    .result-count {
+      color: rgb(29, 29, 27);
+      font-size: 16px;
+    }
+    .controls-right {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-left: auto;
+    }
+    .dropdown {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: rgb(29, 29, 27);
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .dropdown-label { color: rgb(120, 120, 120); }
+    .dropdown .fa-caret-down { font-size: 12px; }
+
+    /* ===== MAIN LAYOUT ===== */
+    .main {
+      display: flex;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ===== FILTER RAIL ===== */
+    .filter-rail {
+      width: 240px;
+      flex-shrink: 0;
+      padding: 16px 24px 16px 0;
+    }
+    .filter-toggles {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .toggle-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: rgb(29, 29, 27);
+      white-space: nowrap;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      background: rgb(200, 200, 200);
+      border-radius: 11px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 18px;
+      height: 18px;
+      background: #fff;
+      border-radius: 50%;
+    }
+
+    .filter-section {
+      border-top: 1px solid rgb(220, 220, 220);
+      padding: 16px 0;
+    }
+    .filter-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      color: rgb(29, 29, 27);
+    }
+    .filter-section-header .fa-chevron-down {
+      font-size: 10px;
+      color: rgb(29, 29, 27);
+    }
+
+    /* ===== PRODUCT GRID ===== */
+    .product-grid {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 32px;
+      padding: 20px 0 40px 32px;
+      align-content: flex-start;
+    }
+
+    .product-card {
+      width: calc((100% - 64px) / 3);
+      cursor: pointer;
+    }
+    .product-image {
+      width: 100%;
+      aspect-ratio: 1;
+      background: rgb(240, 238, 234);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .product-sku {
+      font-size: 14px;
+      color: rgb(120, 120, 120);
+      margin-bottom: 2px;
+    }
+    .product-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: rgb(29, 29, 27);
+      margin-bottom: 2px;
+    }
+    .product-dims {
+      font-size: 14px;
+      color: rgb(29, 29, 27);
+    }
+    .product-price-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+    .product-price {
+      font-size: 14px;
+      color: rgb(29, 29, 27);
+    }
+    .product-price .original {
+      text-decoration: line-through;
+      color: rgb(120, 120, 120);
+      margin-right: 4px;
+    }
+    .product-price .sale {
+      color: rgb(200, 50, 50);
+    }
+    .product-min-qty {
+      font-size: 14px;
+      color: rgb(120, 120, 120);
+    }
+    .product-cta {
+      display: block;
+      width: 100%;
+      padding: 10px 0;
+      margin-top: 8px;
+      background: rgb(29, 29, 27);
+      color: #fff;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* ===== MOBILE HEADER ===== */
+    .mobile-header {
+      display: none;
+      align-items: center;
+      padding: 12px 16px;
+      background: #fff;
+    }
+    .mobile-logo {
+      flex: 1;
+    }
+    .mobile-logo svg { width: 160px; height: 45px; }
+    .hamburger {
+      font-size: 24px;
+      color: rgb(29, 29, 27);
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+    .mobile-search {
+      display: none;
+      padding: 8px 16px 12px;
+      background: #fff;
+    }
+    .mobile-search .search-field {
+      display: flex;
+      width: 100%;
+      border: 1px solid rgb(180, 189, 206);
+    }
+    .mobile-search .form-control {
+      flex: 1;
+      padding: 8px 16px;
+      border: none;
+      font-family: Manrope, serif;
+      font-size: 16px;
+      color: rgb(29, 29, 27);
+      outline: none;
+    }
+    .mobile-search .form-control::placeholder { color: rgb(160, 160, 160); }
+    .mobile-search .btn-primary {
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      color: rgb(29, 29, 27);
+      font-size: 14px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+
+    .mobile-controls { display: none; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 900px) {
+      .header, .nav { display: none; }
+      .mobile-header, .mobile-search { display: flex; }
+      .mobile-controls {
+        display: flex;
+        align-items: center;
+        padding: 8px 16px;
+        background: rgb(248, 246, 242);
+      }
+      .mobile-filter-toggle {
+        background: none;
+        border: none;
+        font-size: 16px;
+        color: rgb(29, 29, 27);
+        cursor: pointer;
+        padding: 4px 8px;
+      }
+      .mobile-controls .controls-right { margin-left: auto; }
+      .filter-rail { display: none; }
+      .controls { display: none; }
+      .main { padding: 0 16px; }
+      .product-grid {
+        gap: 16px;
+        padding: 16px 0 40px 0;
+      }
+      .product-card {
+        width: calc((100% - 16px) / 2);
+      }
+    }
+
+    @media (max-width: 460px) {
+      .product-card {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SVG logo definition (hidden) -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+    <symbol id="logo-bw" viewBox="0 0 492.73 63.26">
+      <title>Willow Group</title>
+      <path d="M71.15 14.13c-.21.77-9.73 29.13-9.73 29.13L57.7 33.02c0 .12-.01.23-.01.36 0 6.55 1.73 11.67 5.19 15.35.22.23.45.43.67.65l11.64-35.27c-.64-.07-1.29-.11-1.96-.11s-1.4.06-2.08.14Zm5.59-6.19c.72-1.8 2.33-3.1 3.69-3.86.81-.47 1.4-.82 2.93-1.05V1.45H66.4v1.58c1.66.06 2.91.27 3.74.63 1.5.61 2.25 1.71 2.25 3.3 0 .21-.02.46-.05.74.16 0 .31-.02.47-.02 1.32 0 2.63.09 3.93.27ZM49.02 20.02 45 10.05c-.44-1.17-.72-1.94-.83-2.32-.11-.38-.17-.81-.17-1.32 0-1.47.64-2.45 1.92-2.92.81-.28 2.28-.43 4.43-.46V1.45H27.47v1.58c1.81.03 3.15.24 4.04.63 1.5.64 2.63 1.91 3.38 3.81l4 10.47-9.03 23.96L17.5 9.75c-.31-.84-.54-1.52-.69-2.05-.15-.53-.23-1.07-.23-1.63 0-1.25.64-2.12 1.92-2.59.72-.25 1.93-.4 3.63-.46V1.44H1.17v1.58c2.51.14 4.35 1.15 5.53 3.03 1.18 1.88 3.26 6.96 6.24 15.24l7.21 20.03 6.36 20h1.29l13.14-38.41 4.55 10.94c-.04-.65-.13-1.31-.09-1.99.32-4.96 1.34-8.01 3.61-11.86Zm1.76 30.39.65 1.73 3.73 9.18h1.33l1.88-4.79c-1.65-.86-3.21-1.88-4.66-3.11-1.1-.93-2.06-1.95-2.93-3.02Z" fill="#1d1d1b" style="fill: #1d1d1b !important; stroke: none;"></path>
+      <path d="M77.82 32.16v1.31c2.63.16 4.33.58 5.11 1.26.78.68 1.17 2.38 1.17 5.13v11.32c0 .79-.21 1.38-.63 1.78s-1.47.88-3.17 1.44c-1.05.35-2.15.6-3.31.76-1.16.16-2.17.24-3.03.24-4.77 0-8.81-1.64-12.15-4.87-.22-.22-.45-.42-.67-.65-3.46-3.68-5.19-8.8-5.19-15.35 0-.12 0-.23.01-.36.05-7.75 1.78-13.34 5.2-16.74 2.94-2.93 6.27-4.6 10-5.05.68-.08 1.37-.14 2.08-.14s1.32.04 1.96.11c3.62.38 6.62 1.82 9.01 4.34 1.56 1.69 3.07 4.26 4.53 7.72h1.64l-.55-15h-1.58c-.3.74-.67 1.31-1.1 1.7-.43.39-1.15.59-2.18.59-.39 0-1.93-.38-4.6-1.15-1.39-.4-2.8-.69-4.22-.88-1.3-.17-2.61-.27-3.93-.27-.16 0-.31.02-.47.02-7.41.11-13.39 2.7-17.91 7.8a25.425 25.425 0 0 0-2.89 3.97c-2.27 3.84-3.41 8.19-3.41 13.06 0 .68.05 1.33.09 1.99.33 5.09 1.96 9.42 4.89 13 .87 1.07 1.83 2.08 2.93 3.02 1.45 1.23 3.01 2.25 4.66 3.11 3.79 1.97 8.1 2.98 12.95 2.98 3.78 0 7.72-.7 11.82-2.1 4.1-1.4 6.14-2.51 6.14-3.35V38.92c0-2.32.49-3.85 1.46-4.59.58-.46 1.75-.75 3.51-.87v-1.31H77.82Z" fill="#1d1d1b" style="fill: #1d1d1b !important; stroke: none;"></path>
+      <path d="M166.56 10.51h6.87l-19.45 48.31h-1.51l-15.73-39.11-15.89 39.11h-1.48L99.98 10.51h6.94l13.26 33.16 13.34-33.16h6.51l13.41 33.16 13.12-33.16Zm6.92 14.43h4.82v33.67h-4.82V24.94Zm10.37 0h4.82v29.28h15.16v4.39h-19.98V24.94Zm22.96 0h4.82v29.28h15.16v4.39h-19.98V24.94Zm37.42-.48c5.2 0 9.53 1.65 12.99 4.94 3.46 3.29 5.19 7.42 5.19 12.39s-1.75 9.07-5.24 12.33c-3.49 3.25-7.9 4.88-13.21 4.88s-9.3-1.63-12.68-4.88c-3.38-3.25-5.07-7.33-5.07-12.23s1.7-9.19 5.11-12.48c3.4-3.29 7.71-4.94 12.91-4.94Zm.19 4.58c-3.85 0-7.02 1.21-9.5 3.62-2.48 2.41-3.72 5.49-3.72 9.23s1.24 6.65 3.73 9.06 5.6 3.61 9.34 3.61 6.89-1.23 9.4-3.69c2.51-2.46 3.77-5.52 3.77-9.18s-1.26-6.57-3.77-9c-2.51-2.43-5.6-3.65-9.26-3.65Zm63.25-4.1h4.81l-13.61 33.81h-1.06L286.8 31.37l-11.12 27.38h-1.04l-13.57-33.81h4.86l9.28 23.21 9.34-23.21h4.56l9.38 23.21 9.18-23.21Zm42.78 9.98h16.15V55.3c-5.92 2.57-11.8 3.86-17.63 3.86-7.96 0-14.33-2.32-19.09-6.97s-7.14-10.38-7.14-17.2c0-7.18 2.47-13.16 7.4-17.94 4.93-4.77 11.12-7.16 18.56-7.16 2.71 0 5.28.29 7.71.88 2.43.59 5.51 1.66 9.23 3.22v7.02c-5.74-3.33-11.43-4.99-17.08-4.99-5.26 0-9.69 1.79-13.29 5.37-3.6 3.58-5.41 7.98-5.41 13.19s1.8 9.93 5.41 13.39 8.24 5.2 13.91 5.2c2.75 0 6.05-.63 9.88-1.89l.65-.21V41.05h-9.26v-6.13Zm21.02 23.69V24.94h8.44c3.41 0 6.11.84 8.11 2.53 2 1.69 3 3.97 3 6.84 0 1.96-.49 3.66-1.47 5.08-.98 1.43-2.39 2.5-4.22 3.21 1.08.71 2.13 1.67 3.16 2.89 1.03 1.22 2.47 3.35 4.34 6.39 1.17 1.91 2.11 3.35 2.82 4.31l1.78 2.41h-5.74l-1.47-2.22c-.05-.08-.14-.22-.29-.41l-.94-1.33-1.49-2.46-1.61-2.63c-1-1.38-1.91-2.48-2.74-3.3-.83-.82-1.58-1.41-2.24-1.77-.67-.36-1.79-.54-3.37-.54h-1.25v14.65h-4.82Zm6.27-29.57h-1.45v10.63h1.83c2.44 0 4.12-.21 5.03-.63.91-.42 1.61-1.05 2.12-1.89.51-.84.76-1.8.76-2.88s-.28-2.02-.84-2.88-1.35-1.47-2.37-1.82c-1.02-.35-2.71-.53-5.07-.53Zm35.72-4.58c5.2 0 9.53 1.65 12.99 4.94 3.46 3.29 5.19 7.42 5.19 12.39s-1.75 9.07-5.24 12.33c-3.49 3.25-7.9 4.88-13.21 4.88s-9.3-1.63-12.68-4.88c-3.38-3.25-5.07-7.33-5.07-12.23s1.7-9.19 5.11-12.48c3.4-3.29 7.71-4.94 12.91-4.94Zm.2 4.58c-3.85 0-7.02 1.21-9.5 3.62-2.48 2.41-3.72 5.49-3.72 9.23s1.24 6.65 3.73 9.06 5.6 3.61 9.34 3.61 6.89-1.23 9.4-3.69c2.51-2.46 3.77-5.52 3.77-9.18s-1.26-6.57-3.77-9c-2.51-2.43-5.6-3.65-9.26-3.65Zm46.11-4.1h4.84v19.11c0 2.59-.19 4.54-.57 5.86-.38 1.32-.84 2.41-1.4 3.29-.55.88-1.23 1.66-2.04 2.35-2.67 2.3-6.15 3.45-10.46 3.45s-7.91-1.14-10.56-3.42c-.8-.71-1.48-1.5-2.04-2.37-.55-.88-1.01-1.95-1.37-3.22s-.54-3.26-.54-5.98V24.95h4.84v19.11c0 3.17.36 5.37 1.08 6.6s1.82 2.23 3.3 2.98 3.22 1.12 5.23 1.12c2.86 0 5.19-.75 6.99-2.24.95-.8 1.63-1.75 2.05-2.84s.63-2.96.63-5.62V24.95Zm9.67 33.67V24.89h10.68c3.21 0 5.78.87 7.69 2.6s2.87 4.07 2.87 6.99c0 1.96-.49 3.7-1.47 5.21-.98 1.51-2.32 2.61-4.02 3.29-1.7.68-4.15 1.02-7.33 1.02h-3.57v14.6h-4.84Zm9.84-29.43h-4.99v10.53h5.28c1.96 0 3.47-.46 4.53-1.39 1.06-.92 1.59-2.25 1.59-3.96 0-3.45-2.14-5.18-6.41-5.18Z" fill="#231f20"></path>
+    </symbol>
+  </svg>
+
+  <!-- ===== DESKTOP HEADER ===== -->
+  <header class="header">
+    <div class="site-search">
+      <form role="search" method="get" name="searchForm">
+        <div class="search-field">
+          <input type="text" class="form-control" aria-label="Search the site"
+                 id="search_field" name="search_field" required="">
+          <label class="control-label" for="search_field">Search the site:</label>
+          <button type="submit" class="btn btn-primary" aria-label="submit search">
+            <i class="fa fa-search search-icon"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+    <div class="logo">
+      <a href="#">
+        <svg><use href="#logo-bw"></use></svg>
+      </a>
+    </div>
+    <div class="header-right">
+      <a href="#">Catalogs</a>
+      <a href="#">Custom Orders</a>
+      <a href="#">Events</a>
+      <a href="#">Register</a>
+      <span class="user-icon"><i class="far fa-user"></i></span>
+    </div>
+  </header>
+
+  <!-- ===== CATEGORY NAV ===== -->
+  <nav class="nav">
+    <a href="#">New</a>
+    <a href="#">Display <i class="fas fa-chevron-down"></i></a>
+    <a href="#">Packaging <i class="fas fa-chevron-down"></i></a>
+    <a href="#">Decor <i class="fas fa-chevron-down"></i></a>
+    <a href="#">Garden &amp; Floral <i class="fas fa-chevron-down"></i></a>
+    <a href="#">Seasonal <i class="fas fa-chevron-down"></i></a>
+  </nav>
+
+  <!-- ===== MOBILE HEADER ===== -->
+  <div class="mobile-header">
+    <div class="mobile-logo">
+      <svg><use href="#logo-bw"></use></svg>
+    </div>
+    <button class="hamburger"><i class="fas fa-bars"></i></button>
+  </div>
+  <div class="mobile-search">
+    <form role="search" method="get" name="mobileSearchForm">
+      <div class="search-field">
+        <input type="text" class="form-control" aria-label="Search the site"
+               name="search_field" required="">
+        <label class="control-label">Search the site:</label>
+        <button type="submit" class="btn btn-primary" aria-label="submit search">
+          <i class="fa fa-search search-icon"></i>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ===== CONTROLS ===== -->
+  <div class="controls">
+    <div class="controls-left">
+      <button class="hide-filters">
+        <i class="fas fa-chevron-left"></i> Hide Filters
+      </button>
+      <span class="result-count">1 - 24 of 214</span>
+    </div>
+    <div class="controls-right">
+      <div class="dropdown">
+        <span class="dropdown-label">Show:</span> 24 <i class="fas fa-caret-down"></i>
+      </div>
+      <div class="dropdown">
+        <span class="dropdown-label">Sort By:</span> Featured <i class="fas fa-caret-down"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MOBILE CONTROLS ===== -->
+  <div class="mobile-controls">
+    <button class="mobile-filter-toggle"><i class="fas fa-chevron-right"></i></button>
+    <div class="controls-right">
+      <div class="dropdown">24 <i class="fas fa-caret-down"></i></div>
+      <div class="dropdown">Featured <i class="fas fa-caret-down"></i></div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN ===== -->
+  <div class="main">
+    <aside class="filter-rail">
+      <div class="filter-toggles">
+        <div class="toggle-item"><div class="toggle-switch"></div> New</div>
+        <div class="toggle-item"><div class="toggle-switch"></div> Sale</div>
+        <div class="toggle-item"><div class="toggle-switch"></div> In Stock</div>
+      </div>
+      <div class="filter-section">
+        <div class="filter-section-header">Material <i class="fas fa-chevron-down"></i></div>
+      </div>
+      <div class="filter-section">
+        <div class="filter-section-header">Set <i class="fas fa-chevron-down"></i></div>
+      </div>
+      <div class="filter-section">
+        <div class="filter-section-header">Shape <i class="fas fa-chevron-down"></i></div>
+      </div>
+      <div class="filter-section">
+        <div class="filter-section-header">Handle <i class="fas fa-chevron-down"></i></div>
+      </div>
+      <div class="filter-section">
+        <div class="filter-section-header">Corporate Lists <i class="fas fa-chevron-down"></i></div>
+      </div>
+      <div class="filter-section">
+        <div class="filter-section-header">Order History <i class="fas fa-chevron-down"></i></div>
+      </div>
+      <div class="filter-section">
+        <div class="filter-section-header">Price <i class="fas fa-chevron-down"></i></div>
+      </div>
+    </aside>
+
+    <div class="product-grid">
+      <div class="product-card">
+        <div class="product-image"><img src="/sandbox/willow-real/images/product-0.jpg" alt="Rectangle Wood Tray" loading="lazy"></div>
+        <div class="product-sku">83175.13</div>
+        <div class="product-name">Rectangle Wood Tray</div>
+        <div class="product-dims">13 L x 9 W x 2 H</div>
+        <div class="product-price-row">
+          <div class="product-price"><span class="original">$5.55</span> <span class="sale">$4.16 Each</span></div>
+          <div class="product-min-qty">Min Qty: 6</div>
+        </div>
+        <button class="product-cta">Add To Cart</button>
+      </div>
+      <div class="product-card">
+        <div class="product-image"><img src="/sandbox/willow-real/images/product-2.jpg" alt="S/4 Round Paperboard Stack Tower" loading="lazy"></div>
+        <div class="product-sku">811076</div>
+        <div class="product-name">S/4 Round Paperboard Stack Tower</div>
+        <div class="product-dims">4 D x 2.75 H Sm</div>
+        <div class="product-dims">7 D x 4 H Lg</div>
+        <div class="product-price-row">
+          <div class="product-price"><span class="original">$14.50</span> <span class="sale">$10.88 Each</span></div>
+          <div class="product-min-qty">Min Qty: 6</div>
+        </div>
+        <button class="product-cta">Add To Cart</button>
+      </div>
+      <div class="product-card">
+        <div class="product-image"><img src="/sandbox/willow-real/images/product-4.jpg" alt="Oval Hyacinth/Wire Tray Sh" loading="lazy"></div>
+        <div class="product-sku">83044.3</div>
+        <div class="product-name">Oval Hyacinth/Wire Tray Sh</div>
+        <div class="product-dims">15.5 L x 12.25 W x 4.5 H</div>
+        <div class="product-price-row">
+          <div class="product-price"><span class="original">$12.25</span> <span class="sale">$9.19 Each</span></div>
+          <div class="product-min-qty">Min Qty: 8</div>
+        </div>
+        <button class="product-cta">Add To Cart</button>
+      </div>
+      <div class="product-card">
+        <div class="product-image"><img src="/sandbox/willow-real/images/product-6.jpg" alt="Oval Hyacinth/Wire Tub" loading="lazy"></div>
+        <div class="product-sku">83043.1</div>
+        <div class="product-name">Oval Hyacinth/Wire Tub</div>
+        <div class="product-dims">10 L x 6.75 W x 4.75 H</div>
+        <div class="product-price-row">
+          <div class="product-price"><span class="original">$8.75</span> <span class="sale">$6.56 Each</span></div>
+          <div class="product-min-qty">Min Qty: 6</div>
+        </div>
+        <button class="product-cta">Add To Cart</button>
+      </div>
+      <div class="product-card">
+        <div class="product-image"><img src="/sandbox/willow-real/images/product-8.jpg" alt="Shredded Wood Excelsior" loading="lazy"></div>
+        <div class="product-sku">1WOOD</div>
+        <div class="product-name">Shredded Wood Excelsior (10 Lb)</div>
+        <div class="product-dims">10 Lb. Box</div>
+        <div class="product-price-row">
+          <div class="product-price">$24.95 Each</div>
+          <div class="product-min-qty">Min Qty: 1</div>
+        </div>
+        <button class="product-cta">Add To Cart</button>
+      </div>
+      <div class="product-card">
+        <div class="product-image"><img src="/sandbox/willow-real/images/product-10.jpg" alt="S/2 Oblong Rattan Oh-Kubu Basket" loading="lazy"></div>
+        <div class="product-sku">931.1.2</div>
+        <div class="product-name">S/2 Oblong Rattan Oh-Kubu Gr</div>
+        <div class="product-dims">14 L x 10 W x 5 H Sm</div>
+        <div class="product-dims">17 L x 13 W x 6 H Lg</div>
+        <div class="product-price-row">
+          <div class="product-price"><span class="original">$16.50</span> <span class="sale">$12.38 Each</span></div>
+          <div class="product-min-qty">Min Qty: 4</div>
+        </div>
+        <button class="product-cta">Add To Cart</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

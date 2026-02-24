@@ -1,0 +1,168 @@
+---
+title: "XTAL Search vs Algolia"
+description: "A detailed comparison of XTAL Search and Algolia for ecommerce — features, pricing, AI capabilities, and setup complexity compared head-to-head."
+competitor: "Algolia"
+date: "2026-02-22"
+updated: "2026-02-22"
+draft: false
+faqItems:
+  - question: "Is XTAL Search a drop-in replacement for Algolia?"
+    answer: "For ecommerce search use cases, yes. XTAL provides the same core search functionality with AI-native features built in. However, if you use Algolia for non-ecommerce search (documentation, SaaS apps), XTAL is specifically designed for product search and may not cover those use cases."
+  - question: "How does XTAL's pricing compare to Algolia?"
+    answer: "Algolia charges per search request and per record, which can become expensive at scale. XTAL uses a simpler pricing model based on your catalog size, making costs more predictable as your search volume grows."
+  - question: "Can I migrate from Algolia to XTAL?"
+    answer: "Yes. XTAL can index your existing product catalog directly from your ecommerce platform. Most merchants complete the migration in a single day without developer involvement."
+  - question: "Does XTAL support the same platforms as Algolia?"
+    answer: "XTAL currently supports Shopify, WooCommerce, and custom storefronts via API and embeddable snippet. Algolia has broader platform support including non-ecommerce use cases."
+  - question: "Which is better for large catalogs (100K+ products)?"
+    answer: "Both handle large catalogs well. Algolia's infrastructure is battle-tested at scale, while XTAL's AI-native approach can provide better relevance for complex product catalogs where keyword matching falls short."
+  - question: "Does XTAL have an equivalent to Algolia Recommend?"
+    answer: "XTAL's aspects and reasoning features serve a similar purpose — surfacing related and complementary products based on semantic understanding rather than collaborative filtering alone."
+---
+
+Algolia has been the default answer to "we need fast site search" for over a decade. It built that position on genuine merit: blazing-fast indexing, a well-documented API, and a developer experience that made search feel tractable in ways it hadn't been before. For teams evaluating search platforms in 2026, it still deserves serious consideration — which is exactly why this comparison tries to be honest about both sides.
+
+What has changed is the competitive landscape. Ecommerce search has moved from the question of "can we make search fast?" to "can we make search intelligent?" That shift changes how the two platforms compare.
+
+---
+
+## TL;DR
+
+- **Pricing model**: Algolia meters on search requests and records simultaneously — costs scale with traffic in ways that catch teams off guard. XTAL uses catalog-based pricing with no per-search charges.
+- **AI depth**: Algolia's semantic search (NeuralSearch) lives in the Elevate tier, which requires a custom enterprise contract. XTAL runs a two-stage LLM pipeline on every search request at all tiers.
+- **Setup complexity**: Algolia rewards developers who invest time — its full power requires ongoing tuning. XTAL deploys as an embeddable snippet in under a day with no theme modifications.
+- **Ecosystem maturity**: Algolia has a decade of documentation, community resources, and third-party integrations that XTAL cannot yet match. If ecosystem breadth matters more than AI depth, Algolia is the honest recommendation.
+
+---
+
+## Feature Comparison
+
+<ComparisonTable
+  headers={["Feature", "XTAL Search", "Algolia"]}
+  rows={[
+    { feature: "AI-native search pipeline (LLM at core)", values: [true, false] },
+    { feature: "Semantic / vector search", values: [true, "Elevate tier only"] },
+    { feature: "Per-search request pricing", values: [false, true] },
+    { feature: "Embeddable snippet (any storefront)", values: [true, true] },
+    { feature: "Pre-built UI component library", values: [false, true] },
+    { feature: "Merchandising rules & boosting", values: [true, true] },
+    { feature: "Search analytics dashboard", values: [true, true] },
+    { feature: "Shopify native integration", values: [true, true] },
+    { feature: "A/B testing for relevance", values: [false, true] },
+    { feature: "Self-service setup (no developer)", values: [true, false] },
+    { feature: "Contextual result explanations", values: [true, false] },
+    { feature: "Non-ecommerce search (docs, SaaS)", values: [false, true] },
+  ]}
+/>
+
+A few notes on the nuanced cells:
+
+Algolia's **pre-built UI library** (InstantSearch for React, Vue, and vanilla JS) is genuinely one of its strongest assets. Teams that want a search-as-you-type experience built in an afternoon will find it hard to beat. XTAL's overlay is purpose-built for the embeddable scenario, but it does not offer the same breadth of composable front-end components.
+
+**A/B testing** in Algolia lets you run controlled experiments comparing ranking configurations — a powerful feature for teams with enough traffic to run statistically meaningful tests. XTAL does not yet have a built-in A/B testing module.
+
+**Contextual result explanations** — the ability to surface why a specific product was returned for a given query — are unique to XTAL's LLM pipeline. This is genuinely useful for merchandisers debugging relevance and for shoppers who want to understand an unexpected result.
+
+---
+
+## Pricing Comparison
+
+Algolia's current pricing has four tiers. The **Build** plan is free for development and testing (1M records, 10K searches/month). The **Grow** plan is pay-as-you-go: the first 10,000 monthly searches are included, with additional searches billed at $1.75 per 1,000 and additional records at $0.40 per 1,000. **Premium** introduces AI-enhanced capabilities and moves to custom-quoted annual contracts. **Elevate** — the tier that includes NeuralSearch (semantic vector search) and Smart Groups — requires a custom enterprise agreement.
+
+<Callout type="insight">
+**Pricing example: a mid-market merchant with 500K records and 500K monthly searches.**
+
+On Algolia Grow, the math looks like this: the 500K records break down as 400K billable extra records at $0.40/1,000 = $160/month. The 490K extra searches at $1.75/1,000 = $857.50/month. Combined base: roughly **$1,017/month** — before any AI features, which require upgrading to a custom-priced contract. If you need semantic search, budget for a meaningful step up from that.
+
+XTAL's pricing is catalog-based with no per-search metering. For the same merchant, the cost scales with catalog size, not with how often customers search. Merchants with high search volume relative to catalog size see the most dramatic cost difference.
+</Callout>
+
+The structural issue with per-search pricing is predictability. A successful marketing campaign, a seasonal traffic spike, or a product launch can double your search volume in a week. On Algolia Grow, that doubles your search bill too. G2 reviewers note this pattern frequently — one wrote that "monthly costs can easily become 10x initial estimates if you aren't monitoring closely." Algolia's startup program compounds the issue: it grants $10,000 in credits, but the clock starts the moment you're accepted, regardless of your go-live date. Teams that don't launch quickly find themselves with expired credits.
+
+Neither pricing model is universally better. If you have a small catalog and very high search volume, Algolia's record-based component may save you money. If you have a large catalog and moderate traffic, XTAL's model is almost certainly cheaper at scale.
+
+---
+
+## Setup Complexity
+
+Algolia's setup complexity has two very different faces. The **baseline setup** — indexing your catalog, adding the InstantSearch UI components, making basic queries — is genuinely fast. A developer who has worked with Algolia before can have a search UI running in a day. The official Shopify app simplifies this further: you can link accounts, configure your API keys, and have indexed products within an hour.
+
+The problem is that the baseline is not where Algolia's value lives. The platform rewards teams who invest in tuning: custom ranking attributes, synonym dictionaries, business rules, facet weight configuration, relevance tuning for specific product categories, and — if you're on Premium or Elevate — AI personalization configuration. Getting from "search works" to "search converts well" requires ongoing engineering investment. G2 and Capterra reviewers consistently flag this gap. One representative review: "requires complete and professional knowledge of coding... not simple and needs a proper web developer to make major changes." Another noted needing two months with two experienced developers for a WordPress implementation.
+
+XTAL's setup model is different by design. The embeddable snippet drops into any storefront via a `<script>` tag — no theme modifications, no platform-specific installation steps. It intercepts your existing search input and renders results in an overlay. Brand context, synonym handling, and relevance tuning are handled by the LLM pipeline rather than manual configuration. For merchants without dedicated search engineering capacity, this removes the largest ongoing cost of running a tuned search product.
+
+The honest tradeoff: Algolia gives you more control and a broader ecosystem to build on. XTAL gives you less to configure and less to maintain. Which matters more depends on whether you have the engineering team to take advantage of that control.
+
+---
+
+## AI Capabilities Comparison
+
+This is where the comparison diverges most sharply, and where the honest framing matters most.
+
+**Algolia's AI story** has evolved significantly. NeuralSearch — its hybrid keyword-plus-vector search that uses LLMs to generate embeddings for both documents and queries — is a genuine technical achievement. It combines traditional inverted-index search with semantic vector retrieval in a single API call, and it works well. The catch is that it lives in the Elevate tier, which is an enterprise contract. If you're evaluating Algolia and wondering whether you'll get AI search, the answer is: not unless you're signing an enterprise deal.
+
+At the Grow tier, you get keyword search with Algolia's long-standing relevance features (typo tolerance, deduplication, custom ranking, synonyms). These are mature and battle-tested. They are not AI in the meaningful sense — they're keyword search with engineering polish.
+
+**XTAL's AI story** is that LLM reasoning is not a premium add-on but the foundation of the pipeline. Every search request runs through two LLM stages before retrieval happens. The first stage augments the query with brand context and inferred intent — understanding that "something cozy for winter evenings" is about warmth and comfort, not about finding products with those exact words. The second stage applies a marketing re-ranking lens, surfacing results that align with the store's brand voice and merchandising goals, not just raw relevance scores.
+
+The result is that XTAL handles natural-language, intent-based queries out of the box — without synonym configuration, without boosting rules for every edge case, without a dedicated search engineer maintaining relevance over time. The LLM handles linguistic complexity so you don't have to.
+
+What XTAL does not yet have: Algolia's A/B testing infrastructure, its InstantSearch UI component library, its agentic AI features (Agent Studio, MCP Server, Ask AI), or its decade of production hardening at global enterprise scale. Teams building developer-first search products or requiring composable front-end tooling will find Algolia's ecosystem substantially richer.
+
+<InlineCTA
+  title="How does your current search hold up against AI-native standards?"
+  body="The XTAL Search Grader evaluates your store across 8 dimensions — including semantic understanding and NLP — and gives you an objective score in under 2 minutes. Use it to benchmark before signing with any vendor."
+  cta="Grade your store's search free"
+  href="/grade"
+/>
+
+---
+
+## Who Should Choose Which
+
+### Choose XTAL Search if:
+
+- **You want AI-native search without an enterprise contract.** XTAL's LLM pipeline runs at all tiers, not just at a premium tier that requires custom pricing negotiations.
+- **You're deploying on a custom storefront or headless build.** The embeddable snippet model requires no platform-specific theme modifications and works anywhere you can add a `<script>` tag.
+- **You don't have dedicated search engineering capacity.** XTAL's self-optimizing LLM pipeline handles the relevance tuning that would otherwise require ongoing developer time in Algolia.
+- **Your search volume is high relative to your catalog size.** Catalog-based pricing means high search traffic doesn't linearly increase your bill.
+- **You want contextual explanations for search results.** XTAL's reasoning layer can surface why a given product was returned, which is useful for merchandising teams and for the shopper experience.
+
+### Choose Algolia if:
+
+- **You have a strong developer team and want maximum control.** Algolia's API primitives, ranking configurability, and InstantSearch component library reward teams who invest in them.
+- **You need search beyond ecommerce.** Documentation search, SaaS application search, content discovery — Algolia is built for general-purpose search in a way XTAL is not.
+- **Your front-end team wants composable UI components.** InstantSearch has a decade of polish and covers React, Vue, and vanilla JavaScript with components that handle autocomplete, faceting, pagination, and more out of the box.
+- **Ecosystem maturity and third-party integrations are a priority.** Algolia has native integrations with hundreds of platforms, a large community, and documentation depth that XTAL cannot yet match.
+- **You're already at Elevate tier and using NeuralSearch.** If you've already made the enterprise investment and NeuralSearch is performing for your catalog, the switching cost may not justify moving.
+- **You need A/B testing for relevance experiments.** Algolia's built-in A/B testing infrastructure is mature and XTAL does not currently offer an equivalent.
+
+The honest summary: Algolia is the right choice for developer-led teams that want composable search infrastructure and have the engineering capacity to configure and maintain it. XTAL is the right choice for ecommerce teams that want sophisticated AI relevance without the engineering overhead or the per-search pricing model.
+
+---
+
+## FAQ
+
+### Is XTAL Search a drop-in replacement for Algolia?
+
+For ecommerce search use cases, yes. XTAL provides the same core search functionality — product indexing, faceted filtering, typo tolerance, autocomplete — with AI-native features built in from the ground up. However, if you use Algolia for non-ecommerce search (documentation, SaaS application search, content indexing), XTAL is specifically designed for product discovery and may not cover those use cases.
+
+### How does XTAL's pricing compare to Algolia?
+
+Algolia charges on two dimensions simultaneously: search requests performed and records stored. The Grow tier bills $1.75 per 1,000 additional searches and $0.40 per 1,000 additional records beyond the monthly inclusions. At mid-market volumes (500K records, 500K searches), this comes to roughly $1,000/month before any AI features. XTAL uses catalog-size-based pricing with no per-search metering, which makes costs significantly more predictable for stores with high search traffic relative to catalog size.
+
+### Can I migrate from Algolia to XTAL?
+
+Yes. XTAL can index your existing product catalog directly from your ecommerce platform (Shopify, WooCommerce, or via the data ingest API). The migration does not require re-implementing a front-end search UI — the embeddable snippet replaces your existing search overlay rather than requiring a new UI build. Most merchants complete the migration in a single day without developer involvement.
+
+### Does XTAL support the same platforms as Algolia?
+
+XTAL currently supports Shopify, WooCommerce, and custom storefronts via API and embeddable JavaScript snippet. Algolia supports a broader range of platforms including non-ecommerce use cases, has native integrations with CMS platforms, and has a wider third-party integration ecosystem built up over the past decade. If platform breadth is a hard requirement, Algolia is the more comprehensive choice today.
+
+### Which is better for large catalogs (100K+ products)?
+
+Both platforms handle large catalogs well technically. Algolia's infrastructure is battle-tested at genuine enterprise scale — they index billions of records across their customer base. XTAL's AI-native approach tends to outperform on relevance quality for complex catalogs where shoppers use natural-language or intent-based queries, because the LLM pipeline understands meaning rather than matching keywords. For very large catalogs with high SKU complexity, the relevance quality gap often matters more than the infrastructure comparison.
+
+### Does XTAL have an equivalent to Algolia Recommend?
+
+XTAL's semantic pipeline and aspects extraction serve a related purpose: surfacing contextually relevant and complementary products based on meaning rather than purely on collaborative filtering signals. Algolia Recommend uses behavioral data (views, purchases, cart additions) to power "frequently bought together" and "related products" modules. XTAL's approach is more LLM-reasoning-based than behavior-based, which means it works better for newer catalogs without large behavioral datasets, but may be less precise than Recommend for high-traffic stores with rich historical data.

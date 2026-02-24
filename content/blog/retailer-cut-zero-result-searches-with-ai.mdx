@@ -1,0 +1,121 @@
+---
+title: "How an Independent Retailer Cut Zero-Result Searches by 80% With AI Search"
+description: "A case study of how one mid-size retailer eliminated most zero-result searches and recovered thousands in monthly revenue with AI-powered search."
+date: "2026-02-14"
+author: "XTAL Team"
+authorTitle: "Customer Success"
+category: "Case Studies"
+tags: ["case study", "zero results", "AI search", "revenue recovery"]
+draft: false
+---
+
+Every month, thousands of dollars were quietly walking out the door at Hearth & Hatch — and the owner had no idea.
+
+Hearth & Hatch is a mid-size home goods retailer with about 3,000 SKUs: kitchenware, textiles, candles, small furniture, and the kind of thoughtfully curated lifestyle products that people buy for themselves and as gifts. They had a loyal customer base, a well-photographed product catalog, and a Shopify store that looked the part. What they didn't have was a search bar that worked.
+
+The realization came during a quarterly analytics review. The store processed around 18,000 site searches per month. Of those, 2,700 — **15%** — returned zero results. Not "here are some alternatives." Not "did you mean?" Just a blank page and a message that said, essentially: *we can't help you.*
+
+The owner, a former retail buyer who had built the business from a pop-up to a six-figure online store, stared at that number for a long time. "I knew search wasn't perfect," she told us later. "I didn't know it was that broken."
+
+## The Hidden Revenue Math
+
+A 15% zero-result rate sounds like a UX statistic. It is also a revenue number.
+
+Here's the math: shoppers who use site search convert at rates **2 to 3 times higher** than those who browse without it. They're not casual visitors — they're people who already know they want something and are trying to find it on your site. When search fails them, they don't pivot to browsing. They leave. And once they've hit a dead end, most don't come back: research consistently shows that around **68% of shoppers won't return to a site after a poor search experience**.
+
+For Hearth & Hatch, 2,700 failed searches per month represented roughly 2,700 high-intent shoppers who encountered a brick wall. Assuming a modest average order value of $65 and a conservative conversion rate for search users of 4%, that translated to an estimated **$7,000 in lost monthly revenue** — not from bad ads or slow pages or clunky checkout, but purely from a search bar that couldn't connect people with the products they were looking for.
+
+<Callout type="insight">
+Site search users contribute roughly 45% of ecommerce revenue while representing only 15% of total visitors — making zero-result searches one of the highest-cost failure points in an online store's entire funnel.
+</Callout>
+
+## What Was Actually Failing
+
+To understand the fix, it helps to understand the failure in specific terms. Hearth & Hatch's default Shopify search was a keyword matcher. It looked for exact or near-exact string matches between a query and product titles, descriptions, and tags. When a shopper typed something that didn't align precisely with the language in the product catalog, it returned nothing.
+
+Here are five queries that were failing every single day:
+
+**"gift for mom"** — Zero results. Hearth & Hatch sold dozens of products that would make excellent mother's gifts: linen throws, ceramic mugs, reed diffusers, French press sets. But none of those products were tagged "gift for mom." The search engine didn't understand intent; it looked for the string.
+
+**"waterproof jacket for hiking"** — Zero results. Hearth & Hatch didn't sell outerwear, but they did sell waxed canvas tote bags and weather-resistant picnic blankets. An AI-aware search might have surfaced adjacent outdoor lifestyle products. The keyword engine surfaced nothing.
+
+**"cozy"** — Zero results. This is a single adjective that thousands of shoppers use to describe exactly what they're looking for in home goods. It matched zero product titles. The store's entire candles, textiles, and throws category — products that exist precisely to make a space cozy — was invisible to this query.
+
+**"housewarming"** — Zero results. One of the most common gift-giving occasions for the category of products Hearth & Hatch sold. Not one product was tagged for it.
+
+**"something for my desk"** — Zero results. Conversational, intent-based, completely reasonable. The kind of query that a human sales associate on a shop floor would handle in five seconds. The keyword search had no concept of "desk context" and couldn't map it to the store's candles, small plants, and ceramic organizers.
+
+These weren't edge cases. They were recurring queries — the analytics showed some of them appearing dozens of times per month. Real shoppers, real intent, zero results.
+
+## A Same-Day Setup
+
+The owner had been putting off addressing the search problem for months, assuming it would require a developer engagement, a platform migration, or a multi-week project to re-tag the entire catalog. None of those assumptions turned out to be true.
+
+XTAL's setup for Hearth & Hatch took one afternoon. There was no code to write, no catalog re-tagging, no developer involvement. The process was:
+
+1. Connect the Shopify store (OAuth, a few clicks)
+2. Configure a brand brief — a short paragraph describing the store's voice, product categories, and the kinds of shoppers it serves
+3. Ingest the catalog into the AI search index
+4. Add the embed snippet to the Shopify theme
+
+The catalog ingestion ran overnight. By the next morning, the search bar was powered by AI. No A/B testing period, no gradual rollout — the change was instant and complete.
+
+The owner's first test query was "gift for mom." It returned a curated set of results: a linen table runner, a soy candle gift set, a French press with a ceramic mug, a woven throw blanket. Every result was a reasonable answer to the query. None of them would have matched under the old keyword system.
+
+## Before and After: The Same Queries, Different Answers
+
+The most telling way to show what changed is to look at the exact queries that were failing before.
+
+| Query | Before (keyword search) | After (AI search) |
+|---|---|---|
+| "gift for mom" | No results | Candle gift set, linen throw, ceramic mug set, reed diffuser |
+| "cozy" | No results | Sherpa throw, soy candles, plaid pillow covers, knit blanket |
+| "housewarming" | No results | Wine carafe set, linen napkins, beeswax candle trio, copper measuring cups |
+| "something for my desk" | No results | Bud vase, ceramic pencil cup, soy candle, succulent planter |
+| "modern kitchen" | 2 results (exact tag match) | 18 results across cookware, textiles, and serveware |
+| "cofee" (typo) | No results | Coffee-related results (French press, mugs, grinder) |
+
+The last two rows matter as much as the zero-result cases. "Modern kitchen" went from 2 results to 18 — the difference between a shopper assuming you don't carry what they want and a shopper who has a full page of options. "Cofee" (a common typo) went from a dead end to a set of results that answered the actual intent. Typo tolerance alone, across an 18,000-query-per-month store, recovers a meaningful slice of traffic that keyword search was silently discarding.
+
+<InlineCTA
+  title="What's your store's zero-result rate?"
+  body="The XTAL Site Search Grader audits your search across 8 quality dimensions — including zero-result handling — and shows you exactly where revenue is leaking."
+  cta="Grade your store's search free"
+  href="/grade"
+/>
+
+## The Results, Three Months Later
+
+Ninety days after switching to AI-powered search, Hearth & Hatch pulled the same analytics report that had started the conversation. The numbers told a clear story.
+
+**Zero-result rate: 15% → 3%.** An 80% reduction. The roughly 2,700 monthly searches that had been hitting dead ends had dropped to around 540 — and most of those remaining failures were genuinely out-of-catalog queries (people searching for products the store simply didn't carry).
+
+**Search-driven revenue: up 34% month-over-month.** This wasn't just recovered revenue from zero-result fixes — it also included the lift from better results on queries that had been returning *something* before, but not the right things. Relevance improvements across the entire catalog raised the conversion rate for search users from around 3.8% to 5.1%.
+
+**Bounce rate on search results pages: down 22%.** Fewer dead ends meant fewer immediate exits. Shoppers who saw relevant results stayed longer and viewed more products.
+
+**Average order value for search users: up $8.** This one surprised the owner most. When AI search surfaced a broader and more contextually relevant set of results, shoppers discovered products they wouldn't have found with a narrow keyword query — and added them to their carts.
+
+The estimated monthly revenue recovery from zero-result fixes alone came to approximately **$5,600 per month**. Over a year, that's more than $67,000 that the old search engine was failing to capture.
+
+## What This Looks Like at Scale
+
+Hearth & Hatch is a mid-size independent retailer, not a household name. They don't have a team of engineers or a dedicated search merchandising specialist. They had one person making one afternoon's worth of configuration decisions — and got a result that would be competitive with stores that have invested far more in their search infrastructure.
+
+That's the story, and it's worth sitting with for a moment. The zero-result rate at most independent ecommerce stores falls between 10% and 20%. Most store owners know their search "could be better" but have no idea the gap is that large, or that it has a calculable dollar value. The problem isn't a mystery — it's a measurement gap. You can't fix what you can't see.
+
+If you're running a store and you don't know your zero-result rate, you almost certainly have one. Industry data suggests that the typical independent retailer on a default platform search loses somewhere between $3,000 and $12,000 per month in failed search revenue, depending on catalog size and traffic volume. Most of that loss is invisible because it shows up as a bounce, not as a declined transaction.
+
+The fix, as Hearth & Hatch discovered, doesn't require a replatform, a developer sprint, or a catalog overhaul. It requires pointing a better search engine at the catalog you already have.
+
+## Find Out Where You Stand
+
+The first step is understanding your actual zero-result rate and what's driving it. Not a guess — the actual number, broken down by query type, with an assessment of what your search is and isn't capable of handling.
+
+That's exactly what the XTAL [Site Search Grader](/grade) produces. Enter your store URL, and within minutes you'll have a score across eight search quality dimensions — including zero-result handling, NLP capability, typo tolerance, and mobile experience — along with a plain-language explanation of what's failing and why.
+
+For more on how search quality scores are calculated and what the letter grades mean in practice, see [what is a good ecommerce search score](/blog/what-is-a-good-ecommerce-search-score). For a deeper guide to the full range of factors that affect search performance, see [ecommerce site search best practices](/blog/ecommerce-site-search-best-practices).
+
+The Hearth & Hatch story is repeatable. But it starts with knowing what your number is.
+
+[Find out your zero-result rate — free, no login required.](/grade)
