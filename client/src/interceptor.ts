@@ -2,31 +2,13 @@ type CleanupFn = () => void
 
 export function attachInterceptor(
   selector: string,
-  onQuery: (query: string) => void,
-  debounceMs = 300
+  onQuery: (query: string) => void
 ): CleanupFn {
-  let timer: ReturnType<typeof setTimeout> | null = null
   let observer: MutationObserver | null = null
   let giveUpTimer: ReturnType<typeof setTimeout> | null = null
   const cleanups: CleanupFn[] = []
 
-  function debounce(fn: () => void, ms: number) {
-    if (timer) clearTimeout(timer)
-    timer = setTimeout(fn, ms)
-  }
-
   function hookInput(input: HTMLInputElement) {
-    // Debounced input listener
-    const handleInput = () => {
-      const value = input.value.trim()
-      if (value.length >= 2) {
-        debounce(() => onQuery(value), debounceMs)
-      }
-    }
-
-    input.addEventListener("input", handleInput)
-    cleanups.push(() => input.removeEventListener("input", handleInput))
-
     // Intercept form submit
     const form = input.closest("form")
     if (form) {
@@ -40,6 +22,19 @@ export function attachInterceptor(
       form.addEventListener("submit", handleSubmit)
       cleanups.push(() => form.removeEventListener("submit", handleSubmit))
     }
+
+    // Enter key on input (fallback when no wrapping <form>)
+    const handleKeydown = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        e.preventDefault()
+        const value = input.value.trim()
+        if (value.length >= 1) {
+          onQuery(value)
+        }
+      }
+    }
+    input.addEventListener("keydown", handleKeydown)
+    cleanups.push(() => input.removeEventListener("keydown", handleKeydown))
   }
 
   // Try to find the input immediately
@@ -83,6 +78,5 @@ export function attachInterceptor(
     observer?.disconnect()
     observer = null
     if (giveUpTimer) clearTimeout(giveUpTimer)
-    if (timer) clearTimeout(timer)
   }
 }

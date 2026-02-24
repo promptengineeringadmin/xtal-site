@@ -5,6 +5,7 @@ import {
   getSnippetEnabled,
   getSnippetSearchSelector,
   getSnippetDisplayMode,
+  getSnippetResultsSelector,
   getSnippetSiteUrl,
   getCardTemplate,
   getProductUrlPattern,
@@ -25,11 +26,12 @@ export async function GET(request: Request) {
     )
   }
 
-  const [enabled, searchSelector, displayMode, siteUrl, cardTemplate, productUrlPattern] =
+  const [enabled, searchSelector, displayMode, resultsSelector, siteUrl, cardTemplate, productUrlPattern] =
     await Promise.all([
       getSnippetEnabled(shopId),
       getSnippetSearchSelector(shopId),
       getSnippetDisplayMode(shopId),
+      getSnippetResultsSelector(shopId),
       getSnippetSiteUrl(shopId),
       getCardTemplate(shopId),
       getProductUrlPattern(shopId),
@@ -40,6 +42,7 @@ export async function GET(request: Request) {
       enabled,
       searchSelector,
       displayMode,
+      ...(resultsSelector ? { resultsSelector } : {}),
       siteUrl,
       features: { aspects: true, explain: true },
       ...(cardTemplate ? { cardTemplate } : {}),

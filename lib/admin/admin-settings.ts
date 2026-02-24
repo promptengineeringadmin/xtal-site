@@ -48,6 +48,9 @@ function snippetSearchSelectorKey(collection: string) {
 function snippetDisplayModeKey(collection: string) {
   return `admin:settings:${collection}:snippet_display_mode`
 }
+function snippetResultsSelectorKey(collection: string) {
+  return `admin:settings:${collection}:snippet_results_selector`
+}
 function cardTemplateKey(collection: string) {
   return `admin:settings:${collection}:card_template`
 }
@@ -281,6 +284,27 @@ export async function saveSnippetDisplayMode(
 ): Promise<void> {
   const kv = getRedis()
   await kv.set(snippetDisplayModeKey(collection), mode)
+}
+
+// ─── Snippet: Results Selector ──────────────────────────
+
+export async function getSnippetResultsSelector(collection: string): Promise<string> {
+  try {
+    const kv = getRedis()
+    const stored = await kv.get<string>(snippetResultsSelectorKey(collection))
+    if (stored) return stored
+  } catch {
+    // Redis unavailable
+  }
+  return "" // default: empty (no inline target)
+}
+
+export async function saveSnippetResultsSelector(
+  collection: string,
+  selector: string
+): Promise<void> {
+  const kv = getRedis()
+  await kv.set(snippetResultsSelectorKey(collection), selector)
 }
 
 // ─── Card Template ───────────────────────────────────────

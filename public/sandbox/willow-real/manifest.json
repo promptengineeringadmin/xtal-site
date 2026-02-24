@@ -1,0 +1,7 @@
+{
+  "collection": "willow",
+  "searchSelector": "#search_field",
+  "resultsSelector": ".product-grid",
+  "sourceUrl": "https://www.willowgroupltd.com",
+  "searchUrl": "https://www.willowgroupltd.com/shop?Search=baskets"
+}

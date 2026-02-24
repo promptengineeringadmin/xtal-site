@@ -41,6 +41,7 @@ export interface XtalConfig {
   enabled: boolean
   searchSelector: string
   displayMode: string
+  resultsSelector?: string
   siteUrl: string
   features: { aspects: boolean; explain: boolean }
   cardTemplate?: {
