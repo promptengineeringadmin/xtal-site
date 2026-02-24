@@ -9,7 +9,7 @@ faqItems:
   - question: "Is XTAL Search a drop-in replacement for Algolia?"
     answer: "For ecommerce search use cases, yes. XTAL provides the same core search functionality with AI-native features built in. However, if you use Algolia for non-ecommerce search (documentation, SaaS apps), XTAL is specifically designed for product search and may not cover those use cases."
   - question: "How does XTAL's pricing compare to Algolia?"
-    answer: "Algolia charges per search request and per record, which can become expensive at scale. XTAL uses a simpler pricing model based on your catalog size, making costs more predictable as your search volume grows."
+    answer: "Algolia charges per search request and per record, which can become expensive at scale. XTAL uses a different pricing model — contact us for details specific to your catalog and traffic volume."
   - question: "Can I migrate from Algolia to XTAL?"
     answer: "Yes. XTAL can index your existing product catalog directly from your ecommerce platform. Most merchants complete the migration in a single day without developer involvement."
   - question: "Does XTAL support the same platforms as Algolia?"
@@ -28,7 +28,7 @@ What has changed is the competitive landscape. Ecommerce search has moved from t
 
 ## TL;DR
 
-- **Pricing model**: Algolia meters on search requests and records simultaneously — costs scale with traffic in ways that catch teams off guard. XTAL uses catalog-based pricing with no per-search charges.
+- **Pricing model**: Algolia meters on search requests and records simultaneously — costs scale with traffic in ways that catch teams off guard. XTAL uses a different pricing model — [contact us](/contact) for details.
 - **AI depth**: Algolia's semantic search (NeuralSearch) lives in the Elevate tier, which requires a custom enterprise contract. XTAL runs a two-stage LLM pipeline on every search request at all tiers.
 - **Setup complexity**: Algolia rewards developers who invest time — its full power requires ongoing tuning. XTAL deploys as an embeddable snippet in under a day with no theme modifications.
 - **Ecosystem maturity**: Algolia has a decade of documentation, community resources, and third-party integrations that XTAL cannot yet match. If ecosystem breadth matters more than AI depth, Algolia is the honest recommendation.
@@ -74,7 +74,7 @@ Algolia's current pricing has four tiers. The **Build** plan is free for develop
 
 On Algolia Grow, the math looks like this: the 500K records break down as 400K billable extra records at $0.40/1,000 = $160/month. The 490K extra searches at $1.75/1,000 = $857.50/month. Combined base: roughly **$1,017/month** — before any AI features, which require upgrading to a custom-priced contract. If you need semantic search, budget for a meaningful step up from that.
 
-XTAL's pricing is catalog-based with no per-search metering. For the same merchant, the cost scales with catalog size, not with how often customers search. Merchants with high search volume relative to catalog size see the most dramatic cost difference.
+Contact XTAL for pricing details for your catalog size and traffic profile.
 </Callout>
 
 The structural issue with per-search pricing is predictability. A successful marketing campaign, a seasonal traffic spike, or a product launch can double your search volume in a week. On Algolia Grow, that doubles your search bill too. G2 reviewers note this pattern frequently — one wrote that "monthly costs can easily become 10x initial estimates if you aren't monitoring closely." Algolia's startup program compounds the issue: it grants $10,000 in credits, but the clock starts the moment you're accepted, regardless of your go-live date. Teams that don't launch quickly find themselves with expired credits.
@@ -125,7 +125,7 @@ What XTAL does not yet have: Algolia's A/B testing infrastructure, its InstantSe
 - **You want AI-native search without an enterprise contract.** XTAL's LLM pipeline runs at all tiers, not just at a premium tier that requires custom pricing negotiations.
 - **You're deploying on a custom storefront or headless build.** The embeddable snippet model requires no platform-specific theme modifications and works anywhere you can add a `<script>` tag.
 - **You don't have dedicated search engineering capacity.** XTAL's self-optimizing LLM pipeline handles the relevance tuning that would otherwise require ongoing developer time in Algolia.
-- **Your search volume is high relative to your catalog size.** Catalog-based pricing means high search traffic doesn't linearly increase your bill.
+- **You want straightforward pricing.** [Contact us](/contact) for a quote tailored to your catalog and traffic.
 - **You want contextual explanations for search results.** XTAL's reasoning layer can surface why a given product was returned, which is useful for merchandising teams and for the shopper experience.
 
 ### Choose Algolia if:
@@ -137,7 +137,7 @@ What XTAL does not yet have: Algolia's A/B testing infrastructure, its InstantSe
 - **You're already at Elevate tier and using NeuralSearch.** If you've already made the enterprise investment and NeuralSearch is performing for your catalog, the switching cost may not justify moving.
 - **You need A/B testing for relevance experiments.** Algolia's built-in A/B testing infrastructure is mature and XTAL does not currently offer an equivalent.
 
-The honest summary: Algolia is the right choice for developer-led teams that want composable search infrastructure and have the engineering capacity to configure and maintain it. XTAL is the right choice for ecommerce teams that want sophisticated AI relevance without the engineering overhead or the per-search pricing model.
+The honest summary: Algolia is the right choice for developer-led teams that want composable search infrastructure and have the engineering capacity to configure and maintain it. XTAL is the right choice for ecommerce teams that want sophisticated AI relevance without the engineering overhead or Algolia's per-search pricing model.
 
 ---
 
@@ -149,7 +149,7 @@ For ecommerce search use cases, yes. XTAL provides the same core search function
 
 ### How does XTAL's pricing compare to Algolia?
 
-Algolia charges on two dimensions simultaneously: search requests performed and records stored. The Grow tier bills $1.75 per 1,000 additional searches and $0.40 per 1,000 additional records beyond the monthly inclusions. At mid-market volumes (500K records, 500K searches), this comes to roughly $1,000/month before any AI features. XTAL uses catalog-size-based pricing with no per-search metering, which makes costs significantly more predictable for stores with high search traffic relative to catalog size.
+Algolia charges on two dimensions simultaneously: search requests performed and records stored. The Grow tier bills $1.75 per 1,000 additional searches and $0.40 per 1,000 additional records beyond the monthly inclusions. At mid-market volumes (500K records, 500K searches), this comes to roughly $1,000/month before any AI features. [Contact XTAL](/contact) for pricing specific to your catalog and traffic volume.
 
 ### Can I migrate from Algolia to XTAL?
 
