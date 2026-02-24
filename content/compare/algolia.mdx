@@ -17,7 +17,7 @@ faqItems:
   - question: "Which is better for large catalogs (100K+ products)?"
     answer: "Both handle large catalogs well. Algolia's infrastructure is battle-tested at scale, while XTAL's AI-native approach can provide better relevance for complex product catalogs where keyword matching falls short."
   - question: "Does XTAL have an equivalent to Algolia Recommend?"
-    answer: "XTAL's aspects and reasoning features serve a similar purpose — surfacing related and complementary products based on semantic understanding rather than collaborative filtering alone."
+    answer: "XTAL's aspects and reasoning features serve a similar purpose — surfacing related and complementary products based on semantic understanding rather than collaborative filtering alone. XTAL also has an early-stage recommendations API (currently powering cannabis dispensary recommendations) with an architecture designed to extend to other verticals."
 ---
 
 Algolia has been the default answer to "we need fast site search" for over a decade. It built that position on genuine merit: blazing-fast indexing, a well-documented API, and a developer experience that made search feel tractable in ways it hadn't been before. For teams evaluating search platforms in 2026, it still deserves serious consideration — which is exactly why this comparison tries to be honest about both sides.
@@ -42,10 +42,10 @@ What has changed is the competitive landscape. Ecommerce search has moved from t
   rows={[
     { feature: "AI-native search pipeline (LLM at core)", values: [true, false] },
     { feature: "Semantic / vector search", values: [true, "Elevate tier only"] },
-    { feature: "Per-search request pricing", values: [false, true] },
     { feature: "Embeddable snippet (any storefront)", values: [true, true] },
     { feature: "Pre-built UI component library", values: [false, true] },
-    { feature: "Merchandising rules & boosting", values: [true, true] },
+    { feature: "Merchandising controls", values: ["AI-guided via prompts", "Visual rules engine"] },
+    { feature: "Context-aware personalization", values: ["Geo + seasonal (zero-config)", "Behavioral (Premium+)"] },
     { feature: "Search analytics dashboard", values: [true, true] },
     { feature: "Shopify native integration", values: [true, true] },
     { feature: "A/B testing for relevance", values: [false, true] },
@@ -165,4 +165,4 @@ Both platforms handle large catalogs well technically. Algolia's infrastructure 
 
 ### Does XTAL have an equivalent to Algolia Recommend?
 
-XTAL's semantic pipeline and aspects extraction serve a related purpose: surfacing contextually relevant and complementary products based on meaning rather than purely on collaborative filtering signals. Algolia Recommend uses behavioral data (views, purchases, cart additions) to power "frequently bought together" and "related products" modules. XTAL's approach is more LLM-reasoning-based than behavior-based, which means it works better for newer catalogs without large behavioral datasets, but may be less precise than Recommend for high-traffic stores with rich historical data.
+XTAL's semantic pipeline and aspects extraction serve a related purpose: surfacing contextually relevant and complementary products based on meaning rather than purely on collaborative filtering signals. XTAL also has an early-stage recommendations API — currently powering cannabis dispensary recommendations with quiz-based and vibe-based flows — with architecture designed to extend to other verticals. Algolia Recommend uses behavioral data (views, purchases, cart additions) to power "frequently bought together" and "related products" modules. XTAL's approach is more LLM-reasoning-based than behavior-based, which means it works better for newer catalogs without large behavioral datasets, but may be less precise than Recommend for high-traffic stores with rich historical data.
