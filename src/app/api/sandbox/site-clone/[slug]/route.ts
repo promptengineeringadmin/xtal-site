@@ -18,12 +18,24 @@ export async function GET(
 
   const baseDir = path.join(process.cwd(), "public", "sandbox", safeSlug);
 
-  // Try search.html first, fall back to home.html
-  let htmlPath = path.join(baseDir, "search.html");
-  let pageName = "search";
-  if (!fs.existsSync(htmlPath)) {
+  // Query params for testing
+  const xtalParam = _req.nextUrl.searchParams.get("xtal");
+  const autoQuery = _req.nextUrl.searchParams.get("q");
+  const pageParam = _req.nextUrl.searchParams.get("page");
+
+  // Page selection — ?page=home forces homepage, default tries search.html
+  let htmlPath: string;
+  let pageName: string;
+  if (pageParam === "home") {
     htmlPath = path.join(baseDir, "home.html");
     pageName = "home";
+  } else {
+    htmlPath = path.join(baseDir, "search.html");
+    pageName = "search";
+    if (!fs.existsSync(htmlPath)) {
+      htmlPath = path.join(baseDir, "home.html");
+      pageName = "home";
+    }
   }
 
   // If neither exists, return helpful 404
@@ -63,12 +75,20 @@ export async function GET(
   }
   const shopId = manifest?.collection || safeSlug;
 
-  // Inject XTAL SDK before </head>
-  const sdkTag = `<script src="/client/v1/xtal.js" data-shop-id="${shopId}" async></script>`;
-  html = html.replace("</head>", `${sdkTag}\n</head>`);
+  // Inject XTAL SDK before </head> — skip if ?xtal=off
+  if (xtalParam !== "off") {
+    const sdkTag = `<script src="/client/v1/xtal.js" data-shop-id="${shopId}" async></script>`;
+    html = html.replace("</head>", `${sdkTag}\n</head>`);
+  }
 
-  // QA banner removed — the outer page.tsx already provides a control bar,
-  // so injecting one inside the iframe created a duplicate.
+  // Pre-fill search input if ?q= present
+  if (autoQuery) {
+    const escaped = autoQuery.replace(/"/g, "&quot;");
+    html = html.replace(
+      /(<input[^>]*id="search_field"[^>]*?)(\/?>)/,
+      `$1 value="${escaped}" $2`
+    );
+  }
 
   return new Response(html, {
     status: 200,

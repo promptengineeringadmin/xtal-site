@@ -16,10 +16,21 @@ export async function generateMetadata({
 
 export default async function SiteClonePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const { slug } = await params;
+  const sp = await searchParams;
+
+  // Forward all query params to the iframe src
+  const qs = new URLSearchParams();
+  for (const [k, v] of Object.entries(sp)) {
+    if (v) qs.set(k, v);
+  }
+  const qsStr = qs.toString();
+  const iframeSrc = `/api/sandbox/site-clone/${slug}${qsStr ? `?${qsStr}` : ""}`;
 
   return (
     <div className="flex flex-col h-screen bg-[#0f0f17]">
@@ -37,7 +48,7 @@ export default async function SiteClonePage({
           XTAL Visual QA
         </span>
         <span style={{ color: "#6c7086" }}>
-          {slug} clone + SDK Overlay
+          {slug} clone + SDK Inline
         </span>
         <a
           href="/sandbox/storefront"
@@ -54,7 +65,7 @@ export default async function SiteClonePage({
 
       {/* Iframe: no sandbox attr — SDK needs full script execution */}
       <iframe
-        src={`/api/sandbox/site-clone/${slug}`}
+        src={iframeSrc}
         className="flex-1 w-full border-0"
         title={`${slug} clone with XTAL SDK`}
       />

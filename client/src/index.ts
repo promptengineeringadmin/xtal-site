@@ -1,14 +1,10 @@
-import { XtalAPI, type SearchFullResponse, type Product } from "./api"
-import { XtalOverlay } from "./ui/overlay"
+import { XtalAPI, type Product } from "./api"
 import { InlineRenderer } from "./ui/inline"
-import { renderResultsGrid, renderLoading, renderEmpty } from "./ui/results"
-import { renderAspectChips } from "./ui/filters"
 import { renderTemplatedCard, type CardHandlers, type CardTemplate } from "./ui/template"
 import { renderProductCard } from "./ui/results"
 import { attachInterceptor } from "./interceptor"
 import { appendUtm } from "./utm"
 import { detectCartAdapter } from "./cart/detect"
-import { showToast, dismissToast } from "./ui/toast"
 
 function boot() {
   try {
@@ -85,15 +81,12 @@ function boot() {
           : null
 
         if (isInline && !gridTarget) {
-          console.warn(
-            `[xtal.js] Inline mode requested but resultsSelector "${config.resultsSelector}" not found — falling back to overlay`
-          )
+          console.log(`[xtal.js] Inline mode: "${config.resultsSelector}" not found — standing by`)
+          return
         }
 
-        const useInline = isInline && !!gridTarget
-
         // ─── INLINE MODE ────────────────────────────────────
-        if (useInline) {
+        {
           const inline = new InlineRenderer(gridTarget!)
           let cleanupInterceptor: (() => void) | null = null
 
@@ -165,6 +158,12 @@ function boot() {
           const selector = config.searchSelector || 'input[type="search"]'
           cleanupInterceptor = attachInterceptor(selector, doSearch)
 
+          // Auto-trigger if input already has a query (e.g. navigated from homepage search)
+          const existingInput = document.querySelector<HTMLInputElement>(selector)
+          if (existingInput?.value?.trim()) {
+            doSearch(existingInput.value.trim())
+          }
+
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ;(window as any).XTAL = {
             destroy() {
@@ -178,183 +177,7 @@ function boot() {
           console.log(
             `[xtal.js] Initialized INLINE for ${shopId}. Search: ${selector}, Grid: ${config.resultsSelector}`
           )
-          return
         }
-
-        // ─── OVERLAY MODE (fallback) ────────────────────────
-        const overlay = new XtalOverlay(cardTemplate?.css)
-
-        const cardHandlers: CardHandlers = {
-          onViewProduct(product) {
-            const url = appendUtm(resolveProductUrl(product), {
-              shopId: shopId!,
-              productId: product.id,
-              query: lastQuery,
-            })
-            window.open(url, "_blank", "noopener,noreferrer")
-          },
-          async onAddToCart(product) {
-            const loadingToast = showToast(
-              overlay.getShadowRoot(),
-              "Adding to cart...",
-              "loading"
-            )
-
-            const result = await cartAdapter.addToCart(product)
-            dismissToast(loadingToast)
-
-            showToast(
-              overlay.getShadowRoot(),
-              result.message,
-              result.success ? "success" : "error"
-            )
-
-            if (result.success) {
-              fetch(`${apiBase}/api/xtal/events`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  product_id: product.id,
-                  action: "add_to_cart",
-                  collection: shopId,
-                  query: lastQuery,
-                }),
-              }).catch(() => {})
-            }
-          },
-        }
-
-        let selectedAspects = new Set<string>()
-        let lastResponse: SearchFullResponse | null = null
-        let cleanupInterceptor: (() => void) | null = null
-
-        overlay.onHide(() => {
-          // Don't clear state — user can re-trigger
-        })
-
-        function render() {
-          if (!lastResponse) return
-
-          const backdrop = document.createElement("div")
-          backdrop.className = "xtal-backdrop"
-          backdrop.addEventListener("click", (e) => {
-            if (e.target === backdrop) overlay.hide()
-          })
-
-          const container = document.createElement("div")
-          container.className = "xtal-container"
-
-          // Header
-          const header = document.createElement("div")
-          header.className = "xtal-header"
-
-          const headerLeft = document.createElement("div")
-          const queryLabel = document.createElement("div")
-          queryLabel.className = "xtal-header-query"
-          queryLabel.textContent = `Results for "${lastQuery}"`
-          headerLeft.appendChild(queryLabel)
-
-          const meta = document.createElement("div")
-          meta.className = "xtal-header-meta"
-          meta.textContent = `${lastResponse.total} products \u00b7 ${lastResponse.query_time.toFixed(0)}ms`
-          headerLeft.appendChild(meta)
-
-          header.appendChild(headerLeft)
-
-          const closeBtn = document.createElement("button")
-          closeBtn.className = "xtal-close"
-          closeBtn.textContent = "\u00d7"
-          closeBtn.addEventListener("click", () => overlay.hide())
-          header.appendChild(closeBtn)
-
-          container.appendChild(header)
-
-          // Aspect chips
-          if (
-            lastResponse.aspects_enabled &&
-            lastResponse.aspects.length > 0
-          ) {
-            const chips = renderAspectChips(
-              lastResponse.aspects,
-              selectedAspects,
-              (aspect) => {
-                if (selectedAspects.has(aspect)) {
-                  selectedAspects.delete(aspect)
-                } else {
-                  selectedAspects.add(aspect)
-                }
-                doSearch(lastQuery)
-              }
-            )
-            container.appendChild(chips)
-          }
-
-          // Results
-          if (lastResponse.results.length > 0) {
-            container.appendChild(
-              renderResultsGrid(lastResponse.results, lastQuery, shopId!, cardTemplate, cardHandlers)
-            )
-          } else {
-            container.appendChild(renderEmpty(lastQuery))
-          }
-
-          // Powered by
-          const powered = document.createElement("div")
-          powered.className = "xtal-powered"
-          powered.textContent = "Powered by XTAL Search"
-          container.appendChild(powered)
-
-          backdrop.appendChild(container)
-          overlay.setContent(backdrop)
-        }
-
-        function showLoadingOverlay() {
-          const backdrop = document.createElement("div")
-          backdrop.className = "xtal-backdrop"
-          backdrop.addEventListener("click", (e) => {
-            if (e.target === backdrop) overlay.hide()
-          })
-          const container = document.createElement("div")
-          container.className = "xtal-container"
-          container.appendChild(renderLoading())
-          backdrop.appendChild(container)
-          overlay.setContent(backdrop)
-          overlay.show()
-        }
-
-        function doSearch(query: string) {
-          lastQuery = query
-          showLoadingOverlay()
-
-          api
-            .searchFull(query, 16, Array.from(selectedAspects))
-            .then((res) => {
-              lastResponse = res
-              render()
-              if (!overlay.isVisible()) overlay.show()
-            })
-            .catch((err) => {
-              if (err instanceof DOMException && err.name === "AbortError") {
-                return
-              }
-              console.error("[xtal.js] Search error:", err)
-            })
-        }
-
-        const selector = config.searchSelector || 'input[type="search"]'
-        cleanupInterceptor = attachInterceptor(selector, doSearch)
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ;(window as any).XTAL = {
-          destroy() {
-            cleanupInterceptor?.()
-            overlay.destroy()
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            delete (window as any).XTAL
-          },
-        }
-
-        console.log(`[xtal.js] Initialized OVERLAY for ${shopId}. Selector: ${selector}`)
       })
       .catch((err) => {
         console.error("[xtal.js] Failed to fetch config:", err)
