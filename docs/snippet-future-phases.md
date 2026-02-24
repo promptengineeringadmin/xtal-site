@@ -65,7 +65,7 @@ URL: `https://cdn.xtalsearch.com/loader/v1/xtal-loader.js` (or `/client/v1/xtal-
 
 ```html
 <!-- What merchants paste (or add to GTM) -->
-<link rel="preconnect" href="https://xtalsearch.com">
+<link rel="preconnect" href="https://www.xtalsearch.com">
 <script>
   (function(){
     window.XTAL = window.XTAL || { q: [], init: function() { this.q.push(arguments); } };
@@ -250,7 +250,7 @@ Merchants with strict Content Security Policy headers need to allow:
 | Directive | Required Value | Reason |
 |-----------|---------------|--------|
 | `script-src` | XTAL CDN domain (or `nonce` on inline loader) | Load xtal.js |
-| `connect-src` | `xtalsearch.com` (or Vercel deployment domain) | API fetch calls |
+| `connect-src` | `www.xtalsearch.com` (or Vercel deployment domain) | API fetch calls |
 | `style-src` | Generally not needed | Shadow DOM styles are CSP-exempt |
 
 **Recommendation:** Provide a CSP-compatible loader variant that uses `nonce` attributes. Document CSP requirements in merchant integration guide.

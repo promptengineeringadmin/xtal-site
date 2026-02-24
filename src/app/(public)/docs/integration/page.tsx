@@ -55,11 +55,11 @@ export default function IntegrationDocsPage() {
           The fastest way to integrate XTAL Search is via our JavaScript snippet.
           Add this to your storefront&apos;s <code className="text-sm bg-slate-100 px-1.5 py-0.5 rounded font-mono">&lt;head&gt;</code> tag:
         </p>
-        <CodeBlock language="html">{`<link rel="preconnect" href="https://xtalsearch.com">
+        <CodeBlock language="html">{`<link rel="preconnect" href="https://www.xtalsearch.com">
 <script>
   (function(){
     var s = document.createElement('script');
-    s.src = 'https://xtalsearch.com/client/v1/xtal.js';
+    s.src = 'https://www.xtalsearch.com/client/v1/xtal.js';
     s.async = true;
     s.dataset.shopId = 'YOUR_COLLECTION_ID';
     document.head.appendChild(s);
