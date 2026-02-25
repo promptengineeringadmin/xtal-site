@@ -17,15 +17,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true })
     }
 
-    const dc = process.env.MAILCHIMP_API_KEY.split('-').pop()
+    const apiKey = process.env.MAILCHIMP_API_KEY.trim()
+    const audienceId = process.env.MAILCHIMP_AUDIENCE_ID.trim()
+    const dc = apiKey.split('-').pop()
     const subscriberHash = createHash('md5').update(sanitizedEmail).digest('hex')
 
     const res = await fetch(
-      `https://${dc}.api.mailchimp.com/3.0/lists/${process.env.MAILCHIMP_AUDIENCE_ID}/members/${subscriberHash}`,
+      `https://${dc}.api.mailchimp.com/3.0/lists/${audienceId}/members/${subscriberHash}`,
       {
         method: 'PUT',
         headers: {
-          Authorization: `apikey ${process.env.MAILCHIMP_API_KEY}`,
+          Authorization: `apikey ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
