@@ -6,10 +6,10 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 
 export const metadata: Metadata = {
-  title: 'Blog | XTAL Search',
+  title: 'Insights | XTAL Search',
   description: 'Expert insights on ecommerce search, AI-powered product discovery, and search quality optimization.',
   openGraph: {
-    title: 'Blog | XTAL Search',
+    title: 'Insights | XTAL Search',
     description: 'Expert insights on ecommerce search, AI-powered product discovery, and search quality optimization.',
     url: 'https://xtalsearch.com/blog',
   },
@@ -38,7 +38,7 @@ export default async function BlogPage({
     <main className="pt-28 pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-xtal-navy mb-4">Blog</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-xtal-navy mb-4">Insights</h1>
           <p className="text-lg text-slate-500 max-w-2xl mx-auto">
             Insights on ecommerce search, AI-powered product discovery, and how to convert more shoppers.
           </p>
