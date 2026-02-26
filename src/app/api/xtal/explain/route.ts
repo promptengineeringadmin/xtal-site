@@ -71,7 +71,7 @@ export async function POST(request: Request) {
         score: body.score,
         ...(system_prompt && { system_prompt }),
       }),
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(9000),
     })
 
     const data = await res.json()

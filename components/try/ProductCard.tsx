@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { HelpCircle, X, ThumbsDown, ThumbsUp } from "lucide-react"
 import type { Product } from "@/lib/xtal-types"
 
@@ -28,6 +28,51 @@ function formatPrice(price: number | number[]): string {
 
 function isHighConfidence(score?: number): boolean {
   return !!score && score >= 0.85
+}
+
+const EXPLAIN_PHRASES = [
+  "Analyzing match quality\u2026",
+  "Comparing to your search intent\u2026",
+  "Evaluating product relevance\u2026",
+  "Examining feature alignment\u2026",
+  "Checking product details\u2026",
+]
+
+function ExplainLoadingIndicator() {
+  const [phraseIndex, setPhraseIndex] = useState(0)
+  const [visible, setVisible] = useState(true)
+  const [elapsed, setElapsed] = useState(0)
+  const startRef = useRef(performance.now())
+
+  useEffect(() => {
+    const id = setInterval(() => setElapsed(performance.now() - startRef.current), 50)
+    return () => clearInterval(id)
+  }, [])
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setVisible(false)
+      setTimeout(() => {
+        setPhraseIndex(prev => (prev + 1) % EXPLAIN_PHRASES.length)
+        setVisible(true)
+      }, 300)
+    }, 2500)
+    return () => clearInterval(id)
+  }, [])
+
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-2">
+        <div className="w-3 h-3 border-2 border-slate-300 border-t-xtal-navy rounded-full animate-spin flex-shrink-0" />
+        <span className={`text-slate-500 transition-opacity duration-300 ${visible ? "opacity-100" : "opacity-0"}`}>
+          {EXPLAIN_PHRASES[phraseIndex]}
+        </span>
+      </div>
+      <span className="text-[10px] text-slate-400 tabular-nums text-right">
+        {(elapsed / 1000).toFixed(1)}s
+      </span>
+    </div>
+  )
 }
 
 export default function ProductCard({ product, score, query, onExplain, onReportIrrelevant, onWellPut, showExplainNudge }: ProductCardProps) {
@@ -125,10 +170,7 @@ export default function ProductCard({ product, score, query, onExplain, onReport
         {explainOpen && (
           <div className="mt-2 p-2 bg-slate-50 rounded text-xs text-slate-600 leading-relaxed">
             {explainLoading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 border-2 border-slate-300 border-t-xtal-navy rounded-full animate-spin" />
-                <span className="text-slate-500">Analyzing relevance&hellip;</span>
-              </div>
+              <ExplainLoadingIndicator />
             ) : (
               <>
                 {explanation}

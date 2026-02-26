@@ -103,13 +103,16 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
 
     try {
       // Fire search + aspects in parallel
-      const [searchRes, aspectsRes] = await Promise.all([
-        fetch("/api/xtal/search", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query: trimmed, limit: resultsPerPage, ...(collection && { collection }) }),
-          signal: controller.signal,
-        }),
+      const searchBody = JSON.stringify({ query: trimmed, limit: resultsPerPage, ...(collection && { collection }) })
+      const searchInit: RequestInit = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: searchBody,
+        signal: controller.signal,
+      }
+
+      let [searchRes, aspectsRes] = await Promise.all([
+        fetch("/api/xtal/search", searchInit),
         fetch("/api/xtal/aspects", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -117,6 +120,13 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
           signal: controller.signal,
         }),
       ])
+
+      if (controller.signal.aborted) return
+
+      // Auto-retry once on cold-start errors (502/504)
+      if (!searchRes.ok && (searchRes.status === 502 || searchRes.status === 504) && !controller.signal.aborted) {
+        searchRes = await fetch("/api/xtal/search", searchInit)
+      }
 
       if (controller.signal.aborted) return
 

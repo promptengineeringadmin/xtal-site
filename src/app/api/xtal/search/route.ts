@@ -51,7 +51,7 @@ export async function POST(request: Request) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(enrichedBody),
-      signal: AbortSignal.timeout(8000),
+      signal: AbortSignal.timeout(12000),
     })
     const backendMs = Date.now() - t0
 

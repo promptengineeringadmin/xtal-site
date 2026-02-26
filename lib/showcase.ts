@@ -8,14 +8,14 @@ export interface ShowcaseQueryDef {
 
 const SHOWCASE_QUERIES: Record<string, ShowcaseQueryDef[]> = {
   xtaldemo: [
-    { query: "cozy gift for someone who is always cold", label: "gift + warmth" },
-    { query: "hosting a dinner party this weekend", label: "occasion" },
     { query: "make my bathroom feel like a spa", label: "vibe + space" },
+    { query: "kitchen gadgets for meal prep", label: "use case + product" },
+    { query: "minimalist desk setup", label: "aesthetic + setup" },
   ],
   bestbuy: [
+    { query: "bluetooth speakers for a pool party", label: "use case + occasion" },
     { query: "noise cancelling headphones for commuting", label: "use case + product" },
-    { query: "setting up a home theater on a budget", label: "occasion + budget" },
-    { query: "gift for a teenage gamer", label: "gift + persona" },
+    { query: "4K TV", label: "category browse" },
   ],
   willow: [
     { query: "cozy gift for someone who is always cold", label: "gift + warmth" },
@@ -36,12 +36,12 @@ const SHOWCASE_QUERIES: Record<string, ShowcaseQueryDef[]> = {
 
 export const EXTRA_SUGGESTIONS: Record<string, string[]> = {
   xtaldemo: [
-    "dainty jewelry for everyday wear",
-    "setting up a home cocktail bar",
+    "my closet is a mess",
+    "gifts for coffee lovers",
   ],
   bestbuy: [
-    "best laptop for college students",
-    "smart home starter kit",
+    "lightweight 15 inch laptop with good battery life",
+    "my wifi doesn't reach the backyard",
   ],
   willow: [
     "dainty jewelry for everyday wear",
