@@ -3,6 +3,7 @@ export interface MerchantConfig {
   name: string
   url: string
   searchUrl: string | null
+  shopifyDomain?: string
   searchApi?: {
     type: "bestbuy-api" | "shopify" | "scrape"
     baseUrl: string
@@ -64,6 +65,11 @@ export interface QueryComparison {
     searchMode?: string
     agentReasoning?: string
   }
+  grade?: {
+    letter: "A" | "B" | "C" | "D" | "F"
+    score: number
+    reason: string
+  }
 }
 
 export interface TeardownReport {
@@ -77,5 +83,38 @@ export interface TeardownReport {
     xtalAvgResults: number
     merchantAvgTime: number
     xtalAvgTime: number
+    overallScore?: number
+    overallGrade?: string
+    dimensionScores?: Record<string, { avgScore: number; grade: string; queryCount: number }>
+    revenueImpact?: { monthlyLost: number; annualLost: number }
   }
+}
+
+// ─── Prospect Pipeline Types ─────────────────────────────────
+
+export interface ProbeResult {
+  slug: string
+  domain: string
+  name: string
+  category: string
+  site: string
+  productsJsonAccessible: boolean
+  totalProducts: number
+  hasDescriptions: boolean
+  hasImages: boolean
+  searchUrl: string | null
+  primaryColor: string
+  teardownReady: boolean
+  error?: string
+}
+
+export interface ProspectContact {
+  vendor: string
+  name: string
+  title: string
+  linkedin: string
+  real: boolean
+  good: boolean
+  hook: string
+  strength?: string
 }

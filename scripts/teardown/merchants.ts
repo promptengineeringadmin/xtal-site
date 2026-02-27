@@ -16,3 +16,37 @@ export const MERCHANTS: Record<string, MerchantConfig> = {
     secondaryColor: "#FFE000",
   },
 }
+
+/**
+ * Build a MerchantConfig for any Shopify store.
+ * Uses the generic /search?q= endpoint (scraped with Playwright).
+ */
+export function buildShopifyMerchantConfig(opts: {
+  slug: string
+  name: string
+  domain: string
+  primaryColor?: string
+}): MerchantConfig {
+  return {
+    id: opts.slug,
+    name: opts.name,
+    url: `https://${opts.domain}`,
+    searchUrl: `https://${opts.domain}/search?q=`,
+    shopifyDomain: opts.domain,
+    searchApi: {
+      type: "shopify",
+      baseUrl: `https://${opts.domain}`,
+      apiKeyEnv: "",
+      searchParam: "",
+    },
+    primaryColor: opts.primaryColor || "#1a1a1a",
+    secondaryColor: "#ffffff",
+  }
+}
+
+/**
+ * Register a merchant config at runtime (e.g. from prospect probe results).
+ */
+export function registerMerchant(config: MerchantConfig): void {
+  MERCHANTS[config.id] = config
+}
