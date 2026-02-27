@@ -66,3 +66,11 @@ public/sandbox/**/card-template.json
 
 # Search teardown output
 teardown-output/
+
+# E2E test artifacts
+e2e/screenshots/
+e2e/html-report/
+e2e/test-results/
+
+# Temp working files
+tmp/
