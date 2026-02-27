@@ -1,0 +1,19 @@
+// XTAL SDK Console Injection Snippet for Willow
+// Paste this into browser console on any page at www.willowgroupltd.com
+//
+// What it does:
+// 1. Loads the latest SDK build from xtalsearch.com
+// 2. Configures it for the "willow" collection
+// 3. Intercepts the site's search input (#search_field)
+// 4. Replaces native results with XTAL-powered results + filter rail
+//
+// To test: after pasting, type a query in the Willow search bar (e.g. "baskets")
+
+(function(){
+  if(window.XTAL){window.XTAL.destroy()}
+  var s=document.createElement('script');
+  s.src='https://www.xtalsearch.com/client/v1/xtal.js';
+  s.setAttribute('data-shop-id','willow');
+  document.head.appendChild(s);
+  console.log('[xtal] Injecting SDK for willow...');
+})();
