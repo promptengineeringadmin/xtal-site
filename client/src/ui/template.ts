@@ -12,7 +12,7 @@ export interface CardTemplate {
 }
 
 /** Build a flat key→string map from a Product for template interpolation */
-function buildTemplateData(product: Product): Record<string, string> {
+function buildTemplateData(product: Product, resolvedUrl?: string): Record<string, string> {
   const price = Array.isArray(product.price)
     ? product.price[0] ?? 0
     : product.price
@@ -29,7 +29,7 @@ function buildTemplateData(product: Product): Record<string, string> {
       product.featured_image ||
       product.images?.[0]?.src ||
       "",
-    product_url: product.product_url ?? "",
+    product_url: resolvedUrl || product.product_url || "",
     available: product.available ? "true" : "",
     description: product.description ?? "",
   }
@@ -108,9 +108,10 @@ export function renderTemplatedCard(
   query: string,
   shopId: string,
   handlers: CardHandlers,
-  cartAdapterName?: string
+  cartAdapterName?: string,
+  resolvedUrl?: string
 ): HTMLElement {
-  const data = buildTemplateData(product)
+  const data = buildTemplateData(product, resolvedUrl)
 
   let html = processConditionals(template, data)
   html = interpolateTokens(html, data)
@@ -118,7 +119,7 @@ export function renderTemplatedCard(
   const el = htmlToElement(html)
 
   // Wire data-xtal-action="view-product" elements
-  const productUrl = appendUtm(product.product_url || "#", {
+  const productUrl = appendUtm(resolvedUrl || product.product_url || "#", {
     shopId,
     productId: product.id,
     query,

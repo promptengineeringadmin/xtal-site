@@ -414,7 +414,8 @@ function boot() {
                   lastQuery,
                   shopId!,
                   cardHandlers,
-                  cartAdapter.name
+                  cartAdapter.name,
+                  resolveProductUrl(product)
                 )
               }
               return renderProductCard(product, lastQuery, shopId!, null, cardHandlers)
