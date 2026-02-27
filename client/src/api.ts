@@ -53,6 +53,8 @@ export interface XtalConfig {
     css: string
   }
   productUrlPattern?: string
+  observerTimeoutMs?: number
+  pricePresets?: { label: string; min?: number; max?: number }[]
 }
 
 export class XtalAPI {
@@ -65,13 +67,27 @@ export class XtalAPI {
     this.shopId = shopId
   }
 
+  /** Abort any in-flight search request */
+  abort() {
+    if (this.controller) {
+      this.controller.abort()
+      this.controller = null
+    }
+  }
+
   async fetchConfig(): Promise<XtalConfig> {
-    const res = await fetch(
-      `${this.apiBase}/api/xtal/config?shopId=${encodeURIComponent(this.shopId)}`,
-      { mode: "cors" }
-    )
-    if (!res.ok) throw new Error(`Config fetch failed: ${res.status}`)
-    return res.json()
+    const ctrl = new AbortController()
+    const timeout = setTimeout(() => ctrl.abort(), 5000)
+    try {
+      const res = await fetch(
+        `${this.apiBase}/api/xtal/config?shopId=${encodeURIComponent(this.shopId)}`,
+        { mode: "cors", signal: ctrl.signal }
+      )
+      if (!res.ok) throw new Error(`Config fetch failed: ${res.status}`)
+      return res.json()
+    } finally {
+      clearTimeout(timeout)
+    }
   }
 
   async searchFull(

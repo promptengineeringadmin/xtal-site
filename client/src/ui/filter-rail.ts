@@ -76,6 +76,7 @@ export class FilterRail {
   private onFacetToggle: (prefix: string, value: string) => void
   private onPriceChange: (range: { min?: number; max?: number } | null) => void
   private onClearAll: () => void
+  private pricePresets: { label: string; min?: number; max?: number }[]
 
   // Desktop rail element
   private railEl: HTMLElement
@@ -96,12 +97,14 @@ export class FilterRail {
     container: HTMLElement,
     onFacetToggle: (prefix: string, value: string) => void,
     onPriceChange: (range: { min?: number; max?: number } | null) => void,
-    onClearAll: () => void
+    onClearAll: () => void,
+    pricePresets?: { label: string; min?: number; max?: number }[]
   ) {
     this.container = container
     this.onFacetToggle = onFacetToggle
     this.onPriceChange = onPriceChange
     this.onClearAll = onClearAll
+    this.pricePresets = pricePresets || PRICE_PRESETS
 
     // ── Desktop rail ──
     this.railEl = document.createElement("aside")
@@ -147,7 +150,7 @@ export class FilterRail {
     footer.className = "xtal-drawer-footer"
     this.drawerFooterBtn = document.createElement("button")
     this.drawerFooterBtn.className = "xtal-drawer-apply"
-    this.drawerFooterBtn.textContent = "See results"
+    this.drawerFooterBtn.textContent = "Show results"
     this.drawerFooterBtn.addEventListener("click", () => this.closeDrawer())
     footer.appendChild(this.drawerFooterBtn)
     this.drawerEl.appendChild(footer)
@@ -200,7 +203,7 @@ export class FilterRail {
     }
 
     // Update footer button
-    this.drawerFooterBtn.textContent = `See ${total} result${total !== 1 ? "s" : ""}`
+    this.drawerFooterBtn.textContent = `Show ${total} result${total !== 1 ? "s" : ""}`
   }
 
   // ── Filter sections builder ──
@@ -267,7 +270,7 @@ export class FilterRail {
       () => {
         const presetWrap = document.createElement("div")
         presetWrap.className = "xtal-price-presets"
-        for (const preset of PRICE_PRESETS) {
+        for (const preset of this.pricePresets) {
           const btn = document.createElement("button")
           btn.className = "xtal-price-btn"
           if (priceRangeEquals(activePrice, preset)) {
@@ -320,6 +323,7 @@ export class FilterRail {
             checkbox.type = "checkbox"
             checkbox.className = "xtal-facet-checkbox"
             checkbox.checked = isChecked
+            if (isZero) checkbox.disabled = true
             checkbox.addEventListener("change", () => this.onFacetToggle(prefix, value))
 
             const text = document.createElement("span")
@@ -342,11 +346,8 @@ export class FilterRail {
             moreBtn.textContent = isShowingMore ? "Show less" : `Show ${hiddenCount} more`
             moreBtn.addEventListener("click", () => {
               this.showMore[sectionKey] = !this.showMore[sectionKey]
-              // Trigger parent re-render — caller should call update() again
-              // For immediate feedback, just toggle inline
               const parent = moreBtn.parentElement
               if (!parent) return
-              // Rebuild this section's list in place
               const newList = this.buildFacetList(prefix, values, activeValues, mode)
               parent.replaceWith(newList)
             })
@@ -391,6 +392,7 @@ export class FilterRail {
       checkbox.type = "checkbox"
       checkbox.className = "xtal-facet-checkbox"
       checkbox.checked = isChecked
+      if (isZero) checkbox.disabled = true
       checkbox.addEventListener("change", () => this.onFacetToggle(prefix, value))
 
       const text = document.createElement("span")
@@ -483,6 +485,11 @@ export class FilterRail {
 
   // ── Mobile drawer ──
 
+  /** Reset ephemeral UI state (showMore toggles) — call on new query */
+  resetState(): void {
+    this.showMore = {}
+  }
+
   private openDrawer(): void {
     this.drawerOpen = true
     this.savedBodyOverflow = document.body.style.overflow
@@ -491,7 +498,7 @@ export class FilterRail {
     this.drawerEl.classList.add("xtal-drawer-open")
   }
 
-  private closeDrawer(): void {
+  closeDrawer(): void {
     this.drawerOpen = false
     document.body.style.overflow = this.savedBodyOverflow
     this.backdropEl.classList.remove("xtal-backdrop-open")

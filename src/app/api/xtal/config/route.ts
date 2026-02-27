@@ -10,6 +10,7 @@ import {
   getCardTemplate,
   getProductUrlPattern,
   getFiltersEnabled,
+  getPricePresets,
 } from "@/lib/admin/admin-settings"
 
 export async function OPTIONS() {
@@ -27,7 +28,7 @@ export async function GET(request: Request) {
     )
   }
 
-  const [enabled, searchSelector, displayMode, resultsSelector, siteUrl, cardTemplate, productUrlPattern, filtersEnabled] =
+  const [enabled, searchSelector, displayMode, resultsSelector, siteUrl, cardTemplate, productUrlPattern, filtersEnabled, pricePresets] =
     await Promise.all([
       getSnippetEnabled(shopId),
       getSnippetSearchSelector(shopId),
@@ -37,6 +38,7 @@ export async function GET(request: Request) {
       getCardTemplate(shopId),
       getProductUrlPattern(shopId),
       getFiltersEnabled(shopId),
+      getPricePresets(shopId),
     ])
 
   return NextResponse.json(
@@ -49,6 +51,7 @@ export async function GET(request: Request) {
       features: { aspects: true, explain: true, filters: filtersEnabled },
       ...(cardTemplate ? { cardTemplate } : {}),
       ...(productUrlPattern ? { productUrlPattern } : {}),
+      ...(pricePresets ? { pricePresets } : {}),
     },
     {
       headers: {

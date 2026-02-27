@@ -7,9 +7,10 @@ import { attachInterceptor } from "./interceptor"
 import { appendUtm } from "./utm"
 import { detectCartAdapter } from "./cart/detect"
 
-/** Fire-and-forget error telemetry via sendBeacon */
+/** Fire-and-forget error telemetry — sendBeacon with fetch fallback */
 function beaconError(apiBase: string, shopId: string, error: string, context?: string) {
   try {
+    const url = `${apiBase}/api/xtal/events`
     const payload = JSON.stringify({
       action: "error",
       collection: shopId,
@@ -17,8 +18,14 @@ function beaconError(apiBase: string, shopId: string, error: string, context?: s
       context,
       ts: Date.now(),
     })
-    if (navigator.sendBeacon) {
-      navigator.sendBeacon(`${apiBase}/api/xtal/events`, payload)
+    const sent = navigator.sendBeacon?.(url, payload)
+    if (!sent) {
+      fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+        keepalive: true,
+      }).catch(() => {})
     }
   } catch {
     // Telemetry must never crash
@@ -312,10 +319,18 @@ function boot() {
           let lastFacets: Record<string, Record<string, number>> = {}
           let filterDebounceTimer: ReturnType<typeof setTimeout> | null = null
 
-          // Init filter layout if enabled
+          // Inject filter CSS at boot so layout is ready, but defer
+          // FilterRail creation until first search resolves (prevents
+          // race condition where user clicks filter before searchContext exists)
           if (filtersEnabled) {
             injectFilterCSS()
-            const railSlot = inline.initLayout()
+            inline.initLayout()
+          }
+
+          /** Lazily create FilterRail — called once after first search resolves */
+          const ensureFilterRail = () => {
+            if (filterRail || !filtersEnabled) return
+            const railSlot = inline.initLayout() // returns existing slot if already created
             filterRail = new FilterRail(
               railSlot,
               // onFacetToggle
@@ -340,7 +355,8 @@ function boot() {
                 facetFilters = {}
                 priceRange = null
                 doFilter()
-              }
+              },
+              config.pricePresets
             )
           }
 
@@ -432,27 +448,9 @@ function boot() {
             facetFilters = {}
             priceRange = null
 
-            // Init layout if filters enabled but not yet initialized
-            if (filtersEnabled && !filterRail) {
-              injectFilterCSS()
-              const railSlot = inline.initLayout()
-              filterRail = new FilterRail(
-                railSlot,
-                (prefix, value) => {
-                  if (!facetFilters[prefix]) facetFilters[prefix] = []
-                  const idx = facetFilters[prefix].indexOf(value)
-                  if (idx >= 0) {
-                    facetFilters[prefix].splice(idx, 1)
-                    if (facetFilters[prefix].length === 0) delete facetFilters[prefix]
-                  } else {
-                    facetFilters[prefix].push(value)
-                  }
-                  doFilter()
-                },
-                (range) => { priceRange = range; doFilter() },
-                () => { facetFilters = {}; priceRange = null; doFilter() }
-              )
-            }
+            // Close mobile drawer + reset showMore on new query
+            filterRail?.closeDrawer()
+            filterRail?.resetState()
 
             inline.showLoading()
 
@@ -462,6 +460,9 @@ function boot() {
                 lastTotal = res.total
                 lastFacets = res.computed_facets || {}
                 searchContext = res.search_context || null
+
+                // Create filter rail on first successful search (deferred to avoid race)
+                ensureFilterRail()
 
                 if (res.results.length === 0) {
                   inline.renderEmpty(query)
@@ -496,7 +497,7 @@ function boot() {
           }
 
           const selector = config.searchSelector || 'input[type="search"]'
-          cleanupInterceptor = attachInterceptor(selector, debouncedSearch)
+          cleanupInterceptor = attachInterceptor(selector, debouncedSearch, config.observerTimeoutMs)
 
           // Auto-trigger if input already has a query (e.g. navigated from homepage search)
           const existingInput = document.querySelector<HTMLInputElement>(selector)
@@ -507,6 +508,11 @@ function boot() {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ;(window as any).XTAL = {
             destroy() {
+              // Cancel pending debounce + filter timers
+              if (debounceTimer) clearTimeout(debounceTimer)
+              if (filterDebounceTimer) clearTimeout(filterDebounceTimer)
+              // Abort any in-flight API request
+              api.abort()
               cleanupInterceptor?.()
               filterRail?.destroy()
               inline.destroy()
@@ -515,7 +521,7 @@ function boot() {
               const filterStyles = document.getElementById("xtal-filter-styles")
               if (filterStyles) filterStyles.remove()
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              delete (window as any).XTAL
+              ;(window as any).XTAL = undefined
             },
           }
 

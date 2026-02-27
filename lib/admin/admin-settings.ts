@@ -60,6 +60,9 @@ function productUrlPatternKey(collection: string) {
 function filtersEnabledKey(collection: string) {
   return `admin:settings:${collection}:filters_enabled`
 }
+function pricePresetsKey(collection: string) {
+  return `admin:settings:${collection}:price_presets`
+}
 
 // ─── Query Enhancement ─────────────────────────────────────
 
@@ -378,4 +381,33 @@ export async function saveFiltersEnabled(
 ): Promise<void> {
   const kv = getRedis()
   await kv.set(filtersEnabledKey(collection), enabled)
+}
+
+// ─── Price Presets ────────────────────────────────────
+
+export interface PricePreset {
+  label: string
+  min?: number
+  max?: number
+}
+
+export async function getPricePresets(
+  collection: string
+): Promise<PricePreset[] | null> {
+  try {
+    const kv = getRedis()
+    const stored = await kv.get<PricePreset[]>(pricePresetsKey(collection))
+    if (stored && Array.isArray(stored) && stored.length > 0) return stored
+  } catch {
+    // Redis unavailable
+  }
+  return null // default: use SDK hard-coded presets
+}
+
+export async function savePricePresets(
+  collection: string,
+  presets: PricePreset[]
+): Promise<void> {
+  const kv = getRedis()
+  await kv.set(pricePresetsKey(collection), presets)
 }

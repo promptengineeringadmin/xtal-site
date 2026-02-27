@@ -2,7 +2,8 @@ type CleanupFn = () => void
 
 export function attachInterceptor(
   selector: string,
-  onQuery: (query: string) => void
+  onQuery: (query: string) => void,
+  observerTimeoutMs?: number
 ): CleanupFn {
   let observer: MutationObserver | null = null
   let giveUpTimer: ReturnType<typeof setTimeout> | null = null
@@ -68,12 +69,13 @@ export function attachInterceptor(
 
   observer.observe(document.body, { childList: true, subtree: true })
 
-  // Give up after 10 seconds
+  // Give up after timeout (default 10s)
+  const timeoutMs = observerTimeoutMs ?? 10000
   giveUpTimer = setTimeout(() => {
     observer?.disconnect()
     observer = null
-    console.warn(`[xtal.js] Could not find input matching "${selector}" after 10s`)
-  }, 10000)
+    console.warn(`[xtal.js] Could not find input matching "${selector}" after ${timeoutMs / 1000}s`)
+  }, timeoutMs)
 
   return () => {
     cleanups.forEach((fn) => fn())

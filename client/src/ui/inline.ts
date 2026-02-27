@@ -8,20 +8,27 @@
  */
 export class InlineRenderer {
   private target: HTMLElement
-  private originalHTML: string
+  private originalHTML: string | null = null
   private layoutEl: HTMLElement | null = null
   private railSlot: HTMLElement | null = null
   private gridSlot: HTMLElement | null = null
 
   constructor(target: HTMLElement) {
     this.target = target
-    this.originalHTML = target.innerHTML
+  }
+
+  /** Capture original HTML on first mutation — ensures fresh snapshot */
+  private captureOriginal() {
+    if (this.originalHTML === null) {
+      this.originalHTML = this.target.innerHTML
+    }
   }
 
   /** Creates the persistent layout wrapper. Returns the rail slot for FilterRail to mount into. */
   initLayout(): HTMLElement {
     if (this.layoutEl) return this.railSlot!
 
+    this.captureOriginal()
     this.target.innerHTML = ""
 
     this.layoutEl = document.createElement("div")
@@ -41,6 +48,7 @@ export class InlineRenderer {
   }
 
   showLoading() {
+    this.captureOriginal()
     const slot = this.gridSlot || this.target
     slot.innerHTML = ""
 
@@ -92,7 +100,10 @@ export class InlineRenderer {
     this.layoutEl = null
     this.railSlot = null
     this.gridSlot = null
-    this.target.innerHTML = this.originalHTML
+    if (this.originalHTML !== null) {
+      this.target.innerHTML = this.originalHTML
+      this.originalHTML = null
+    }
   }
 
   destroy() {

@@ -15,6 +15,7 @@ import {
   saveCardTemplate,
   saveProductUrlPattern,
   saveFiltersEnabled,
+  savePricePresets,
 } from "../lib/admin/admin-settings"
 
 const COLLECTION = "willow"
@@ -102,6 +103,13 @@ async function main() {
     saveCardTemplate(COLLECTION, { html: TEMPLATE_HTML, css: TEMPLATE_CSS }),
     saveProductUrlPattern(COLLECTION, "https://www.willowgroupltd.com/shop/{sku}?position=-1"),
     saveFiltersEnabled(COLLECTION, true),
+    savePricePresets(COLLECTION, [
+      { label: "Under $10", max: 10 },
+      { label: "$10–$25", min: 10, max: 25 },
+      { label: "$25–$50", min: 25, max: 50 },
+      { label: "$50–$100", min: 50, max: 100 },
+      { label: "$100+", min: 100 },
+    ]),
   ])
 
   console.log("Done! Settings saved:")
@@ -113,6 +121,7 @@ async function main() {
   console.log("  product_url_pattern: https://www.willowgroupltd.com/shop/{sku}?position=-1")
   console.log("  card_template: Willow-native classes (product-card, product-image, etc.)")
   console.log("  filters_enabled: true")
+  console.log("  price_presets: Under $10 / $10–$25 / $25–$50 / $50–$100 / $100+")
 }
 
 main().catch((err) => {
