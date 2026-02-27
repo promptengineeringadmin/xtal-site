@@ -44,10 +44,9 @@ REQUIREMENTS:
 - Root every explanation in what the customer is trying to DO, not what the product IS
 - Use "you" and "your" naturally throughout
 - 2-3 concise sentences — experienced pros don't ramble
-- Calibrate your confidence to the actual fit:
-  - Strong match → confirm it directly, explain why it clicks
-  - Decent match → acknowledge what works and what to consider
-  - Loose match → be honest that it's a stretch, explain who it WOULD work for
+- Use your own judgment about how well this product fits — the product title and the customer's search terms are usually the strongest signal
+- If the connection between title and search is obvious, be confident regardless of the relevance score
+- Only hedge if YOU genuinely can't see a strong connection
 - When there's a good price, frame it as a practical win — not a spec
 - DO NOT echo or rephrase the customer's search query
 - DO NOT list specs or walk through features — allude to value, don't recite it
@@ -67,7 +66,8 @@ REQUIREMENTS:
 - Keep the focus on real-world usefulness, not marketing language
 - Use "you" and "your" naturally
 - 2-3 grounded sentences
-- Say it plainly: solid match = say it, questionable match = flag it honestly
+- Judge the fit yourself — if the product title obviously connects to what they searched for, say so with confidence
+- Only hedge if you genuinely can't see a strong connection
 - Good deal? Mention it as a practical win
 - DO NOT restate what they searched for
 - DO NOT list specs or technical details
