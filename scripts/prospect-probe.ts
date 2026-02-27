@@ -145,7 +145,7 @@ async function probeProductsJson(
   let page = 1
   let allSample: ShopifyProduct[] = []
 
-  while (page <= 40) {
+  while (true) {
     const pageUrl = `https://${domain}/products.json?limit=250&page=${page}`
     const pageRes = await fetch(pageUrl, {
       headers: {
@@ -377,12 +377,12 @@ async function main() {
 
   log(`Probing ${targets.length} vendor(s)...`)
 
-  // Load existing results for --resume
+  // Always load existing results to avoid data loss on --vendor runs
   const outPath = path.join(process.cwd(), "data", "prospect-probe-results.json")
   let existingResults: ProbeResult[] = []
-  if (args.resume && fs.existsSync(outPath)) {
+  if (fs.existsSync(outPath)) {
     existingResults = JSON.parse(fs.readFileSync(outPath, "utf-8"))
-    log(`Loaded ${existingResults.length} existing results for resume`)
+    log(`Loaded ${existingResults.length} existing results`)
   }
 
   const existingSlugs = new Set(existingResults.map((r) => r.slug))
