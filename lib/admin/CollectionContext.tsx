@@ -52,7 +52,7 @@ export function CollectionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const stored = sessionStorage.getItem(COLLECTION_STORAGE_KEY)
-    if (stored && COLLECTIONS.some((c) => c.id === stored)) {
+    if (stored) {
       setCollectionState(stored)
     }
     try {

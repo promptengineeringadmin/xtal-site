@@ -70,7 +70,15 @@ export async function POST(request: Request) {
         { status: 400 }
       )
     }
-    await addDemoCollection({ id, label, description: description || "" })
+    await addDemoCollection({
+      id,
+      label,
+      description: description || "",
+      vertical: body.vertical,
+      productCount: body.productCount,
+      source: body.source,
+      sourceUrl: body.sourceUrl,
+    })
     return NextResponse.json({ ok: true })
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : "Unknown error"

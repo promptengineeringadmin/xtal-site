@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { getAspectsPrompt, DEFAULT_ASPECTS_SYSTEM_PROMPT } from "@/lib/admin/aspects-prompt"
 import { getStoreType, getAspectsEnabled } from "@/lib/admin/admin-settings"
 import { corsHeaders, handleOptions } from "@/lib/api/cors"
-import { COLLECTIONS } from "@/lib/admin/collections"
+import { isValidCollection } from "@/lib/admin/demo-collections"
 import { logProxyTiming } from "@/lib/admin/proxy-timing"
 
 export async function OPTIONS() {
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
       )
     }
 
-    if (!COLLECTIONS.some((c) => c.id === collection)) {
+    if (!(await isValidCollection(collection))) {
       return NextResponse.json(
         { error: "Invalid collection" },
         { status: 400, headers: corsHeaders() }

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { getRandomExplainPrompt } from "@/lib/admin/explain-prompt"
 import { corsHeaders, handleOptions } from "@/lib/api/cors"
-import { COLLECTIONS } from "@/lib/admin/collections"
+import { isValidCollection } from "@/lib/admin/demo-collections"
 
 export async function OPTIONS() {
   return handleOptions()
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       )
     }
 
-    if (!COLLECTIONS.some((c) => c.id === collection)) {
+    if (!(await isValidCollection(collection))) {
       return NextResponse.json(
         { error: "Invalid collection" },
         { status: 400, headers: corsHeaders() }

@@ -10,7 +10,8 @@
 
 import * as fs from "fs"
 import * as path from "path"
-import type { Vertical, CollectionSource } from "../../lib/admin/collections"
+import { Redis } from "@upstash/redis"
+import type { Vertical, CollectionSource, CollectionConfig } from "../../lib/admin/collections"
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -246,21 +247,38 @@ async function pollTaskStatus(
 // ── Register collection in Redis ─────────────────────────────
 
 async function registerCollection(opts: IngestOptions): Promise<void> {
-  // Count products from JSONL
   const lineCount = fs
     .readFileSync(opts.jsonlPath, "utf-8")
     .split("\n")
     .filter(Boolean).length
 
-  // Use the admin API (through Next.js) to register
-  // But since we're running as a script, we call the Redis-backed API directly
-  // via the Next.js dev server or just note it for manual registration
-  log(
-    `  Collection metadata: slug=${opts.slug}, label=${opts.label}, vertical=${opts.vertical || "general"}, products=${lineCount}`,
-  )
-  log(
-    `  Register via admin UI or API: POST /api/admin/collections { id: "${opts.slug}", label: "${opts.label}", ... }`,
-  )
+  const redis = new Redis({
+    url: (process.env.UPSTASH_REDIS_REST_URL ?? "").trim(),
+    token: (process.env.UPSTASH_REDIS_REST_TOKEN ?? "").trim(),
+  })
+
+  const KEY = "demo:collections"
+  const current = (await redis.get<CollectionConfig[]>(KEY)) ?? []
+
+  const config: CollectionConfig = {
+    id: opts.slug,
+    label: opts.label,
+    description: `xtalsearch.com/${opts.slug}`,
+    vertical: opts.vertical || "general",
+    productCount: lineCount,
+    source: opts.source || "shopify-import",
+    sourceUrl: opts.sourceUrl,
+  }
+
+  const existing = current.findIndex((c) => c.id === opts.slug)
+  if (existing >= 0) {
+    current[existing] = config
+  } else {
+    current.push(config)
+  }
+
+  await redis.set(KEY, current)
+  log(`  Registered collection: ${opts.slug} (${lineCount} products, vertical: ${config.vertical})`)
 }
 
 // ── Main export ──────────────────────────────────────────────
