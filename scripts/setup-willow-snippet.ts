@@ -100,7 +100,7 @@ async function main() {
     saveSnippetEnabled(COLLECTION, true),
     saveSnippetSearchSelector(COLLECTION, "#search_field"),
     saveSnippetDisplayMode(COLLECTION, "inline"),
-    saveSnippetResultsSelector(COLLECTION, ".product-grid"),
+    saveSnippetResultsSelector(COLLECTION, "shopping-multi-view"),
     saveSnippetSiteUrl(COLLECTION, "https://www.willowgroupltd.com"),
     saveCardTemplate(COLLECTION, { html: TEMPLATE_HTML, css: TEMPLATE_CSS }),
     saveProductUrlPattern(COLLECTION, "https://www.willowgroupltd.com/shop/{sku}?position=-1"),
@@ -110,7 +110,7 @@ async function main() {
   console.log("  snippet_enabled: true")
   console.log('  search_selector: #search_field')
   console.log("  display_mode: inline")
-  console.log("  results_selector: .product-grid")
+  console.log("  results_selector: shopping-multi-view")
   console.log("  site_url: https://www.willowgroupltd.com")
   console.log("  product_url_pattern: https://www.willowgroupltd.com/shop/{sku}?position=-1")
   console.log("  card_template: Willow-native classes (product-card, product-image, etc.)")
