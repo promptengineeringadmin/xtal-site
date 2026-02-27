@@ -11,12 +11,11 @@ import {
   Flag,
   Settings,
   KeyRound,
-  ChevronDown,
   Menu,
   X,
 } from "lucide-react"
-import { useCollection } from "@/lib/admin/CollectionContext"
 import UserMenu from "@/components/admin/UserMenu"
+import CollectionCombobox from "@/components/admin/CollectionCombobox"
 
 const NAV_ITEMS = [
   { href: "/admin/dashboard", label: "Dashboard", icon: BarChart3 },
@@ -34,10 +33,7 @@ interface UserInfo {
   image?: string | null
 }
 
-function SidebarContent({ collection, setCollection, collections, pathname, user }: {
-  collection: string
-  setCollection: (v: string) => void
-  collections: { id: string; label: string }[]
+function SidebarContent({ pathname, user }: {
   pathname: string
   user?: UserInfo
 }) {
@@ -56,24 +52,7 @@ function SidebarContent({ collection, setCollection, collections, pathname, user
         <label className="block text-[10px] font-medium text-white/40 uppercase tracking-wider mb-1.5 px-1">
           Experience
         </label>
-        <div className="relative">
-          <select
-            value={collection}
-            onChange={(e) => setCollection(e.target.value)}
-            className="w-full appearance-none bg-white/10 text-white text-sm font-medium rounded-lg pl-3 pr-8 py-2 border border-white/10 outline-none focus:border-white/30 transition-colors cursor-pointer"
-          >
-            {collections.map((c) => (
-              <option
-                key={c.id}
-                value={c.id}
-                className="text-slate-900 bg-white"
-              >
-                {c.label}
-              </option>
-            ))}
-          </select>
-          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50 pointer-events-none" />
-        </div>
+        <CollectionCombobox />
       </div>
 
       <nav className="flex-1 px-3 space-y-1">
@@ -111,7 +90,6 @@ function SidebarContent({ collection, setCollection, collections, pathname, user
 
 export default function AdminSidebar({ user }: { user?: UserInfo }) {
   const pathname = usePathname()
-  const { collection, setCollection, collections } = useCollection()
   const [mobileOpen, setMobileOpen] = useState(false)
 
   // Close mobile sidebar on navigation
@@ -145,9 +123,6 @@ export default function AdminSidebar({ user }: { user?: UserInfo }) {
       {/* Desktop sidebar — always visible at md+ */}
       <aside className="hidden md:flex fixed left-0 top-0 h-full w-60 bg-xtal-navy flex-col z-30">
         <SidebarContent
-          collection={collection}
-          setCollection={setCollection}
-          collections={collections}
           pathname={pathname}
           user={user}
         />
@@ -178,9 +153,6 @@ export default function AdminSidebar({ user }: { user?: UserInfo }) {
         </button>
 
         <SidebarContent
-          collection={collection}
-          setCollection={setCollection}
-          collections={collections}
           pathname={pathname}
           user={user}
         />
