@@ -102,7 +102,7 @@ export function renderLoading(query?: string): HTMLElement {
   const wrap = document.createElement("div")
   wrap.className = "xtal-loading"
   wrap.style.cssText =
-    "display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;"
+    "display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;width:100%;"
 
   // Spinner ring with sparkle icon
   const ring = document.createElement("div")
