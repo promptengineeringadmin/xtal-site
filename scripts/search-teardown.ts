@@ -554,7 +554,11 @@ async function main() {
   })
 }
 
-main().catch((err) => {
-  console.error("Fatal error:", err)
-  process.exit(1)
-})
+// Only run CLI when executed directly (not when imported)
+const isDirectRun = process.argv[1]?.replace(/\\/g, "/").includes("search-teardown")
+if (isDirectRun) {
+  main().catch((err) => {
+    console.error("Fatal error:", err)
+    process.exit(1)
+  })
+}
