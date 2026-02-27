@@ -104,9 +104,6 @@ async function main() {
   const required = ["XTAL_BACKEND_URL"]
   if (!args.reuseData) {
     required.push("ANTHROPIC_API_KEY")
-    if (merchant.searchApi?.apiKeyEnv) {
-      required.push(merchant.searchApi.apiKeyEnv)
-    }
   }
   for (const key of required) {
     if (!process.env[key]) {
@@ -123,6 +120,16 @@ async function main() {
 
   log(`Search Teardown: ${merchant.name}`)
   log(`Output: ${outDir}`)
+
+  // ── Launch browser (used for both scraping and slide rendering) ──
+  const browserPath = findBrowser()
+  log(`Browser: ${browserPath}`)
+
+  const browser = await chromium.launch({
+    executablePath: browserPath,
+    headless: false,
+    args: ["--disable-blink-features=AutomationControlled"],
+  })
 
   let comparisons: QueryComparison[]
 
@@ -159,15 +166,21 @@ async function main() {
     log("Step 2: Running searches...")
     comparisons = []
 
+    // Create a scraping page with realistic viewport and user agent
+    const scrapePage = await browser.newPage({
+      viewport: { width: 1280, height: 900 },
+      userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    })
+
     for (let i = 0; i < queries.length; i++) {
       const q = queries[i]
       log(`  [${i + 1}/${queries.length}] "${q.text}"`)
 
-      // Merchant search
+      // Merchant search (scrapes the actual website)
       let merchantResult
       try {
-        merchantResult = await searchMerchant(merchant, q.text)
-        log(`    ${merchant.name}: ${merchantResult.count} results (${merchantResult.responseTime}ms)`)
+        merchantResult = await searchMerchant(merchant, q.text, scrapePage)
+        log(`    ${merchant.name}: ${merchantResult.results.length} results scraped`)
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err)
         log(`    ${merchant.name}: ERROR - ${msg}`)
@@ -178,7 +191,7 @@ async function main() {
       let xtalResult
       try {
         xtalResult = await searchXtal(q.text, merchant.id)
-        log(`    XTAL: ${xtalResult.resultCount} results (${Math.round(xtalResult.responseTime)}ms)`)
+        log(`    XTAL: ${xtalResult.resultCount} results`)
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err)
         log(`    XTAL: ERROR - ${msg}`)
@@ -197,9 +210,6 @@ async function main() {
           results: merchantResult.results,
           resultCount: merchantResult.count,
           responseTime: merchantResult.responseTime,
-          error: merchantResult.count === 0 && merchantResult.results.length === 0
-            ? undefined
-            : undefined,
         },
         xtal: {
           results: xtalResult.results,
@@ -210,11 +220,13 @@ async function main() {
         },
       })
 
-      // Rate limit between merchant API calls
+      // Brief pause between scrape navigations
       if (i < queries.length - 1) {
-        await sleep(1200)
+        await sleep(2000)
       }
     }
+
+    await scrapePage.close()
 
     // Save comparison data
     fs.writeFileSync(
@@ -226,13 +238,6 @@ async function main() {
 
   // ── Step 3: Render slides ──
   log("Step 3: Rendering slides...")
-  const browserPath = findBrowser()
-  log(`  Browser: ${browserPath}`)
-
-  const browser = await chromium.launch({
-    executablePath: browserPath,
-    headless: true,
-  })
 
   const page = await browser.newPage({
     viewport: { width: 1080, height: 1350 },
