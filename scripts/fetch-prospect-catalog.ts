@@ -26,7 +26,7 @@ interface ShopifyProduct {
   body_html: string | null
   vendor: string
   product_type: string
-  tags: string
+  tags: string | string[]
   created_at: string
   updated_at: string
   images: { src: string; alt?: string }[]
@@ -78,13 +78,12 @@ function transformProduct(
     .replace(/\s+/g, " ")
     .trim()
 
-  // Parse comma-separated tags
-  const tags = raw.tags
-    ? raw.tags
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean)
-    : []
+  // Tags can be a string or an array depending on Shopify API version
+  const tags = Array.isArray(raw.tags)
+    ? raw.tags.filter(Boolean)
+    : typeof raw.tags === "string"
+      ? raw.tags.split(",").map((t) => t.trim()).filter(Boolean)
+      : []
 
   // Parse variants
   const firstVariant = raw.variants[0]

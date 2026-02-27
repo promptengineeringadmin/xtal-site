@@ -42,7 +42,7 @@ interface ShopifyProduct {
   body_html: string | null
   vendor: string
   product_type: string
-  tags: string
+  tags: string | string[]
   images: { src: string; alt?: string }[]
   variants: {
     id: number
@@ -99,12 +99,11 @@ async function fetchCatalogIfNeeded(
         .replace(/<[^>]*>/g, " ")
         .replace(/\s+/g, " ")
         .trim()
-      const tags = raw.tags
-        ? raw.tags
-            .split(",")
-            .map((t: string) => t.trim())
-            .filter(Boolean)
-        : []
+      const tags = Array.isArray(raw.tags)
+        ? raw.tags.filter(Boolean)
+        : typeof raw.tags === "string"
+          ? raw.tags.split(",").map((t: string) => t.trim()).filter(Boolean)
+          : []
       const firstVariant = raw.variants[0]
       const price = firstVariant ? parseFloat(firstVariant.price) : 0
       const compareAt = firstVariant?.compare_at_price
