@@ -1,7 +1,41 @@
-.Tonia img {
-  height: 250px;       /* choose the uniform height you want */
-  width: auto;         /* let the width scale proportionally */
-  object-fit: cover;   /* crop edges to fill if needed */
-  display: block;
-  margin: 0 auto;      /* centers them since you used img-center */
+  /**umb_name:H1 */
+  h1 { }
+  
+  /**umb_name:H2 */
+  h2 { }
+  
+  /**umb_name:H3 */
+  h3 { }
+  
+  /**umb_name:H4 */
+  h4 { }
+  
+  /**umb_name:H5 */
+  h5 { }
+  
+  /**umb_name:H6 */
+  h6 { }
+
+  /**umb_name:Lg Paragraph */
+  p.intro { }
+
+  /**umb_name:Paragraph */
+  p { }
+
+  /**umb_name:Light Text */
+  .light-text { }
+
+/**umb_name:Dark Text */
+  .dark-text { }
+body.mce-content-body {
+   		font-size: 16px;
 }
+body.mce-content-body * {
+		margin-top: 0;
+}
+body.mce-content-body .light-text {	
+}
+body.mce-content-body .serif {  
+		font-family: "Playfair Display", serif;
+}
+

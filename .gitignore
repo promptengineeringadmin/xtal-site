@@ -63,3 +63,6 @@ public/sandbox/**/*-screenshot.png
 public/sandbox/**/compare-*.png
 public/sandbox/**/extracted-styles.json
 public/sandbox/**/card-template.json
+
+# Search teardown output
+teardown-output/

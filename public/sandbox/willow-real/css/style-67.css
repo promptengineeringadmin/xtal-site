@@ -1,0 +1,25 @@
+
+.cust .main {
+  display: inline; }
+
+.cust .cms {
+  display: inline; }
+
+.cust .crm {
+  display: none; }
+
+.customer-dashboard-tabs .tab-pane {
+  margin-top: 2rem; }
+
+/* CUSTOMER DASHBOARD TABS ON MOBILE */
+@media (max-width: 767px) {
+  .customer-dashboard-tabs ul.nav.nav-tabs li {
+    width: 16.66667%;
+    display: inline-block; }
+  .customer-dashboard-tabs ul.nav.nav-tabs li a {
+    padding: 4px 2px;
+    font-size: 9px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; } }
+

@@ -1,0 +1,39 @@
+/* DASHBOARD WIDGETS*/
+#salesDailyQuick {
+  background-color: #1ab394; }
+
+#websiteDailyQuick {
+  background-color: #fff; }
+
+#managerQuick {
+  background-color: #003d88; }
+
+.bg-grey {
+  background-color: #f3f3f3;
+  border: solid 1px #e0e0e0; }
+
+.bg-ibox-t-grey {
+  color: #fff;
+  background-color: #757575; }
+
+.bg-ibox-t-purple {
+  color: #fff;
+  background-color: #7228ab; }
+
+.bg-ibox-t-red {
+  color: #fff;
+  background-color: #b51b1b; }
+
+.bg-ibox-t-aqua {
+  color: #fff;
+  background-color: #29b9b2; }
+
+.inset-box-shadow {
+  background-color: #fff;
+  -webkit-box-shadow: inset 0px 0px 8px 1px rgba(0, 0, 0, 0.18);
+  -moz-box-shadow: inset 0px 0px 8px 1px rgba(0, 0, 0, 0.18);
+  box-shadow: inset 0px 0px 8px 1px rgba(0, 0, 0, 0.18); }
+
+h3.widget {
+  margin: 10px 0; }
+

@@ -374,14 +374,52 @@ async function main() {
     // Strip <script> tags
     html = html.replace(/<script[\s\S]*?<\/script>/gi, "");
 
-    // Rewrite CSS URLs to local paths
+    // Strip <base> tag — relative URLs are already resolved in rendered HTML,
+    // and keeping it causes local paths to resolve incorrectly
+    html = html.replace(/<base[^>]*>/gi, "");
+
+    // Strip cookie consent banners (e.g. CookieYes) — captured by Playwright
+    // but non-functional without JS. Remove the CSS block and HTML elements.
+    html = html.replace(/<style id="cky-style">[\s\S]*?<\/style>/gi, "");
+    html = html.replace(/<div class="cky-overlay[^"]*"[\s\S]*?<\/div>/gi, "");
+    html = html.replace(/<div class="cky-btn-revisit-wrapper[\s\S]*?<\/div><\/div>/gi, "");
+    html = html.replace(/<div class="cky-consent-container[\s\S]*?<\/div><\/div><\/div><\/div><\/div>/gi, "");
+    html = html.replace(/<div class="cky-modal"[\s\S]*?<\/div><\/div><\/div><\/div>/gi, "");
+
+    // Rewrite CSS URLs to local relative paths (dual-match: full URL + pathname)
     for (const css of pageCss) {
       if (css.url !== "(inline)") {
-        const escaped = css.url.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const localHref = `css/${css.filename}`;
+
+        // Strategy 1: Match full URL (works for CDN/cross-origin)
+        const escapedFull = css.url.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
         html = html.replace(
-          new RegExp(`href=["']${escaped}["']`, "g"),
-          `href="/sandbox/${slug}/css/${css.filename}"`
+          new RegExp(`href=["']${escapedFull}["']`, "g"),
+          `href="${localHref}"`
         );
+
+        // Strategy 2: Match pathname + query string (same-origin with versioned URLs)
+        // Strategy 3: Match pathname only (same-origin without query string)
+        try {
+          const parsed = new URL(css.url);
+          const pathWithQuery = parsed.pathname + parsed.search;
+          const escapedPathQuery = pathWithQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          html = html.replace(
+            new RegExp(`href=["']${escapedPathQuery}["']`, "g"),
+            `href="${localHref}"`
+          );
+
+          if (parsed.search) {
+            // Also try without query string
+            const escapedPath = parsed.pathname.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            html = html.replace(
+              new RegExp(`href=["']${escapedPath}["']`, "g"),
+              `href="${localHref}"`
+            );
+          }
+        } catch {
+          // Invalid URL — skip pathname match
+        }
       }
     }
 
@@ -390,24 +428,42 @@ async function main() {
       if (css.url === "(inline)") {
         html = html.replace(
           "</head>",
-          `<link rel="stylesheet" href="/sandbox/${slug}/css/${css.filename}">\n</head>`
+          `<link rel="stylesheet" href="css/${css.filename}">\n</head>`
         );
       }
     }
 
-    // Rewrite font URLs in captured CSS files
+    // Rewrite font URLs in captured CSS files (dual-match: full URL + pathname)
     for (const font of pageFonts) {
       for (const css of interceptedCss) {
+        const localFont = `../fonts/${font.filename}`;
+
+        // Match full URL
         if (css.body.includes(font.url)) {
-          css.body = css.body.replace(
-            new RegExp(
-              font.url.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-              "g"
-            ),
-            `/sandbox/${slug}/fonts/${font.filename}`
-          );
+          css.body = css.body.replaceAll(font.url, localFont);
         }
+
+        // Match pathname (same-origin fonts use relative paths in CSS)
+        try {
+          const pathname = new URL(font.url).pathname;
+          if (css.body.includes(pathname)) {
+            const escapedPath = pathname.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            css.body = css.body.replace(
+              new RegExp(`url\\(["']?${escapedPath}["']?\\)`, "g"),
+              `url("${localFont}")`
+            );
+          }
+        } catch {}
       }
+    }
+
+    // Rewrite remaining absolute url() references in CSS to point to origin server
+    const originUrl = new URL(homeUrl).origin;
+    for (const css of interceptedCss) {
+      css.body = css.body.replace(
+        /url\(["']?(\/(?!sandbox\/)[\w/._-]+)["']?\)/g,
+        (match, pathname) => `url("${originUrl}${pathname}")`
+      );
     }
 
     // Save HTML

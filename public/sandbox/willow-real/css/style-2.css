@@ -1,7 +1,67 @@
-.Tonia img {
-  height: 250px;       /* choose the uniform height you want */
-  width: auto;         /* let the width scale proportionally */
-  object-fit: cover;   /* crop edges to fill if needed */
-  display: block;
-  margin: 0 auto;      /* centers them since you used img-center */
-}
+/*
+ *  growl-container styles
+ */
+.growl-container.growl-fixed {
+  position: fixed;
+  float: right;
+  width: 90%;
+  max-width: 400px;
+  z-index: 9999; }
+
+.growl-container.growl-fixed.top-right {
+  top: 10px;
+  right: 15px; }
+
+.growl-container.growl-fixed.bottom-right {
+  bottom: 10px;
+  right: 15px; }
+
+.growl-container.growl-fixed.top-left {
+  top: 10px;
+  left: 15px; }
+
+.growl-container.growl-fixed.bottom-left {
+  bottom: 10px;
+  left: 15px; }
+
+.growl-container.growl-fixed.top-center {
+  top: 10px;
+  left: 50%;
+  margin-left: -200px; }
+
+.growl-container.growl-fixed.bottom-center {
+  bottom: 10px;
+  left: 50%;
+  margin-left: -200px; }
+
+.growl-container.growl-fixed.middle-center {
+  bottom: 50%;
+  left: 50%;
+  margin-top: -50px; }
+
+/*
+ * growl-item styles
+ */
+.growl-container > .growl-item {
+  padding: 10px;
+  padding-right: 35px;
+  margin-bottom: 10px;
+  cursor: pointer; }
+
+.growl-container > button {
+  border: none;
+  outline: none; }
+
+.growl-container > div.growl-item {
+  background-position: 12px center;
+  background-repeat: no-repeat; }
+
+/*
+ * growl-title styles
+ */
+.growl-title {
+  font-size: 16px; }
+
+.growl-item.icon > .growl-title {
+  /*margin: 0 0 0 40px;*/ }
+

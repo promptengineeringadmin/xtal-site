@@ -13495,6 +13495,10 @@ body.mce-content-body .serif { font-family: "Playfair Display", serif; }
 
 /* --- next inline sheet --- */
 
+@import url("https://fonts.googleapis.com/css2?family=Manrope:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800&display=swap");
+
+/* --- next inline sheet --- */
+
 .cky-overlay { background: rgb(0, 0, 0); opacity: 0.4; position: fixed; top: 0px; left: 0px; width: 100%; height: 100%; z-index: 99999999; }
 .cky-hide { display: none; }
 .cky-btn-revisit-wrapper { display: flex; align-items: center; justify-content: center; background: rgb(0, 86, 167); width: 45px; height: 45px; border-radius: 50%; position: fixed; z-index: 999999; cursor: pointer; }

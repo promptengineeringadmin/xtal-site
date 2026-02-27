@@ -1,0 +1,221 @@
+.max-w-280 {
+  max-width: 280px; }
+
+.retailer-container-wrap {
+  width: 100%; }
+
+.retailer-nav-col, .retailer-content-col {
+  width: 100%;
+  display: block; }
+
+@media screen and (min-width: 768px) {
+  .retailer-nav-col {
+    width: 185px;
+    display: inline-block; }
+  .retailer-content-col {
+    width: calc(100% - 200px);
+    display: inline-block;
+    margin-left: 15px; } }
+
+.retailer-nav-desktop-header {
+  padding: 7px 15px 8px; }
+
+.retailer-dash-wrap .panel-default .panel-heading,
+.retailer-dash-wrap thead {
+  background-color: #f8f8f8; }
+
+.retailer-dash-wrap .table {
+  border: 1px solid #ddd; }
+
+.retailer-dash-btn-box .btn {
+  margin-right: auto;
+  margin-left: auto; }
+
+retailer-requests .credit-approved,
+customer-dashboard-toolbar .credit-approved {
+  color: #2c91c9; }
+
+retailer-requests .request,
+retailer-requests .in-progress,
+retailer-requests .pending,
+retailer-requests .customer-pending,
+retailer-requests .pending-customer,
+retailer-requests .application-complete,
+retailer-requests .rep-assigned,
+retailer-requests .rep-approved,
+retailer-requests .rep-pre-approved,
+customer-dashboard-toolbar .request,
+customer-dashboard-toolbar .in-progress,
+customer-dashboard-toolbar .pending,
+customer-dashboard-toolbar .customer-pending,
+customer-dashboard-toolbar .pending-customer,
+customer-dashboard-toolbar .application-complete,
+customer-dashboard-toolbar .rep-assigned,
+customer-dashboard-toolbar .rep-approved,
+customer-dashboard-toolbar .rep-pre-approved {
+  color: #f8ac59; }
+
+retailer-requests .credit-declined,
+retailer-requests .rep-declined,
+retailer-requests .not-approved,
+customer-dashboard-toolbar .credit-declined,
+customer-dashboard-toolbar .rep-declined,
+customer-dashboard-toolbar .not-approved {
+  color: #e80019; }
+
+retailer-requests .completed,
+customer-dashboard-toolbar .completed {
+  color: #2b9400; }
+
+/* RETAILER AREA DESKTOP LEFT NAV */
+.claim-explanation {
+  font-weight: bold;
+  margin: 0; }
+
+.rep-image {
+  max-height: 100px; }
+
+#retailer-nav-desktop {
+  border: solid 1px; }
+
+#retailer-nav-desktop .nav-stacked > li {
+  margin-top: 0; }
+
+#retailer-nav-desktop .nav-stacked > li {
+  border-top: solid 1px; }
+
+#retailer-nav-desktop .nav-pills > li > a {
+  border-radius: 0; }
+
+/* RETAILER DASHBOARD */
+div[class*="retailer-dash-box-"] {
+  padding: 10px; }
+
+.retailer-dash-box-1 .icon-box .fa {
+  font-size: 40px; }
+
+.box-1-line-1 {
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 1px; }
+
+@media (max-width: 991px) {
+  .box-1-line-1 {
+    margin-top: 6px; }
+  .box-1-line-1, .box-1-line-2 {
+    text-align: center; } }
+
+.box-3-number {
+  font-size: 38px;
+  font-weight: 600;
+  line-height: 1.1; }
+
+.box-3-icon, .box-3-date, .box-3-text {
+  font-size: 28px; }
+
+.box-3-line-1 {
+  font-size: 16px;
+  font-weight: 600; }
+
+.box-3-line-2 {
+  font-size: 11px; }
+
+.retailer-invoices-dashboard-heading {
+  font-size: 30px;
+  font-weight: 600;
+  margin-bottom: 10px; }
+
+@media (max-width: 767px) {
+  .retailer-invoices-dashboard-heading {
+    font-size: 25px; } }
+
+.retailer-invoices-dashboard-heading:after {
+  content: "";
+  position: absolute;
+  bottom: 5px;
+  left: calc(50% - 125px);
+  width: 250px;
+  height: 2px;
+  background-color: #333; }
+
+@media (min-width: 768px) {
+  .retailer-invoices-dashboard-heading:after {
+    left: calc(50% - 15vw);
+    width: 30vw; } }
+
+.box-4-header {
+  font-weight: 800;
+  font-style: italic;
+  font-size: 25px;
+  letter-spacing: 1px;
+  margin-bottom: 5px; }
+
+.box-4-number {
+  font-size: 50px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  line-height: 1.1; }
+
+.box-4-icon {
+  font-size: 38px; }
+
+.box-4-line-1 {
+  font-size: 18px;
+  font-weight: 600; }
+
+.box-4-line-2 {
+  font-size: 14px; }
+
+/* TABLES */
+img.thumb-50 {
+  max-width: 50px !important; }
+
+retailer-container table th {
+  white-space: nowrap; }
+
+retailer-container table {
+  font-size: 80%; }
+
+retailer-container td.order-list-actions {
+  min-width: 125px; }
+
+retailer-container td.invoice-list-actions {
+  min-width: 280px; }
+
+retailer-container td.invoice-list-actions-first {
+  min-width: 85px; }
+
+retailer-container td.return-list-entry-number {
+  max-width: 100px; }
+
+retailer-container td.payment-list-actions {
+  min-width: 30px; }
+
+/* ADDRESS SECTIONS */
+@media (max-width: 767px) {
+  .address .address-line:last-of-type {
+    margin-bottom: 2rem; } }
+
+/* FILTERS COLUMN */
+retailer-container auto-query-criteria .panel {
+  margin-bottom: 8px; }
+
+retailer-container auto-query-criteria .panel-heading {
+  padding: 4px; }
+
+retailer-container auto-query-criteria .panel-body {
+  padding: 8px 15px 0; }
+
+retailer-container auto-query-criteria .panel-body label {
+  font-size: 90%; }
+
+.twos024 > retailer-container .input-group {
+  max-width: 400px; }
+
+retailer-toolbar .inline-block {
+  vertical-align: bottom; }
+
+.this-can-be-overridden {
+  background-color: #000; }
+
+
