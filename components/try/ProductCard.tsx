@@ -173,7 +173,9 @@ export default function ProductCard({ product, score, query, onExplain, onReport
               <ExplainLoadingIndicator />
             ) : (
               <>
-                {explanation}
+                {explanation?.split('\n\n').map((para, i) => (
+                  <p key={i} className={i > 0 ? 'mt-1.5' : ''}>{para}</p>
+                ))}
                 <div className="flex items-center gap-3 mt-2">
                   {onWellPut && (
                     <button
