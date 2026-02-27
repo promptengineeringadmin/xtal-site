@@ -174,6 +174,11 @@ async function pollTaskStatus(
       })
 
       if (!res.ok) {
+        // 404 = backend cleaned up the task entry (likely completed)
+        if (res.status === 404) {
+          log(`  Task ${taskId} returned 404 — task entry cleaned up, treating as completed`)
+          return { status: "completed", productsProcessed: undefined }
+        }
         consecutiveErrors++
         log(`  Task poll error: HTTP ${res.status} (${consecutiveErrors} consecutive errors)`)
         if (consecutiveErrors >= 10) {
@@ -266,7 +271,7 @@ async function collectionAlreadyIngested(slug: string): Promise<boolean> {
     const res = await fetch(`${backendUrl}/api/search`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query: "test", collection: slug, limit: 1 }),
+      body: JSON.stringify({ query: "*", collection: slug, limit: 1 }),
       signal: AbortSignal.timeout(10_000),
     })
     if (!res.ok) return false
