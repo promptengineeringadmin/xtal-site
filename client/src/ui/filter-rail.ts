@@ -27,10 +27,10 @@ const FACET_LABELS: Record<string, string> = {
   color: "Color",
 }
 
-const DEFAULT_EXPANDED = new Set([
+const DEFAULT_EXPANDED = [
   "product-subcategory", "brand", "vendor", "strain-type",
   "terpene", "effect", "format", "material", "use-case", "style",
-])
+]
 
 const INITIALLY_VISIBLE = 5
 
@@ -87,7 +87,7 @@ export class FilterRail {
   private drawerFooterBtn: HTMLElement
 
   // State
-  private expandedSections = new Set<string>(["price", ...DEFAULT_EXPANDED])
+  private expandedSections = new Set<string>(["price"].concat(DEFAULT_EXPANDED))
   private showMore: Record<string, boolean> = {}
   private drawerOpen = false
   private savedBodyOverflow = ""

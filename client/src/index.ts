@@ -375,7 +375,7 @@ function boot() {
           }
 
           /** Build card elements from results */
-          function buildCards(results: Product[]): HTMLElement[] {
+          const buildCards = (results: Product[]): HTMLElement[] => {
             return results.map((product) => {
               if (cardTemplate) {
                 return renderTemplatedCard(
