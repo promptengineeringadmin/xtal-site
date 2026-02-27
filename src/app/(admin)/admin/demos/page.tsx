@@ -16,10 +16,27 @@ import {
   Save,
   RotateCcw,
 } from "lucide-react"
+import { Search, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react"
 import { useCollection } from "@/lib/admin/CollectionContext"
-import { COLLECTIONS, type CollectionConfig } from "@/lib/admin/collections"
+import { COLLECTIONS, type CollectionConfig, type Vertical } from "@/lib/admin/collections"
 
 const HARDCODED_IDS = new Set(COLLECTIONS.map((c) => c.id))
+
+const VERTICALS: { value: Vertical | "all"; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "home", label: "Home" },
+  { value: "beauty", label: "Beauty" },
+  { value: "electronics", label: "Electronics" },
+  { value: "food", label: "Food" },
+  { value: "outdoor", label: "Outdoor" },
+  { value: "pet", label: "Pet" },
+  { value: "cannabis", label: "Cannabis" },
+  { value: "apparel", label: "Apparel" },
+  { value: "niche", label: "Niche" },
+  { value: "general", label: "General" },
+]
+
+const ITEMS_PER_PAGE = 12
 
 // Known static routes (not through /demo/[slug])
 const STATIC_ROUTES: Record<string, string> = {
@@ -56,6 +73,47 @@ export default function DemosPage() {
   const { collections, refreshCollections } = useCollection()
   const [showForm, setShowForm] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [activeVertical, setActiveVertical] = useState<Vertical | "all">("all")
+  const [sortBy, setSortBy] = useState<"name" | "productCount">("name")
+  const [page, setPage] = useState(1)
+
+  // Filter collections
+  const filtered = collections.filter((c) => {
+    const q = searchQuery.toLowerCase()
+    if (q && !c.label.toLowerCase().includes(q) && !c.description.toLowerCase().includes(q) && !c.id.toLowerCase().includes(q)) {
+      return false
+    }
+    if (activeVertical !== "all" && c.vertical !== activeVertical) {
+      return false
+    }
+    return true
+  })
+
+  // Sort
+  const sorted = [...filtered].sort((a, b) => {
+    if (sortBy === "productCount") {
+      return (b.productCount ?? 0) - (a.productCount ?? 0)
+    }
+    return a.label.localeCompare(b.label)
+  })
+
+  // Separate pinned and rest
+  const pinned = sorted.filter((c) => c.pinned)
+  const rest = sorted.filter((c) => !c.pinned)
+
+  // Paginate the rest (pinned always shown)
+  const totalPages = Math.max(1, Math.ceil(rest.length / ITEMS_PER_PAGE))
+  const safePage = Math.min(page, totalPages)
+  const paginatedRest = rest.slice(
+    (safePage - 1) * ITEMS_PER_PAGE,
+    safePage * ITEMS_PER_PAGE,
+  )
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1)
+  }, [searchQuery, activeVertical, sortBy])
 
   const handleDelete = async (id: string) => {
     if (!confirm(`Remove "${id}" from the demo list?`)) return
@@ -112,18 +170,142 @@ export default function DemosPage() {
         />
       )}
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {collections.map((c) => (
-          <DemoCard
-            key={c.id}
-            collection={c}
-            isBuiltIn={HARDCODED_IDS.has(c.id)}
-            isDeleting={deleting === c.id}
-            onDelete={() => handleDelete(c.id)}
-            onUpdate={refreshCollections}
+      {/* Search + Sort bar */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+        <div className="relative flex-1">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search demos..."
+            className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-xtal-navy/50 transition-colors"
           />
+        </div>
+        <div className="relative">
+          <ArrowUpDown size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as "name" | "productCount")}
+            className="appearance-none pl-8 pr-8 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:border-xtal-navy/50 cursor-pointer"
+          >
+            <option value="name">Name A-Z</option>
+            <option value="productCount">Product Count</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Vertical filter tabs */}
+      <div className="flex gap-1 mb-5 overflow-x-auto pb-1">
+        {VERTICALS.map((v) => (
+          <button
+            key={v.value}
+            onClick={() => setActiveVertical(v.value)}
+            className={`px-3 py-1.5 text-xs font-medium rounded-full whitespace-nowrap transition-colors ${
+              activeVertical === v.value
+                ? "bg-xtal-navy text-white"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            }`}
+          >
+            {v.label}
+          </button>
         ))}
       </div>
+
+      {/* Results count */}
+      <p className="text-xs text-slate-400 mb-3">
+        {sorted.length} collection{sorted.length !== 1 ? "s" : ""}
+        {searchQuery && ` matching "${searchQuery}"`}
+      </p>
+
+      {/* Curated/pinned section */}
+      {pinned.length > 0 && !searchQuery && (
+        <>
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+            Curated
+          </h2>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
+            {pinned.map((c) => (
+              <DemoCard
+                key={c.id}
+                collection={c}
+                isBuiltIn={HARDCODED_IDS.has(c.id)}
+                isDeleting={deleting === c.id}
+                onDelete={() => handleDelete(c.id)}
+                onUpdate={refreshCollections}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Imported / rest section */}
+      {paginatedRest.length > 0 && (
+        <>
+          {pinned.length > 0 && !searchQuery && (
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+              Imported
+            </h2>
+          )}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {paginatedRest.map((c) => (
+              <DemoCard
+                key={c.id}
+                collection={c}
+                isBuiltIn={HARDCODED_IDS.has(c.id)}
+                isDeleting={deleting === c.id}
+                onDelete={() => handleDelete(c.id)}
+                onUpdate={refreshCollections}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* When searching, show pinned inline with rest */}
+      {searchQuery && pinned.length > 0 && paginatedRest.length === 0 && rest.length === 0 && (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {pinned.map((c) => (
+            <DemoCard
+              key={c.id}
+              collection={c}
+              isBuiltIn={HARDCODED_IDS.has(c.id)}
+              isDeleting={deleting === c.id}
+              onDelete={() => handleDelete(c.id)}
+              onUpdate={refreshCollections}
+            />
+          ))}
+        </div>
+      )}
+
+      {sorted.length === 0 && (
+        <div className="text-center py-12 text-sm text-slate-400">
+          No collections found
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-6">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={safePage <= 1}
+            className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <span className="text-sm text-slate-500 px-3">
+            {safePage} / {totalPages}
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={safePage >= totalPages}
+            className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -215,6 +397,11 @@ function DemoCard({
           <h3 className="font-semibold text-slate-900">{collection.label}</h3>
         </div>
         <div className="flex items-center gap-1.5">
+          {collection.vertical && (
+            <span className="text-[9px] font-semibold uppercase tracking-wider bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">
+              {collection.vertical}
+            </span>
+          )}
           {hasSuggestions && (
             <span className="text-[10px] font-medium bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full">
               {collection.suggestions!.length} queries
@@ -229,7 +416,14 @@ function DemoCard({
       </div>
 
       <p className="text-xs text-slate-400 mb-1 font-mono">{collection.id}</p>
-      <p className="text-sm text-slate-500 mb-3">{collection.description}</p>
+      <div className="flex items-center gap-2 mb-3">
+        <p className="text-sm text-slate-500">{collection.description}</p>
+        {collection.productCount != null && (
+          <span className="text-[10px] text-slate-400 whitespace-nowrap">
+            {collection.productCount.toLocaleString()} products
+          </span>
+        )}
+      </div>
 
       {/* Suggestions editor */}
       {editing && (

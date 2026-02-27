@@ -6,10 +6,54 @@ import {
   updateDemoCollection,
 } from "@/lib/admin/demo-collections"
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const collections = await getAllCollections()
-    return NextResponse.json({ collections })
+    const { searchParams } = new URL(request.url)
+    const search = searchParams.get("search")?.toLowerCase()
+    const vertical = searchParams.get("vertical")
+    const source = searchParams.get("source")
+    const sort = searchParams.get("sort") || "name"
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10))
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "0", 10)))
+
+    let collections = await getAllCollections()
+
+    // Filter
+    if (search) {
+      collections = collections.filter(
+        (c) =>
+          c.label.toLowerCase().includes(search) ||
+          c.description.toLowerCase().includes(search) ||
+          c.id.toLowerCase().includes(search),
+      )
+    }
+    if (vertical) {
+      collections = collections.filter((c) => c.vertical === vertical)
+    }
+    if (source) {
+      collections = collections.filter((c) => c.source === source)
+    }
+
+    // Sort
+    collections.sort((a, b) => {
+      switch (sort) {
+        case "productCount":
+          return (b.productCount ?? 0) - (a.productCount ?? 0)
+        case "name":
+        default:
+          return a.label.localeCompare(b.label)
+      }
+    })
+
+    const total = collections.length
+
+    // Paginate (only if limit > 0)
+    if (limit > 0) {
+      const start = (page - 1) * limit
+      collections = collections.slice(start, start + limit)
+    }
+
+    return NextResponse.json({ collections, total, page, limit })
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : "Unknown error"
     return NextResponse.json({ error: msg }, { status: 500 })
