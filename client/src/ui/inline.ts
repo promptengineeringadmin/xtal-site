@@ -47,35 +47,97 @@ export class InlineRenderer {
     return this.railSlot
   }
 
-  showLoading() {
+  private loadingPhraseTimer: ReturnType<typeof setInterval> | null = null
+
+  showLoading(query?: string) {
     this.captureOriginal()
+    if (this.loadingPhraseTimer) {
+      clearInterval(this.loadingPhraseTimer)
+      this.loadingPhraseTimer = null
+    }
     const slot = this.gridSlot || this.target
     slot.innerHTML = ""
-
-    const spinner = document.createElement("div")
-    spinner.style.cssText =
-      "display:flex;align-items:center;justify-content:center;padding:60px 20px;gap:8px;color:#888;font-size:14px;"
-    const dot = document.createElement("div")
-    dot.style.cssText =
-      "width:16px;height:16px;border:2px solid #ccc;border-top-color:#555;border-radius:50%;animation:xtal-inline-spin .6s linear infinite;"
-    const label = document.createElement("span")
-    label.textContent = "Searching..."
-    spinner.appendChild(dot)
-    spinner.appendChild(label)
 
     // Inject keyframes if not already present
     if (!document.getElementById("xtal-inline-keyframes")) {
       const style = document.createElement("style")
       style.id = "xtal-inline-keyframes"
-      style.textContent =
-        "@keyframes xtal-inline-spin{to{transform:rotate(360deg)}}"
+      style.textContent = [
+        "@keyframes xtal-inline-spin{to{transform:rotate(360deg)}}",
+        "@keyframes xtal-pulse{0%,100%{opacity:1}50%{opacity:0.4}}",
+      ].join("")
       document.head.appendChild(style)
     }
 
-    slot.appendChild(spinner)
+    const wrap = document.createElement("div")
+    wrap.style.cssText =
+      "display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;"
+
+    // Spinner ring with sparkle icon
+    const ring = document.createElement("div")
+    ring.style.cssText =
+      "position:relative;width:48px;height:48px;margin-bottom:12px;"
+    const track = document.createElement("div")
+    track.style.cssText =
+      "position:absolute;inset:0;border:3px solid #e5e5e5;border-radius:50%;"
+    const spinner = document.createElement("div")
+    spinner.style.cssText =
+      "position:absolute;inset:0;border:3px solid transparent;border-top-color:#1d1d1b;border-radius:50%;animation:xtal-inline-spin .8s linear infinite;"
+    const sparkle = document.createElement("div")
+    sparkle.style.cssText =
+      "position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"
+    sparkle.innerHTML =
+      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1d1d1b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:xtal-pulse 2s ease-in-out infinite"><path d="M12 3l1.91 5.49L19.4 10.4l-5.49 1.91L12 17.8l-1.91-5.49L4.6 10.4l5.49-1.91z"/><path d="M19 2l.5 1.5L21 4l-1.5.5L19 6l-.5-1.5L17 4l1.5-.5z"/><path d="M5 18l.5 1.5L7 20l-1.5.5L5 22l-.5-1.5L3 20l1.5-.5z"/></svg>'
+    ring.appendChild(track)
+    ring.appendChild(spinner)
+    ring.appendChild(sparkle)
+    wrap.appendChild(ring)
+
+    // Query echo
+    if (query) {
+      const displayQuery = query.length > 80 ? query.slice(0, 77) + "…" : query
+      const queryEl = document.createElement("p")
+      queryEl.style.cssText =
+        "margin:0 0 8px 0;font-size:14px;color:#555;font-style:italic;text-align:center;max-width:320px;"
+      queryEl.textContent = `\u201C${displayQuery}\u201D`
+      wrap.appendChild(queryEl)
+    }
+
+    // Cycling status phrase
+    const phrases = [
+      "Analyzing search intent\u2026",
+      "Finding best matches\u2026",
+      "Ranking results\u2026",
+      "Almost there\u2026",
+    ]
+    const phraseEl = document.createElement("p")
+    phraseEl.style.cssText =
+      "margin:0;font-size:13px;color:#999;text-align:center;transition:opacity 0.3s;"
+    phraseEl.textContent = phrases[0]
+    wrap.appendChild(phraseEl)
+
+    let idx = 0
+    this.loadingPhraseTimer = setInterval(() => {
+      phraseEl.style.opacity = "0"
+      setTimeout(() => {
+        idx = (idx + 1) % phrases.length
+        phraseEl.textContent = phrases[idx]
+        phraseEl.style.opacity = "1"
+      }, 300)
+    }, 2500)
+
+    slot.appendChild(wrap)
+  }
+
+  private clearPhraseTimer() {
+    if (this.loadingPhraseTimer) {
+      clearInterval(this.loadingPhraseTimer)
+      this.loadingPhraseTimer = null
+    }
   }
 
   renderCards(cards: HTMLElement[]) {
+    this.clearPhraseTimer()
     const slot = this.gridSlot || this.target
     slot.innerHTML = ""
     const grid = document.createElement("div")
@@ -87,6 +149,7 @@ export class InlineRenderer {
   }
 
   renderEmpty(query: string) {
+    this.clearPhraseTimer()
     const slot = this.gridSlot || this.target
     slot.innerHTML = ""
     const msg = document.createElement("div")
@@ -107,6 +170,7 @@ export class InlineRenderer {
   }
 
   destroy() {
+    this.clearPhraseTimer()
     this.restore()
     const style = document.getElementById("xtal-inline-keyframes")
     if (style) style.remove()

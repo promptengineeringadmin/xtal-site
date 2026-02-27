@@ -147,21 +147,32 @@ function injectFilterCSS() {
 
 /* ── Mobile: hide rail, show FAB + drawer ── */
 .xtal-filter-fab {
-  display: none; position: fixed; bottom: 24px; left: 50%;
-  transform: translateX(-50%); z-index: 9990;
-  align-items: center; gap: 8px; padding: 12px 20px; border-radius: 9999px;
-  background: #1d1d1b; color: #fff; border: none; cursor: pointer;
-  font-family: "Manrope", serif; font-size: 14px; font-weight: 600;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  display: none; position: fixed;
+  bottom: max(24px, env(safe-area-inset-bottom, 0px) + 16px);
+  left: 50%; transform: translateX(-50%); z-index: 2147483647;
+  align-items: center; justify-content: center; gap: 8px;
+  padding: 14px 24px; border-radius: 9999px;
+  background: #1d1d1b; color: #fff;
+  border: 1px solid rgba(255,255,255,0.15); cursor: pointer;
+  font-family: "Manrope", system-ui, -apple-system, sans-serif;
+  font-size: 15px; font-weight: 600;
+  line-height: 1; letter-spacing: 0.3px; text-transform: none;
+  box-sizing: border-box;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15), 0 12px 28px rgba(0,0,0,0.3);
 }
-.xtal-filter-fab:hover { transform: translateX(-50%) scale(1.05); }
-.xtal-fab-text { margin: 0; }
+.xtal-filter-fab:active { transform: translateX(-50%) scale(0.96); transition: transform 0.1s ease; }
+.xtal-fab-text { margin: 0; padding: 0; display: block; }
 .xtal-fab-badge {
   display: flex; align-items: center; justify-content: center;
-  width: 20px; height: 20px; border-radius: 50%;
-  background: #fff; color: #1d1d1b; font-size: 11px; font-weight: 700;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #fff; color: #1d1d1b; font-size: 12px; font-weight: 700;
+  line-height: 1; margin-left: 2px;
 }
 .xtal-fab-hidden { display: none !important; }
+@keyframes xtalFabSlideUp {
+  0% { opacity: 0; transform: translate(-50%, 150%); }
+  100% { opacity: 1; transform: translate(-50%, 0); }
+}
 
 .xtal-backdrop {
   display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
@@ -207,7 +218,10 @@ function injectFilterCSS() {
 @media (max-width: 767px) {
   .xtal-filter-rail { display: none; }
   .xtal-layout { display: block !important; }
-  .xtal-filter-fab { display: flex; }
+  .xtal-filter-fab {
+    display: flex !important;
+    animation: xtalFabSlideUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
+  }
   .xtal-backdrop { display: block; }
   .xtal-filter-drawer { display: flex; }
 }
@@ -412,7 +426,7 @@ function boot() {
             if (!searchContext) return
             if (filterDebounceTimer) clearTimeout(filterDebounceTimer)
             filterDebounceTimer = setTimeout(() => {
-              inline.showLoading()
+              inline.showLoading(lastQuery)
               api
                 .searchFiltered(lastQuery, searchContext!, {
                   facetFilters,
@@ -452,7 +466,7 @@ function boot() {
             filterRail?.closeDrawer()
             filterRail?.resetState()
 
-            inline.showLoading()
+            inline.showLoading(query)
 
             api
               .searchFull(query, 24)
