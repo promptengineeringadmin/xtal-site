@@ -1,9 +1,8 @@
 /**
  * Ingest helper — Upload a JSONL catalog to XTAL backend
  *
- * Reads a JSONL catalog file, converts to CSV (the format the backend expects),
- * authenticates via Cognito, uploads via POST /api/demo/ingest, and polls
- * until the background task completes.
+ * Reads a JSONL catalog file, authenticates via Cognito, uploads directly
+ * via POST /api/demo/ingest, and polls until the background task completes.
  *
  * Optionally registers the collection in Redis with metadata.
  */
@@ -14,22 +13,6 @@ import { Redis } from "@upstash/redis"
 import type { Vertical, CollectionSource, CollectionConfig } from "../../lib/admin/collections"
 
 // ── Types ────────────────────────────────────────────────────
-
-interface JnlProduct {
-  id: string
-  title: string
-  description: string
-  vendor: string
-  product_type: string
-  tags: string[]
-  price: number
-  compare_at_price?: number | null
-  image_url: string | null
-  product_url: string
-  handle: string
-  available: boolean
-  sku: string
-}
 
 interface IngestOptions {
   slug: string
@@ -101,64 +84,10 @@ async function getCognitoToken(): Promise<string> {
   return cachedToken!
 }
 
-// ── JSONL → CSV conversion ───────────────────────────────────
+// ── Upload JSONL to backend ──────────────────────────────────
 
-function escapeCsvField(value: string): string {
-  if (
-    value.includes(",") ||
-    value.includes('"') ||
-    value.includes("\n") ||
-    value.includes("\r")
-  ) {
-    return '"' + value.replace(/"/g, '""') + '"'
-  }
-  return value
-}
-
-function jsonlToCsv(jsonlPath: string): string {
-  const lines = fs
-    .readFileSync(jsonlPath, "utf-8")
-    .split("\n")
-    .filter(Boolean)
-
-  const headers = [
-    "Title",
-    "URL handle",
-    "Vendor",
-    "Type",
-    "Tags",
-    "Body (HTML)",
-    "Variant SKU",
-    "Variant Price",
-    "Image Src",
-  ]
-
-  const rows = [headers.join(",")]
-
-  for (const line of lines) {
-    const p: JnlProduct = JSON.parse(line)
-    rows.push(
-      [
-        escapeCsvField(p.title),
-        escapeCsvField(p.handle),
-        escapeCsvField(p.vendor),
-        escapeCsvField(p.product_type),
-        escapeCsvField(p.tags.join(", ")),
-        escapeCsvField(p.description),
-        escapeCsvField(p.sku),
-        String(p.price),
-        escapeCsvField(p.image_url || ""),
-      ].join(","),
-    )
-  }
-
-  return rows.join("\n")
-}
-
-// ── Upload to backend ────────────────────────────────────────
-
-async function uploadCsv(
-  csvContent: string,
+async function uploadJsonl(
+  jsonlPath: string,
   collectionName: string,
   label: string,
 ): Promise<string> {
@@ -167,34 +96,60 @@ async function uploadCsv(
     throw new Error("Missing env var: XTAL_BACKEND_URL")
   }
 
-  const token = await getCognitoToken()
+  const MAX_RETRIES = 3
+  const BACKOFF_MS = [15_000, 30_000, 60_000]
 
-  // Create a Blob/File from CSV content
-  const csvBlob = new Blob([csvContent], { type: "text/csv" })
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      const token = await getCognitoToken()
 
-  const form = new FormData()
-  form.append("file", csvBlob, `${collectionName}.csv`)
-  form.append("collection_name", collectionName)
-  form.append("label", label)
+      const content = fs.readFileSync(jsonlPath, "utf-8")
+      const jsonlBlob = new Blob([content], { type: "application/x-ndjson" })
+      const form = new FormData()
+      form.append("file", jsonlBlob, `${collectionName}.jsonl`)
+      form.append("collection_name", collectionName)
+      form.append("label", label)
 
-  log(`Uploading to ${backendUrl}/api/demo/ingest (collection: ${collectionName})...`)
+      log(`Uploading JSONL to ${backendUrl}/api/demo/ingest (collection: ${collectionName}, attempt ${attempt + 1}/${MAX_RETRIES})...`)
 
-  const res = await fetch(`${backendUrl}/api/demo/ingest`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    body: form,
-    signal: AbortSignal.timeout(60_000),
-  })
+      const res = await fetch(`${backendUrl}/api/demo/ingest`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: form,
+        signal: AbortSignal.timeout(300_000),
+      })
 
-  if (!res.ok) {
-    const text = await res.text()
-    throw new Error(`Backend ingest error ${res.status}: ${text}`)
+      if (!res.ok) {
+        const text = await res.text()
+        const status = res.status
+        // Retry on 502/503 (transient backend errors)
+        if ((status === 502 || status === 503) && attempt < MAX_RETRIES - 1) {
+          const delay = BACKOFF_MS[attempt]
+          log(`  Upload got ${status}, retrying in ${delay / 1000}s...`)
+          await new Promise((r) => setTimeout(r, delay))
+          continue
+        }
+        throw new Error(`Backend ingest error ${status}: ${text}`)
+      }
+
+      const data = await res.json()
+      return data.task_id
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      // Retry on timeout or network errors
+      if (attempt < MAX_RETRIES - 1 && (msg.includes("timeout") || msg.includes("ECONNREFUSED") || msg.includes("fetch failed"))) {
+        const delay = BACKOFF_MS[attempt]
+        log(`  Upload failed (${msg}), retrying in ${delay / 1000}s...`)
+        await new Promise((r) => setTimeout(r, delay))
+        continue
+      }
+      throw err
+    }
   }
 
-  const data = await res.json()
-  return data.task_id
+  throw new Error(`Upload failed after ${MAX_RETRIES} attempts`)
 }
 
 // ── Poll task status ─────────────────────────────────────────
@@ -207,36 +162,56 @@ async function pollTaskStatus(
   const startTime = Date.now()
   const pollInterval = 30_000 // 30 seconds
 
+  let consecutiveErrors = 0
+
   while (Date.now() - startTime < timeoutMs) {
-    const token = await getCognitoToken()
+    try {
+      const token = await getCognitoToken()
 
-    const res = await fetch(`${backendUrl}/api/demo/task/${taskId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-      signal: AbortSignal.timeout(10_000),
-    })
+      const res = await fetch(`${backendUrl}/api/demo/task/${taskId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        signal: AbortSignal.timeout(15_000),
+      })
 
-    if (!res.ok) {
-      log(`  Task poll error: HTTP ${res.status}`)
-      await new Promise((r) => setTimeout(r, pollInterval))
-      continue
-    }
+      if (!res.ok) {
+        consecutiveErrors++
+        log(`  Task poll error: HTTP ${res.status} (${consecutiveErrors} consecutive errors)`)
+        if (consecutiveErrors >= 10) {
+          throw new Error(`Task poll failed ${consecutiveErrors} consecutive times, giving up`)
+        }
+        await new Promise((r) => setTimeout(r, pollInterval))
+        continue
+      }
 
-    const data = await res.json()
-    const status = data.status || data.state || "unknown"
+      consecutiveErrors = 0
+      const data = await res.json()
+      const status = data.status || data.state || "unknown"
 
-    if (status === "completed" || status === "SUCCESS") {
-      return {
-        status: "completed",
-        productsProcessed: data.products_processed || data.result?.products_processed,
+      if (status === "completed" || status === "SUCCESS") {
+        return {
+          status: "completed",
+          productsProcessed: data.products_processed || data.result?.products_processed,
+        }
+      }
+
+      if (status === "failed" || status === "FAILURE") {
+        throw new Error(`Task failed: ${data.error || data.result?.error || "unknown"}`)
+      }
+
+      const elapsed = Math.round((Date.now() - startTime) / 1000)
+      log(`  Task ${taskId}: ${status} (${elapsed}s elapsed)`)
+    } catch (err) {
+      // Re-throw genuine task failures
+      if (err instanceof Error && err.message.startsWith("Task failed:")) throw err
+      if (err instanceof Error && err.message.includes("consecutive times")) throw err
+
+      consecutiveErrors++
+      const msg = err instanceof Error ? err.message : String(err)
+      log(`  Poll error (attempt will retry): ${msg} (${consecutiveErrors} consecutive)`)
+      if (consecutiveErrors >= 10) {
+        throw new Error(`Task poll failed ${consecutiveErrors} consecutive times: ${msg}`)
       }
     }
-
-    if (status === "failed" || status === "FAILURE") {
-      throw new Error(`Task failed: ${data.error || data.result?.error || "unknown"}`)
-    }
-
-    const elapsed = Math.round((Date.now() - startTime) / 1000)
-    log(`  Task ${taskId}: ${status} (${elapsed}s elapsed)`)
 
     await new Promise((r) => setTimeout(r, pollInterval))
   }
@@ -283,8 +258,35 @@ async function registerCollection(opts: IngestOptions): Promise<void> {
 
 // ── Main export ──────────────────────────────────────────────
 
+async function collectionAlreadyIngested(slug: string): Promise<boolean> {
+  const backendUrl = process.env.XTAL_BACKEND_URL
+  if (!backendUrl) return false
+
+  try {
+    const res = await fetch(`${backendUrl}/api/search`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: "test", collection: slug, limit: 1 }),
+      signal: AbortSignal.timeout(10_000),
+    })
+    if (!res.ok) return false
+    const data = await res.json()
+    return (data.results?.length ?? 0) > 0
+  } catch {
+    return false
+  }
+}
+
 export async function ingestToXtal(opts: IngestOptions): Promise<IngestResult> {
   log(`Ingesting ${opts.slug} from ${opts.jsonlPath}`)
+
+  // Check if already ingested (saves BatchPipeline AI costs)
+  const alreadyExists = await collectionAlreadyIngested(opts.slug)
+  if (alreadyExists) {
+    log(`  Collection ${opts.slug} already has data — skipping ingest`)
+    await registerCollection(opts)
+    return { taskId: null, status: "completed", productsProcessed: 0 }
+  }
 
   // Validate
   if (!fs.existsSync(opts.jsonlPath)) {
@@ -297,17 +299,8 @@ export async function ingestToXtal(opts: IngestOptions): Promise<IngestResult> {
     .filter(Boolean).length
   log(`  ${lineCount} products in JSONL`)
 
-  // Convert JSONL → CSV
-  log(`  Converting JSONL to CSV...`)
-  const csvContent = jsonlToCsv(opts.jsonlPath)
-
-  // Save CSV for debugging
-  const csvPath = opts.jsonlPath.replace(/\.jsonl$/, ".csv")
-  fs.writeFileSync(csvPath, csvContent)
-  log(`  CSV saved to ${csvPath}`)
-
-  // Upload
-  const taskId = await uploadCsv(csvContent, opts.slug, opts.label)
+  // Upload JSONL directly (no CSV conversion — backend handles JSONL natively)
+  const taskId = await uploadJsonl(opts.jsonlPath, opts.slug, opts.label)
   log(`  Upload accepted, task ID: ${taskId}`)
 
   // Poll until complete
