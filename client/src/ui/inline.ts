@@ -9,6 +9,7 @@
 export class InlineRenderer {
   private target: HTMLElement
   private originalHTML: string | null = null
+  private originalDisplay: string = ""
   private layoutEl: HTMLElement | null = null
   private railSlot: HTMLElement | null = null
   private gridSlot: HTMLElement | null = null
@@ -21,6 +22,11 @@ export class InlineRenderer {
   private captureOriginal() {
     if (this.originalHTML === null) {
       this.originalHTML = this.target.innerHTML
+      // Custom elements (e.g. <shopping-multi-view>) default to display:inline.
+      // Force block so children can expand to full width.
+      this.originalDisplay = this.target.style.display
+      this.target.style.display = "block"
+      this.target.style.width = "100%"
     }
   }
 
@@ -165,6 +171,8 @@ export class InlineRenderer {
     this.gridSlot = null
     if (this.originalHTML !== null) {
       this.target.innerHTML = this.originalHTML
+      this.target.style.display = this.originalDisplay
+      this.target.style.width = ""
       this.originalHTML = null
     }
   }
