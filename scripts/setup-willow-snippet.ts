@@ -37,7 +37,7 @@ const TEMPLATE_HTML = `<div class="product-card" data-xtal-action="view-product"
   <button class="product-cta" data-xtal-action="add-to-cart">Add To Cart</button>
 </div>`
 
-const TEMPLATE_CSS = `@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&display=swap');
+const TEMPLATE_CSS = `@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
 
 .xtal-grid {
   display: flex;
@@ -49,7 +49,7 @@ const TEMPLATE_CSS = `@import url('https://fonts.googleapis.com/css2?family=Manr
 .product-card {
   width: calc((100% - 64px) / 3);
   cursor: pointer;
-  font-family: 'Manrope', sans-serif;
+  font-family: "Manrope", serif;
   color: #1d1d1b;
 }
 .product-image {
