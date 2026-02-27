@@ -57,6 +57,9 @@ function cardTemplateKey(collection: string) {
 function productUrlPatternKey(collection: string) {
   return `admin:settings:${collection}:product_url_pattern`
 }
+function filtersEnabledKey(collection: string) {
+  return `admin:settings:${collection}:filters_enabled`
+}
 
 // ─── Query Enhancement ─────────────────────────────────────
 
@@ -354,4 +357,25 @@ export async function saveProductUrlPattern(
 ): Promise<void> {
   const kv = getRedis()
   await kv.set(productUrlPatternKey(collection), pattern)
+}
+
+// ─── Filters Enabled ────────────────────────────────────
+
+export async function getFiltersEnabled(collection: string): Promise<boolean> {
+  try {
+    const kv = getRedis()
+    const stored = await kv.get<boolean>(filtersEnabledKey(collection))
+    if (stored !== null && stored !== undefined) return stored
+  } catch {
+    // Redis unavailable
+  }
+  return false // default: disabled
+}
+
+export async function saveFiltersEnabled(
+  collection: string,
+  enabled: boolean
+): Promise<void> {
+  const kv = getRedis()
+  await kv.set(filtersEnabledKey(collection), enabled)
 }

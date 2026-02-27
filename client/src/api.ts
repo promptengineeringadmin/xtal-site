@@ -24,15 +24,19 @@ export interface Product {
   available: boolean
 }
 
+export interface SearchContext {
+  augmented_query: string
+  extracted_price_lte: number | null
+  extracted_price_gte: number | null
+  product_keyword?: string
+}
+
 export interface SearchFullResponse {
   results: Product[]
   total: number
   query_time: number
-  search_context?: {
-    augmented_query: string
-    extracted_price_lte: number | null
-    extracted_price_gte: number | null
-  }
+  search_context?: SearchContext
+  computed_facets?: Record<string, Record<string, number>>
   aspects: string[]
   aspects_enabled: boolean
 }
@@ -43,7 +47,7 @@ export interface XtalConfig {
   displayMode: string
   resultsSelector?: string
   siteUrl: string
-  features: { aspects: boolean; explain: boolean }
+  features: { aspects: boolean; explain: boolean; filters: boolean }
   cardTemplate?: {
     html: string
     css: string
@@ -95,6 +99,47 @@ export class XtalAPI {
     })
 
     if (!res.ok) throw new Error(`Search failed: ${res.status}`)
+    return res.json()
+  }
+
+  async searchFiltered(
+    query: string,
+    searchContext: SearchContext,
+    opts?: {
+      facetFilters?: Record<string, string[]>
+      priceRange?: { min?: number; max?: number } | null
+      limit?: number
+    }
+  ): Promise<SearchFullResponse> {
+    // Cancel any in-flight request (shared controller with searchFull)
+    if (this.controller) {
+      this.controller.abort()
+    }
+    this.controller = new AbortController()
+
+    const hasActiveFacets = opts?.facetFilters
+      && Object.values(opts.facetFilters).some(v => v.length > 0)
+
+    const priceRange = opts?.priceRange
+      ? { min: opts.priceRange.min, max: opts.priceRange.max }
+      : undefined
+
+    const res = await fetch(`${this.apiBase}/api/xtal/search`, {
+      method: "POST",
+      mode: "cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query,
+        collection: this.shopId,
+        search_context: searchContext,
+        limit: opts?.limit ?? 24,
+        ...(hasActiveFacets ? { facet_filters: opts!.facetFilters } : {}),
+        ...(priceRange ? { price_range: priceRange } : {}),
+      }),
+      signal: this.controller.signal,
+    })
+
+    if (!res.ok) throw new Error(`Filter search failed: ${res.status}`)
     return res.json()
   }
 }

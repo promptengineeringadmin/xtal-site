@@ -9,6 +9,7 @@ import {
   getSnippetSiteUrl,
   getCardTemplate,
   getProductUrlPattern,
+  getFiltersEnabled,
 } from "@/lib/admin/admin-settings"
 
 export async function OPTIONS() {
@@ -26,7 +27,7 @@ export async function GET(request: Request) {
     )
   }
 
-  const [enabled, searchSelector, displayMode, resultsSelector, siteUrl, cardTemplate, productUrlPattern] =
+  const [enabled, searchSelector, displayMode, resultsSelector, siteUrl, cardTemplate, productUrlPattern, filtersEnabled] =
     await Promise.all([
       getSnippetEnabled(shopId),
       getSnippetSearchSelector(shopId),
@@ -35,6 +36,7 @@ export async function GET(request: Request) {
       getSnippetSiteUrl(shopId),
       getCardTemplate(shopId),
       getProductUrlPattern(shopId),
+      getFiltersEnabled(shopId),
     ])
 
   return NextResponse.json(
@@ -44,7 +46,7 @@ export async function GET(request: Request) {
       displayMode,
       ...(resultsSelector ? { resultsSelector } : {}),
       siteUrl,
-      features: { aspects: true, explain: true },
+      features: { aspects: true, explain: true, filters: filtersEnabled },
       ...(cardTemplate ? { cardTemplate } : {}),
       ...(productUrlPattern ? { productUrlPattern } : {}),
     },

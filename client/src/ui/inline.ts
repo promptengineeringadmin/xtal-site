@@ -1,18 +1,49 @@
 /**
  * Inline renderer — replaces the merchant's product grid in-place.
  * No Shadow DOM: cards inherit the merchant's CSS naturally.
+ *
+ * Uses a persistent .xtal-layout wrapper with two slots:
+ * - .xtal-rail-slot: filter rail (persists across loading/results/empty)
+ * - .xtal-grid-slot: only this part updates on state changes
  */
 export class InlineRenderer {
   private target: HTMLElement
   private originalHTML: string
+  private layoutEl: HTMLElement | null = null
+  private railSlot: HTMLElement | null = null
+  private gridSlot: HTMLElement | null = null
 
   constructor(target: HTMLElement) {
     this.target = target
     this.originalHTML = target.innerHTML
   }
 
-  showLoading() {
+  /** Creates the persistent layout wrapper. Returns the rail slot for FilterRail to mount into. */
+  initLayout(): HTMLElement {
+    if (this.layoutEl) return this.railSlot!
+
     this.target.innerHTML = ""
+
+    this.layoutEl = document.createElement("div")
+    this.layoutEl.className = "xtal-layout"
+
+    this.railSlot = document.createElement("div")
+    this.railSlot.className = "xtal-rail-slot"
+
+    this.gridSlot = document.createElement("div")
+    this.gridSlot.className = "xtal-grid-slot"
+
+    this.layoutEl.appendChild(this.railSlot)
+    this.layoutEl.appendChild(this.gridSlot)
+    this.target.appendChild(this.layoutEl)
+
+    return this.railSlot
+  }
+
+  showLoading() {
+    const slot = this.gridSlot || this.target
+    slot.innerHTML = ""
+
     const spinner = document.createElement("div")
     spinner.style.cssText =
       "display:flex;align-items:center;justify-content:center;padding:60px 20px;gap:8px;color:#888;font-size:14px;"
@@ -33,29 +64,34 @@ export class InlineRenderer {
       document.head.appendChild(style)
     }
 
-    this.target.appendChild(spinner)
+    slot.appendChild(spinner)
   }
 
   renderCards(cards: HTMLElement[]) {
-    this.target.innerHTML = ""
+    const slot = this.gridSlot || this.target
+    slot.innerHTML = ""
     const grid = document.createElement("div")
     grid.className = "xtal-grid"
     for (const card of cards) {
       grid.appendChild(card)
     }
-    this.target.appendChild(grid)
+    slot.appendChild(grid)
   }
 
   renderEmpty(query: string) {
-    this.target.innerHTML = ""
+    const slot = this.gridSlot || this.target
+    slot.innerHTML = ""
     const msg = document.createElement("div")
     msg.style.cssText =
       "text-align:center;padding:60px 20px;color:#888;font-size:14px;"
     msg.textContent = `No results found for "${query}"`
-    this.target.appendChild(msg)
+    slot.appendChild(msg)
   }
 
   restore() {
+    this.layoutEl = null
+    this.railSlot = null
+    this.gridSlot = null
     this.target.innerHTML = this.originalHTML
   }
 

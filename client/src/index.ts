@@ -1,5 +1,6 @@
-import { XtalAPI, type Product } from "./api"
+import { XtalAPI, type Product, type SearchContext } from "./api"
 import { InlineRenderer } from "./ui/inline"
+import { FilterRail } from "./ui/filter-rail"
 import { renderTemplatedCard, type CardHandlers, type CardTemplate } from "./ui/template"
 import { renderProductCard } from "./ui/results"
 import { attachInterceptor } from "./interceptor"
@@ -22,6 +23,189 @@ function beaconError(apiBase: string, shopId: string, error: string, context?: s
   } catch {
     // Telemetry must never crash
   }
+}
+
+/** Inject filter rail CSS (all xtal- prefixed to avoid merchant conflicts) */
+function injectFilterCSS() {
+  if (document.getElementById("xtal-filter-styles")) return
+  const style = document.createElement("style")
+  style.id = "xtal-filter-styles"
+  style.textContent = `
+/* ── Layout ── */
+.xtal-layout { display: flex; gap: 40px; }
+.xtal-rail-slot { flex-shrink: 0; }
+.xtal-grid-slot { flex: 1; min-width: 0; }
+
+/* ── Desktop filter rail ── */
+.xtal-filter-rail {
+  width: 260px;
+  font-family: "Manrope", serif;
+  font-size: 14px;
+  color: #1d1d1b;
+  position: sticky;
+  top: 20px;
+  align-self: flex-start;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  padding-right: 8px;
+}
+.xtal-filter-rail::-webkit-scrollbar { width: 4px; }
+.xtal-filter-rail::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
+.xtal-filter-rail::-webkit-scrollbar-track { background: transparent; }
+
+/* ── Responsive grid ── */
+.xtal-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 20px !important;
+  padding: 20px 0 40px 0 !important;
+  flex-wrap: initial !important;
+}
+.xtal-grid .product-card { width: auto !important; }
+@media (min-width: 640px) {
+  .xtal-grid { grid-template-columns: repeat(3, 1fr) !important; }
+}
+@media (min-width: 1024px) {
+  .xtal-grid { grid-template-columns: repeat(4, 1fr) !important; }
+}
+
+/* ── Filter sections ── */
+.xtal-filter-section { border-bottom: 1px solid #e5e5e5; padding-bottom: 12px; margin-bottom: 12px; }
+.xtal-filter-section:last-child { border-bottom: none; }
+.xtal-section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 6px 0; background: none; border: none;
+  cursor: pointer; font-size: 14px; font-weight: 600; color: #1d1d1b;
+  font-family: inherit;
+}
+.xtal-section-header:hover { color: #000; }
+.xtal-section-label { display: flex; align-items: center; gap: 8px; }
+.xtal-section-badge {
+  font-size: 10px; padding: 1px 6px; border-radius: 9999px;
+  background: #1d1d1b; color: #fff; font-weight: 600;
+}
+.xtal-section-chevron { font-size: 12px; color: #999; }
+.xtal-section-content { margin-top: 6px; }
+
+/* ── Facet checkboxes ── */
+.xtal-facet-list { display: flex; flex-direction: column; gap: 4px; }
+.xtal-facet-label {
+  display: flex; align-items: center; gap: 8px; padding: 2px 0;
+  cursor: pointer; font-size: 13px; color: #444;
+}
+.xtal-facet-label:hover { color: #1d1d1b; }
+.xtal-facet-disabled { opacity: 0.4; pointer-events: none; }
+.xtal-facet-checkbox {
+  width: 14px; height: 14px; border-radius: 3px;
+  accent-color: #1d1d1b; cursor: pointer; flex-shrink: 0;
+}
+.xtal-facet-text { flex: 1; }
+.xtal-facet-count { font-size: 11px; color: #999; }
+.xtal-show-more {
+  background: none; border: none; cursor: pointer;
+  font-size: 12px; color: #1d1d1b; padding: 4px 0;
+  font-family: inherit; text-decoration: underline;
+}
+.xtal-show-more:hover { color: #000; }
+
+/* ── Price presets ── */
+.xtal-price-presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.xtal-price-btn {
+  padding: 6px 12px; border: 1px solid #ddd; border-radius: 6px;
+  background: #fff; cursor: pointer; font-size: 12px; color: #444;
+  font-family: inherit; transition: all 0.15s;
+}
+.xtal-price-btn:hover { border-color: #1d1d1b; color: #1d1d1b; }
+.xtal-price-btn-active {
+  background: #1d1d1b; color: #fff; border-color: #1d1d1b;
+}
+
+/* ── Applied filters ── */
+.xtal-applied-section { margin-bottom: 16px; }
+.xtal-clear-row { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+.xtal-clear-all {
+  background: none; border: none; cursor: pointer;
+  font-size: 12px; color: #999; font-family: inherit;
+}
+.xtal-clear-all:hover { color: #1d1d1b; }
+.xtal-applied-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.xtal-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 9999px;
+  background: #f0eeea; border: none; cursor: pointer;
+  font-size: 12px; color: #1d1d1b; font-family: inherit;
+}
+.xtal-chip:hover { background: #e0ddd8; }
+.xtal-chip-x { font-size: 14px; line-height: 1; opacity: 0.6; }
+
+/* ── Mobile: hide rail, show FAB + drawer ── */
+.xtal-filter-fab {
+  display: none; position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%); z-index: 9990;
+  align-items: center; gap: 8px; padding: 12px 20px; border-radius: 9999px;
+  background: #1d1d1b; color: #fff; border: none; cursor: pointer;
+  font-family: "Manrope", serif; font-size: 14px; font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+}
+.xtal-filter-fab:hover { transform: translateX(-50%) scale(1.05); }
+.xtal-fab-text { margin: 0; }
+.xtal-fab-badge {
+  display: flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: #fff; color: #1d1d1b; font-size: 11px; font-weight: 700;
+}
+.xtal-fab-hidden { display: none !important; }
+
+.xtal-backdrop {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  z-index: 9998; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.xtal-backdrop-open { opacity: 1; pointer-events: auto; }
+
+.xtal-filter-drawer {
+  display: none; position: fixed; top: 0; left: 0; height: 100%;
+  width: 85vw; max-width: 360px; background: #fff; z-index: 9999;
+  box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+  flex-direction: column;
+  transform: translateX(-100%); transition: transform 0.25s ease;
+}
+.xtal-drawer-open { transform: translateX(0); }
+
+.xtal-drawer-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px; border-bottom: 1px solid #e5e5e5;
+}
+.xtal-drawer-title {
+  font-family: "Manrope", serif; font-size: 14px; font-weight: 700; color: #1d1d1b;
+}
+.xtal-drawer-close {
+  background: none; border: none; cursor: pointer; padding: 8px;
+  color: #999; display: flex; align-items: center;
+}
+.xtal-drawer-close:hover { color: #1d1d1b; }
+.xtal-drawer-content {
+  flex: 1; overflow-y: auto; padding: 16px;
+  font-family: "Manrope", serif; font-size: 14px; color: #1d1d1b;
+}
+.xtal-drawer-footer {
+  padding: 16px; border-top: 1px solid #e5e5e5;
+}
+.xtal-drawer-apply {
+  width: 100%; padding: 12px; background: #1d1d1b; color: #fff;
+  border: none; border-radius: 8px; cursor: pointer;
+  font-family: "Manrope", serif; font-size: 14px; font-weight: 600;
+}
+.xtal-drawer-apply:hover { background: #333; }
+
+@media (max-width: 767px) {
+  .xtal-filter-rail { display: none; }
+  .xtal-layout { display: block !important; }
+  .xtal-filter-fab { display: flex; }
+  .xtal-backdrop { display: block; }
+  .xtal-filter-drawer { display: flex; }
+}
+`
+  document.head.appendChild(style)
 }
 
 function boot() {
@@ -118,6 +302,48 @@ function boot() {
           const inline = new InlineRenderer(gridTarget!)
           let cleanupInterceptor: (() => void) | null = null
 
+          // ── Filter state ──
+          const filtersEnabled = config.features?.filters === true
+          let searchContext: SearchContext | null = null
+          let facetFilters: Record<string, string[]> = {}
+          let priceRange: { min?: number; max?: number } | null = null
+          let filterRail: FilterRail | null = null
+          let lastTotal = 0
+          let lastFacets: Record<string, Record<string, number>> = {}
+          let filterDebounceTimer: ReturnType<typeof setTimeout> | null = null
+
+          // Init filter layout if enabled
+          if (filtersEnabled) {
+            injectFilterCSS()
+            const railSlot = inline.initLayout()
+            filterRail = new FilterRail(
+              railSlot,
+              // onFacetToggle
+              (prefix: string, value: string) => {
+                if (!facetFilters[prefix]) facetFilters[prefix] = []
+                const idx = facetFilters[prefix].indexOf(value)
+                if (idx >= 0) {
+                  facetFilters[prefix].splice(idx, 1)
+                  if (facetFilters[prefix].length === 0) delete facetFilters[prefix]
+                } else {
+                  facetFilters[prefix].push(value)
+                }
+                doFilter()
+              },
+              // onPriceChange
+              (range: { min?: number; max?: number } | null) => {
+                priceRange = range
+                doFilter()
+              },
+              // onClearAll
+              () => {
+                facetFilters = {}
+                priceRange = null
+                doFilter()
+              }
+            )
+          }
+
           const cardHandlers: CardHandlers = {
             onViewProduct(product) {
               const url = appendUtm(resolveProductUrl(product), {
@@ -148,32 +374,105 @@ function boot() {
             },
           }
 
+          /** Build card elements from results */
+          function buildCards(results: Product[]): HTMLElement[] {
+            return results.map((product) => {
+              if (cardTemplate) {
+                return renderTemplatedCard(
+                  cardTemplate.html,
+                  product,
+                  lastQuery,
+                  shopId!,
+                  cardHandlers,
+                  cartAdapter.name
+                )
+              }
+              return renderProductCard(product, lastQuery, shopId!, null, cardHandlers)
+            })
+          }
+
+          /** Filter-in-place — uses lightweight /api/xtal/search with search_context */
+          const doFilter = () => {
+            if (!searchContext) return
+            if (filterDebounceTimer) clearTimeout(filterDebounceTimer)
+            filterDebounceTimer = setTimeout(() => {
+              inline.showLoading()
+              api
+                .searchFiltered(lastQuery, searchContext!, {
+                  facetFilters,
+                  priceRange,
+                  limit: 24,
+                })
+                .then((res) => {
+                  lastTotal = res.total
+                  lastFacets = res.computed_facets || {}
+
+                  if (res.results.length === 0) {
+                    inline.renderEmpty(lastQuery)
+                  } else {
+                    inline.renderCards(buildCards(res.results))
+                  }
+
+                  // Update filter rail with new facets
+                  filterRail?.update(lastFacets, facetFilters, priceRange, lastTotal)
+                })
+                .catch((err) => {
+                  if (err instanceof DOMException && err.name === "AbortError") return
+                  console.error("[xtal.js] Filter error:", err)
+                  beaconError(apiBase, shopId!, String(err), "filter")
+                })
+            }, 150)
+          }
+
           const doSearch = (query: string) => {
             lastQuery = query
+
+            // Reset filter state on new query
+            searchContext = null
+            facetFilters = {}
+            priceRange = null
+
+            // Init layout if filters enabled but not yet initialized
+            if (filtersEnabled && !filterRail) {
+              injectFilterCSS()
+              const railSlot = inline.initLayout()
+              filterRail = new FilterRail(
+                railSlot,
+                (prefix, value) => {
+                  if (!facetFilters[prefix]) facetFilters[prefix] = []
+                  const idx = facetFilters[prefix].indexOf(value)
+                  if (idx >= 0) {
+                    facetFilters[prefix].splice(idx, 1)
+                    if (facetFilters[prefix].length === 0) delete facetFilters[prefix]
+                  } else {
+                    facetFilters[prefix].push(value)
+                  }
+                  doFilter()
+                },
+                (range) => { priceRange = range; doFilter() },
+                () => { facetFilters = {}; priceRange = null; doFilter() }
+              )
+            }
+
             inline.showLoading()
 
             api
               .searchFull(query, 24)
               .then((res) => {
+                lastTotal = res.total
+                lastFacets = res.computed_facets || {}
+                searchContext = res.search_context || null
+
                 if (res.results.length === 0) {
                   inline.renderEmpty(query)
+                  filterRail?.update({}, {}, null, 0)
                   return
                 }
 
-                const cards: HTMLElement[] = res.results.map((product) => {
-                  if (cardTemplate) {
-                    return renderTemplatedCard(
-                      cardTemplate.html,
-                      product,
-                      query,
-                      shopId!,
-                      cardHandlers,
-                      cartAdapter.name
-                    )
-                  }
-                  return renderProductCard(product, query, shopId!, null, cardHandlers)
-                })
-                inline.renderCards(cards)
+                inline.renderCards(buildCards(res.results))
+
+                // Update filter rail with facets from initial search
+                filterRail?.update(lastFacets, facetFilters, priceRange, lastTotal)
               })
               .catch((err) => {
                 if (err instanceof DOMException && err.name === "AbortError") {
@@ -209,16 +508,19 @@ function boot() {
           ;(window as any).XTAL = {
             destroy() {
               cleanupInterceptor?.()
+              filterRail?.destroy()
               inline.destroy()
               const cardStyles = document.getElementById("xtal-card-styles")
               if (cardStyles) cardStyles.remove()
+              const filterStyles = document.getElementById("xtal-filter-styles")
+              if (filterStyles) filterStyles.remove()
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               delete (window as any).XTAL
             },
           }
 
           console.log(
-            `[xtal.js] Initialized INLINE for ${shopId}. Search: ${selector}, Grid: ${config.resultsSelector}`
+            `[xtal.js] Initialized INLINE for ${shopId}. Search: ${selector}, Grid: ${config.resultsSelector}${filtersEnabled ? ", Filters: ON" : ""}`
           )
         }
       })

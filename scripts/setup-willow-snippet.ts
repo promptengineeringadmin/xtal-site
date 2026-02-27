@@ -14,6 +14,7 @@ import {
   saveSnippetResultsSelector,
   saveCardTemplate,
   saveProductUrlPattern,
+  saveFiltersEnabled,
 } from "../lib/admin/admin-settings"
 
 const COLLECTION = "willow"
@@ -40,14 +41,10 @@ const TEMPLATE_HTML = `<div class="product-card" data-xtal-action="view-product"
 const TEMPLATE_CSS = `@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
 
 .xtal-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 32px;
-  padding: 20px 0 40px 32px;
-  align-content: flex-start;
+  gap: 20px;
+  padding: 20px 0 40px 0;
 }
 .product-card {
-  width: calc((100% - 64px) / 3);
   cursor: pointer;
   font-family: "Manrope", serif;
   color: #1d1d1b;
@@ -104,6 +101,7 @@ async function main() {
     saveSnippetSiteUrl(COLLECTION, "https://www.willowgroupltd.com"),
     saveCardTemplate(COLLECTION, { html: TEMPLATE_HTML, css: TEMPLATE_CSS }),
     saveProductUrlPattern(COLLECTION, "https://www.willowgroupltd.com/shop/{sku}?position=-1"),
+    saveFiltersEnabled(COLLECTION, true),
   ])
 
   console.log("Done! Settings saved:")
@@ -114,6 +112,7 @@ async function main() {
   console.log("  site_url: https://www.willowgroupltd.com")
   console.log("  product_url_pattern: https://www.willowgroupltd.com/shop/{sku}?position=-1")
   console.log("  card_template: Willow-native classes (product-card, product-image, etc.)")
+  console.log("  filters_enabled: true")
 }
 
 main().catch((err) => {
