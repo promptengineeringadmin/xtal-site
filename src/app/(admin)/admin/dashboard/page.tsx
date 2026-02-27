@@ -28,22 +28,36 @@ export default function DashboardPage() {
     if (!collection) return
     setLoading(true)
     setError(null)
-    try {
-      const res = await fetch(
-        `/api/admin/analytics/dashboard?days=${days}&collection=${encodeURIComponent(collection)}`
-      )
-      if (!res.ok) {
-        const body = await res.json().catch(() => null)
-        const detail = body?.detail || body?.error || `Status ${res.status}`
-        throw new Error(`Failed to fetch: ${detail}`)
+
+    const url = `/api/admin/analytics/dashboard?days=${days}&collection=${encodeURIComponent(collection)}`
+    const maxAttempts = 2
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const res = await fetch(url)
+        if (!res.ok) {
+          // Retry once on transient backend errors
+          if (attempt < maxAttempts && res.status >= 502 && res.status <= 504) {
+            await new Promise((r) => setTimeout(r, 1000))
+            continue
+          }
+          const body = await res.json().catch(() => null)
+          const detail = body?.detail || body?.error || `Status ${res.status}`
+          throw new Error(`Failed to fetch: ${detail}`)
+        }
+        const json: AnalyticsDashboard = await res.json()
+        setData(json)
+        setLoading(false)
+        return
+      } catch (err) {
+        if (attempt < maxAttempts) {
+          await new Promise((r) => setTimeout(r, 1000))
+          continue
+        }
+        setError(err instanceof Error ? err.message : "Failed to load analytics")
       }
-      const json: AnalyticsDashboard = await res.json()
-      setData(json)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load analytics")
-    } finally {
-      setLoading(false)
     }
+    setLoading(false)
   }, [days, collection])
 
   useEffect(() => {

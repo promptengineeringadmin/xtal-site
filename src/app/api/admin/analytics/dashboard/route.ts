@@ -11,7 +11,9 @@ export async function GET(request: Request) {
     if (collection) params.set("collection", collection)
     params.set("days", days)
 
-    const res = await adminFetch(`/api/analytics/dashboard?${params.toString()}`)
+    const res = await adminFetch(`/api/analytics/dashboard?${params.toString()}`, {
+      signal: AbortSignal.timeout(25_000),
+    })
 
     if (!res.ok) {
       const text = await res.text().catch(() => "(no body)")
