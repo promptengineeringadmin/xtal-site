@@ -174,7 +174,7 @@ function boot() {
                 inline.restore()
                 // Fallback: navigate to merchant's native search
                 if (config.siteUrl && lastQuery) {
-                  window.location.href = `${config.siteUrl.replace(/\/$/, "")}/search-results/?search_field=${encodeURIComponent(lastQuery)}`
+                  window.location.href = `${config.siteUrl.replace(/\/$/, "")}/shop/?Search=${encodeURIComponent(lastQuery)}`
                 }
               })
           }
