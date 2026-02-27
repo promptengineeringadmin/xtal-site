@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { Sparkles } from "lucide-react"
-import { detectQuerySignal } from "@/lib/query-signals"
+import { detectQuerySignal, PROCESS_PHRASES } from "@/lib/query-signals"
 
 interface SearchLoadingSpinnerProps {
   query?: string
@@ -10,12 +10,17 @@ interface SearchLoadingSpinnerProps {
 }
 
 export default function SearchLoadingSpinner({ query, isFirstSearch }: SearchLoadingSpinnerProps) {
-  const processDescription = query ? detectQuerySignal(query) : "Understanding your intent and finding matches"
+  const signalMessage = query ? detectQuerySignal(query) : "Understanding your intent and finding matches"
+  const phrases = [signalMessage, ...PROCESS_PHRASES]
   const displayQuery = query && query.length > 80 ? query.slice(0, 77) + "…" : query
 
   // Live stopwatch: starts at 0 on mount, ticks every 50ms
   const [elapsed, setElapsed] = useState(0)
   const startRef = useRef(performance.now())
+
+  // Cycling phrases: fade out → swap → fade in every 2.5s
+  const [phraseIndex, setPhraseIndex] = useState(0)
+  const [visible, setVisible] = useState(true)
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -23,6 +28,17 @@ export default function SearchLoadingSpinner({ query, isFirstSearch }: SearchLoa
     }, 50)
     return () => clearInterval(id)
   }, [])
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setVisible(false)
+      setTimeout(() => {
+        setPhraseIndex(prev => (prev + 1) % phrases.length)
+        setVisible(true)
+      }, 300)
+    }, 2500)
+    return () => clearInterval(id)
+  }, [phrases.length])
 
   return (
     <div
@@ -53,8 +69,8 @@ export default function SearchLoadingSpinner({ query, isFirstSearch }: SearchLoa
           </p>
         )}
 
-        <p className="text-sm text-slate-400 mt-3 leading-relaxed">
-          {processDescription}
+        <p className={`text-sm text-slate-400 mt-3 leading-relaxed transition-opacity duration-300 ${visible ? "opacity-100" : "opacity-0"}`}>
+          {phrases[phraseIndex]}
         </p>
 
         {/* Zone D: Conditional first-search hint */}

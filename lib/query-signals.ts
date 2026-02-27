@@ -20,6 +20,14 @@ const SIGNALS: Signal[] = [
 
 const DEFAULT_MESSAGE = "Understanding your intent and finding matches"
 
+export const PROCESS_PHRASES = [
+  "Analyzing search intent…",
+  "Scanning the catalog…",
+  "Ranking by relevance…",
+  "Evaluating product matches…",
+  "Refining results…",
+]
+
 export function detectQuerySignal(query: string): string {
   for (const { patterns, message } of SIGNALS) {
     if (patterns.test(query)) return message
