@@ -1,5 +1,6 @@
 import type { Browser, Page } from "playwright-core"
-import type { MerchantConfig, QueryComparison, MerchantResult, XtalResult } from "./types"
+import type { MerchantConfig, QueryComparison, MerchantResult, XtalResult, TeardownReport } from "./types"
+import type { DimensionSummary } from "./query-grader"
 import { readFileSync } from "fs"
 import { resolve } from "path"
 
@@ -57,6 +58,27 @@ function escapeHtml(text: string): string {
 function truncate(text: string, maxLen: number): string {
   if (text.length <= maxLen) return text
   return text.slice(0, maxLen - 1) + "…"
+}
+
+// ── Grade badge colors ──────────────────────────────────────
+
+function gradeColor(letter: string): { bg: string; text: string } {
+  switch (letter) {
+    case "A": return { bg: "#16a34a", text: "#ffffff" }
+    case "B": return { bg: "#65a30d", text: "#ffffff" }
+    case "C": return { bg: "#eab308", text: "#1a1a1a" }
+    case "D": return { bg: "#ea580c", text: "#ffffff" }
+    case "F": return { bg: "#dc2626", text: "#ffffff" }
+    default: return { bg: "#6b7280", text: "#ffffff" }
+  }
+}
+
+function gradeBadgeHtml(grade: { letter: string; score: number; reason: string }): string {
+  const c = gradeColor(grade.letter)
+  return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+    <div style="width:48px;height:48px;border-radius:50%;background:${c.bg};color:${c.text};font-size:24px;font-weight:800;display:flex;align-items:center;justify-content:center;">${grade.letter}</div>
+    <div style="font-size:11px;color:#888;text-align:center;max-width:140px;line-height:1.3;">${escapeHtml(grade.reason)}</div>
+  </div>`
 }
 
 function merchantResultCard(r: MerchantResult, idx: number): string {
@@ -141,9 +163,12 @@ export function buildComparisonSlideHtml(
 
   <!-- Column Headers -->
   <div style="display:flex;border-bottom:2px solid #eee;">
-    <div style="flex:1;padding:14px 36px;display:flex;align-items:center;gap:8px;border-right:1px solid #eee;">
-      <div style="width:10px;height:10px;border-radius:50%;background:${merchant.primaryColor};"></div>
-      <span style="font-size:16px;font-weight:700;color:#333;">${escapeHtml(merchant.name)}</span>
+    <div style="flex:1;padding:14px 36px;display:flex;align-items:center;justify-content:space-between;border-right:1px solid #eee;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:10px;height:10px;border-radius:50%;background:${merchant.primaryColor};"></div>
+        <span style="font-size:16px;font-weight:700;color:#333;">${escapeHtml(merchant.name)}</span>
+      </div>
+      ${comparison.grade ? gradeBadgeHtml(comparison.grade) : ""}
     </div>
     <div style="flex:1;padding:14px 36px;display:flex;align-items:center;gap:8px;">
       <div style="width:10px;height:10px;border-radius:50%;background:#1B2D5B;"></div>
@@ -256,6 +281,170 @@ export function buildCtaSlideHtml(): string {
   <div style="position:absolute;bottom:36px;display:flex;align-items:center;gap:10px;">
     ${xtalLogoImg(28, 28)}
     <span style="color:white;font-size:16px;font-weight:600;letter-spacing:0.15em;">XTAL</span>
+  </div>
+</div>
+</body>
+</html>`
+}
+
+export function buildCoverSheetHtml(
+  merchant: MerchantConfig,
+  totalQueries: number,
+): string {
+  const categories = [
+    { key: "natural_language", label: "Natural Language", desc: "Conversational queries like a real shopper would type" },
+    { key: "budget", label: "Budget Search", desc: "Price-constrained queries with dollar amounts" },
+    { key: "use_case", label: "Use Case", desc: "Searching by intended purpose or scenario" },
+    { key: "synonym", label: "Synonym Handling", desc: "Alternative words for the same product" },
+    { key: "long_tail", label: "Long-Tail", desc: "Multi-attribute, specific product descriptions" },
+    { key: "category", label: "Category Browse", desc: "Broad category exploration queries" },
+    { key: "typo", label: "Typo Tolerance", desc: "Misspelled queries that still need results" },
+    { key: "gift", label: "Gift / Occasion", desc: "Shopping for others with vague intent" },
+  ]
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { width:${SLIDE_W}px; height:${SLIDE_H}px; font-family:'Inter',system-ui,-apple-system,sans-serif; overflow:hidden; }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+</style>
+</head>
+<body>
+<div style="width:${SLIDE_W}px;height:${SLIDE_H}px;background:#FCFDFF;display:flex;flex-direction:column;">
+
+  <!-- Header -->
+  <div style="background:#0F1A35;padding:28px 48px;">
+    <div style="color:rgba(255,255,255,0.5);font-size:14px;font-weight:500;letter-spacing:0.05em;margin-bottom:8px;">WHAT WE TESTED</div>
+    <div style="color:white;font-size:28px;font-weight:700;">${totalQueries} queries across 8 search categories</div>
+  </div>
+
+  <!-- Stats bar -->
+  <div style="background:#f0f4f8;padding:16px 48px;display:flex;gap:40px;border-bottom:1px solid #e2e8f0;">
+    <div><span style="font-size:28px;font-weight:800;color:#dc2626;">43%</span><span style="font-size:13px;color:#666;margin-left:8px;">of shoppers abandon after a failed search</span></div>
+    <div><span style="font-size:28px;font-weight:800;color:#ea580c;">80%</span><span style="font-size:13px;color:#666;margin-left:8px;">bounce immediately on zero results</span></div>
+    <div><span style="font-size:28px;font-weight:800;color:#16a34a;">2x</span><span style="font-size:13px;color:#666;margin-left:8px;">higher conversion rate from searchers</span></div>
+  </div>
+
+  <!-- Category grid -->
+  <div style="flex:1;padding:24px 48px;display:grid;grid-template-columns:1fr 1fr;gap:12px 32px;">
+    ${categories.map((cat, i) => `
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;">
+        <div style="width:32px;height:32px;border-radius:8px;background:#1B2D5B;color:white;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i + 1}</div>
+        <div>
+          <div style="font-size:15px;font-weight:700;color:#1a1a1a;">${cat.label}</div>
+          <div style="font-size:13px;color:#666;line-height:1.4;">${cat.desc}</div>
+        </div>
+      </div>
+    `).join("")}
+  </div>
+
+  <!-- Footer -->
+  <div style="background:#0F1A35;padding:12px 48px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      ${xtalLogoImg(24, 24)}
+      <span style="color:white;font-size:13px;font-weight:600;letter-spacing:0.15em;">XTAL</span>
+    </div>
+    <span style="color:rgba(255,255,255,0.5);font-size:12px;">Sources: Econsultancy, Forrester, Algolia</span>
+  </div>
+</div>
+</body>
+</html>`
+}
+
+export function buildScorecardHtml(
+  merchant: MerchantConfig,
+  overallScore: number,
+  overallGrade: string,
+  dimensionScores: Record<string, DimensionSummary>,
+  revenueImpact?: { monthlyLost: number; annualLost: number },
+): string {
+  const gc = gradeColor(overallGrade)
+
+  // Build dimension bars
+  const dimOrder = [
+    "natural_language", "budget", "use_case", "synonym",
+    "long_tail", "category", "typo", "gift",
+  ]
+  const dimBars = dimOrder
+    .filter((k) => dimensionScores[k])
+    .map((k) => {
+      const d = dimensionScores[k]
+      const dc = gradeColor(d.grade)
+      const label = CATEGORY_LABELS[k] || k
+      const barWidth = Math.max(d.avgScore, 3) // min visible width
+      return `<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+        <div style="width:140px;font-size:13px;font-weight:500;color:#333;text-align:right;">${label}</div>
+        <div style="flex:1;height:28px;background:#f0f4f8;border-radius:6px;overflow:hidden;position:relative;">
+          <div style="width:${barWidth}%;height:100%;background:${dc.bg};border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;">
+            <span style="color:${dc.text};font-size:12px;font-weight:700;">${d.avgScore}</span>
+          </div>
+        </div>
+        <div style="width:36px;height:36px;border-radius:50%;background:${dc.bg};color:${dc.text};font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;">${d.grade}</div>
+        <div style="width:40px;font-size:11px;color:#888;">${d.queryCount}q</div>
+      </div>`
+    })
+    .join("")
+
+  const revenueBlock = revenueImpact
+    ? `<div style="margin-top:20px;padding:16px 24px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;display:flex;gap:40px;">
+        <div>
+          <div style="font-size:12px;color:#991b1b;font-weight:500;">Est. Monthly Revenue Left on Table</div>
+          <div style="font-size:28px;font-weight:800;color:#dc2626;">$${revenueImpact.monthlyLost.toLocaleString()}</div>
+        </div>
+        <div>
+          <div style="font-size:12px;color:#991b1b;font-weight:500;">Annualized Impact</div>
+          <div style="font-size:28px;font-weight:800;color:#dc2626;">$${revenueImpact.annualLost.toLocaleString()}</div>
+        </div>
+      </div>`
+    : ""
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { width:${SLIDE_W}px; height:${SLIDE_H}px; font-family:'Inter',system-ui,-apple-system,sans-serif; overflow:hidden; }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+</style>
+</head>
+<body>
+<div style="width:${SLIDE_W}px;height:${SLIDE_H}px;display:flex;flex-direction:column;">
+
+  <!-- Header -->
+  <div style="background:#0F1A35;padding:24px 48px;">
+    <div style="color:rgba(255,255,255,0.5);font-size:14px;font-weight:500;letter-spacing:0.05em;margin-bottom:6px;">SEARCH SCORECARD</div>
+    <div style="color:white;font-size:28px;font-weight:700;">${escapeHtml(merchant.name)} — Search Quality Assessment</div>
+  </div>
+
+  <!-- Content -->
+  <div style="flex:1;padding:28px 48px;display:flex;gap:40px;">
+
+    <!-- Left: Overall score -->
+    <div style="width:260px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:20px;">
+      <div style="width:140px;height:140px;border-radius:50%;background:${gc.bg};color:${gc.text};font-size:64px;font-weight:900;display:flex;align-items:center;justify-content:center;margin-bottom:12px;">${overallGrade}</div>
+      <div style="font-size:48px;font-weight:800;color:#1a1a1a;">${overallScore}</div>
+      <div style="font-size:14px;color:#888;margin-top:4px;">out of 100</div>
+      ${revenueBlock}
+    </div>
+
+    <!-- Right: Dimension bars -->
+    <div style="flex:1;padding-top:10px;">
+      <div style="font-size:15px;font-weight:700;color:#333;margin-bottom:16px;">Category Breakdown</div>
+      ${dimBars}
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div style="background:#0F1A35;padding:10px 48px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      ${xtalLogoImg(24, 24)}
+      <span style="color:white;font-size:13px;font-weight:600;letter-spacing:0.15em;">XTAL</span>
+    </div>
+    <span style="color:rgba(255,255,255,0.5);font-size:12px;">xtalsearch.com</span>
   </div>
 </div>
 </body>

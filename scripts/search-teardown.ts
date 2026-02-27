@@ -21,7 +21,7 @@
 import * as fs from "fs"
 import * as path from "path"
 import { chromium } from "playwright-core"
-import { MERCHANTS } from "./teardown/merchants"
+import { MERCHANTS, buildShopifyMerchantConfig, registerMerchant } from "./teardown/merchants"
 import { generateQueries } from "./teardown/query-gen"
 import { searchMerchant, sleep } from "./teardown/merchant-search"
 import { searchXtal } from "./teardown/xtal-search"
@@ -391,6 +391,62 @@ export async function runTeardown(
   }
 }
 
+// ── URL detection + merchant auto-config ─────────────────────
+
+function isUrl(s: string): boolean {
+  return s.startsWith("http://") || s.startsWith("https://") || s.includes(".")
+}
+
+function extractDomainFromUrl(url: string): string {
+  let u = url.trim()
+  if (!u.startsWith("http")) u = "https://" + u
+  try {
+    return new URL(u).hostname
+  } catch {
+    return u.replace(/^https?:\/\//, "").split("/")[0]
+  }
+}
+
+function slugifyDomain(domain: string): string {
+  return domain
+    .replace(/^www\./, "")
+    .replace(/\.com$|\.co$|\.io$|\.net$|\.org$/, "")
+    .replace(/[^a-z0-9]+/gi, "-")
+    .toLowerCase()
+}
+
+function humanizeDomain(domain: string): string {
+  const slug = domain.replace(/^www\./, "").split(".")[0]
+  return slug.charAt(0).toUpperCase() + slug.slice(1)
+}
+
+async function detectPlatformFromUrl(domain: string): Promise<"shopify" | "bigcommerce" | "woocommerce" | "generic"> {
+  try {
+    // Check for Shopify by trying /products.json
+    const res = await fetch(`https://${domain}/products.json?limit=1`, {
+      headers: { "User-Agent": "Mozilla/5.0" },
+      signal: AbortSignal.timeout(10_000),
+    })
+    if (res.ok) return "shopify"
+  } catch {}
+
+  try {
+    // Check homepage HTML for platform signals
+    const res = await fetch(`https://${domain}`, {
+      headers: { "User-Agent": "Mozilla/5.0" },
+      signal: AbortSignal.timeout(10_000),
+    })
+    if (res.ok) {
+      const html = await res.text()
+      if (/cdn\.shopify\.com|Shopify\.theme/i.test(html)) return "shopify"
+      if (/bigcommerce|data-stencil/i.test(html)) return "bigcommerce"
+      if (/woocommerce|wp-content.*wc/i.test(html)) return "woocommerce"
+    }
+  } catch {}
+
+  return "generic"
+}
+
 // ── CLI Arg Parsing ──────────────────────────────────────────
 
 interface CliArgs {
@@ -398,19 +454,35 @@ interface CliArgs {
   reuseData: boolean
   queriesPath?: string
   collection?: string
+  isUrl: boolean
+  rawUrl?: string
 }
 
 function parseArgs(): CliArgs {
   const args = process.argv.slice(2)
   if (args.length === 0 || args[0].startsWith("--")) {
     console.error(
-      "Usage: npx tsx scripts/search-teardown.ts <merchant-id> [--reuse-data] [--queries <path>] [--collection <name>]",
+      "Usage: npx tsx scripts/search-teardown.ts <merchant-id|url> [options]",
     )
-    console.error(`\nAvailable merchants: ${Object.keys(MERCHANTS).join(", ")}`)
+    console.error("")
+    console.error("  <merchant-id>   Known merchant (e.g., bestbuy)")
+    console.error("  <url>           Any store URL (auto-detects platform)")
+    console.error("")
+    console.error("Options:")
+    console.error("  --reuse-data          Reuse cached comparison data")
+    console.error("  --queries <path>      Custom queries JSON file")
+    console.error("  --collection <name>   XTAL collection to search against")
+    console.error(`\nKnown merchants: ${Object.keys(MERCHANTS).join(", ")}`)
     process.exit(1)
   }
 
-  const parsed: CliArgs = { merchantId: args[0], reuseData: false }
+  const target = args[0]
+  const parsed: CliArgs = {
+    merchantId: target,
+    reuseData: false,
+    isUrl: isUrl(target),
+    rawUrl: isUrl(target) ? target : undefined,
+  }
 
   for (let i = 1; i < args.length; i++) {
     if (args[i] === "--reuse-data") {
@@ -430,10 +502,55 @@ function parseArgs(): CliArgs {
 async function main() {
   const args = parseArgs()
 
+  if (args.isUrl && args.rawUrl) {
+    // URL mode: auto-detect platform, build config, register
+    const domain = extractDomainFromUrl(args.rawUrl)
+    const slug = slugifyDomain(domain)
+    const name = humanizeDomain(domain)
+
+    log(`URL mode: ${domain}`)
+    log(`  Detecting platform...`)
+    const platform = await detectPlatformFromUrl(domain)
+    log(`  Platform: ${platform}`)
+
+    if (platform === "shopify") {
+      const config = buildShopifyMerchantConfig({
+        slug,
+        name,
+        domain,
+      })
+      registerMerchant(config)
+    } else {
+      // Generic config: use /search?q= as default search URL
+      const searchPaths: Record<string, string> = {
+        bigcommerce: `/search.php?search_query=`,
+        woocommerce: `/?s=`,
+        generic: `/search?q=`,
+      }
+      registerMerchant({
+        id: slug,
+        name,
+        url: `https://${domain}`,
+        searchUrl: `https://${domain}${searchPaths[platform] || "/search?q="}`,
+        searchApi: {
+          type: "scrape",
+          baseUrl: `https://${domain}`,
+          apiKeyEnv: "",
+          searchParam: "",
+        },
+        primaryColor: "#1a1a1a",
+        secondaryColor: "#ffffff",
+      })
+    }
+
+    args.merchantId = slug
+    log(`  Registered as: ${slug}`)
+  }
+
   await runTeardown(args.merchantId, {
     reuseData: args.reuseData,
     queriesPath: args.queriesPath,
-    collection: args.collection,
+    collection: args.collection || (args.isUrl ? args.merchantId : undefined),
   })
 }
 
