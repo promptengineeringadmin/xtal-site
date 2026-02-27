@@ -1,3 +1,20 @@
+# Large data files
 data/bestbuy-catalog.jsonl
 grader-output/
 mockups/
+teardown-output/
+tmp/
+
+# E2E tests (Playwright — not needed for production build)
+e2e/
+playwright.config.ts
+
+# Misc untracked files
+*.csv
+scripts/gift-cards-raw.json
+scripts/delete-bestbuy-junk.mjs
+
+# IDE
+.idea
+.vscode/*
+!.vscode/extensions.json
