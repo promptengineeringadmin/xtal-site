@@ -69,6 +69,16 @@ function boot() {
         // Template system
         const cardTemplate: CardTemplate | null = config.cardTemplate ?? null
 
+        // Inject card template CSS into <head>
+        if (cardTemplate?.css) {
+          const existing = document.getElementById("xtal-card-styles")
+          if (existing) existing.remove()
+          const style = document.createElement("style")
+          style.id = "xtal-card-styles"
+          style.textContent = cardTemplate.css
+          document.head.appendChild(style)
+        }
+
         // Cart adapter — detects platform once at boot
         let lastQuery = ""
         const cartAdapter = detectCartAdapter(shopId, () => lastQuery)
@@ -200,6 +210,8 @@ function boot() {
             destroy() {
               cleanupInterceptor?.()
               inline.destroy()
+              const cardStyles = document.getElementById("xtal-card-styles")
+              if (cardStyles) cardStyles.remove()
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               delete (window as any).XTAL
             },

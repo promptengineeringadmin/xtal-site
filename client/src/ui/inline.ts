@@ -38,9 +38,12 @@ export class InlineRenderer {
 
   renderCards(cards: HTMLElement[]) {
     this.target.innerHTML = ""
+    const grid = document.createElement("div")
+    grid.className = "xtal-grid"
     for (const card of cards) {
-      this.target.appendChild(card)
+      grid.appendChild(card)
     }
+    this.target.appendChild(grid)
   }
 
   renderEmpty(query: string) {
