@@ -29,6 +29,11 @@ const SCENARIOS: { id: DomScenario; label: string; selectors: string }[] = [
     selectors: "Input injected after 2s delay — tests MutationObserver",
   },
   {
+    id: "angular-ngsubmit",
+    label: "Angular ng-submit (Willow)",
+    selectors: '#search_field — bubble-phase submit handler simulates Angular ng-submit canary',
+  },
+  {
     id: "generic",
     label: "Generic / Minimal",
     selectors: 'input.search-input[type="text"]',

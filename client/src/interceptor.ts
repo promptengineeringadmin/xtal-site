@@ -9,32 +9,34 @@ export function attachInterceptor(
   const cleanups: CleanupFn[] = []
 
   function hookInput(input: HTMLInputElement) {
-    // Intercept form submit
+    // Intercept form submit (capture phase to beat Angular ng-submit etc.)
     const form = input.closest("form")
     if (form) {
       const handleSubmit = (e: Event) => {
         e.preventDefault()
+        e.stopImmediatePropagation()
         const value = input.value.trim()
         if (value.length >= 1) {
           onQuery(value)
         }
       }
-      form.addEventListener("submit", handleSubmit)
-      cleanups.push(() => form.removeEventListener("submit", handleSubmit))
+      form.addEventListener("submit", handleSubmit, true)
+      cleanups.push(() => form.removeEventListener("submit", handleSubmit, true))
     }
 
-    // Enter key on input (fallback when no wrapping <form>)
+    // Enter key on input (capture phase, fallback when no wrapping <form>)
     const handleKeydown = (e: KeyboardEvent) => {
       if (e.key === "Enter") {
         e.preventDefault()
+        e.stopImmediatePropagation()
         const value = input.value.trim()
         if (value.length >= 1) {
           onQuery(value)
         }
       }
     }
-    input.addEventListener("keydown", handleKeydown)
-    cleanups.push(() => input.removeEventListener("keydown", handleKeydown))
+    input.addEventListener("keydown", handleKeydown, true)
+    cleanups.push(() => input.removeEventListener("keydown", handleKeydown, true))
   }
 
   // Try to find the input immediately

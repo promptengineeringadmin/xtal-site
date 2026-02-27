@@ -152,6 +152,28 @@ document.head.appendChild(s);
 
 The SDK will load on every page, fetch config from `https://www.xtalsearch.com/api/xtal/config?shopId=willow`, and hook the search input.
 
+### Bookmarklet (one-click live-site injection)
+
+Create a browser bookmark with this URL to instantly inject the SDK on any page:
+
+```
+javascript:void((function(){if(window.XTAL){window.XTAL.destroy()}var s=document.createElement('script');s.src='https://www.xtalsearch.com/client/v1/xtal.js?t='+Date.now();s.async=true;s.dataset.shopId='willow';document.head.appendChild(s)})())
+```
+
+**What it does:**
+1. Destroys any existing SDK instance (`window.XTAL.destroy()`)
+2. Injects a cache-busted `xtal.js` from production
+3. Boots with `data-shop-id="willow"`
+
+**Usage:**
+1. Navigate to `willowgroupltd.com/shop?Search=baskets`
+2. Click the bookmarklet
+3. XTAL results should replace the product grid
+4. Check Network tab for `/api/xtal/search-full` requests
+5. Check Console for `[xtal.js]` log messages
+
+**Changing shop ID:** Edit the bookmark and replace `'willow'` with another collection name.
+
 ### GTM Preview Mode (safe testing before publish)
 
 Instead of publishing immediately:

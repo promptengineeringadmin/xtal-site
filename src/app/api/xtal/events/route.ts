@@ -18,7 +18,7 @@ export async function POST(request: Request) {
             )
         }
 
-        if (!body.product_id || !body.action) {
+        if (!body.action || (body.action !== "error" && !body.product_id)) {
             return NextResponse.json(
                 { error: "Missing required fields" },
                 { status: 400, headers: corsHeaders() }

@@ -6,6 +6,24 @@ import { attachInterceptor } from "./interceptor"
 import { appendUtm } from "./utm"
 import { detectCartAdapter } from "./cart/detect"
 
+/** Fire-and-forget error telemetry via sendBeacon */
+function beaconError(apiBase: string, shopId: string, error: string, context?: string) {
+  try {
+    const payload = JSON.stringify({
+      action: "error",
+      collection: shopId,
+      error,
+      context,
+      ts: Date.now(),
+    })
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon(`${apiBase}/api/xtal/events`, payload)
+    }
+  } catch {
+    // Telemetry must never crash
+  }
+}
+
 function boot() {
   try {
     // Find our script tag
@@ -125,7 +143,7 @@ function boot() {
             inline.showLoading()
 
             api
-              .searchFull(query, 16)
+              .searchFull(query, 24)
               .then((res) => {
                 if (res.results.length === 0) {
                   inline.renderEmpty(query)
@@ -139,7 +157,8 @@ function boot() {
                       product,
                       query,
                       shopId!,
-                      cardHandlers
+                      cardHandlers,
+                      cartAdapter.name
                     )
                   }
                   return renderProductCard(product, query, shopId!, null, cardHandlers)
@@ -151,12 +170,24 @@ function boot() {
                   return
                 }
                 console.error("[xtal.js] Search error:", err)
+                beaconError(apiBase, shopId!, String(err), "search")
                 inline.restore()
+                // Fallback: navigate to merchant's native search
+                if (config.siteUrl && lastQuery) {
+                  window.location.href = `${config.siteUrl.replace(/\/$/, "")}/search-results/?search_field=${encodeURIComponent(lastQuery)}`
+                }
               })
           }
 
+          // Debounced search — prevents rapid-fire requests from fast typing
+          let debounceTimer: ReturnType<typeof setTimeout> | null = null
+          const debouncedSearch = (query: string) => {
+            if (debounceTimer) clearTimeout(debounceTimer)
+            debounceTimer = setTimeout(() => doSearch(query), 200)
+          }
+
           const selector = config.searchSelector || 'input[type="search"]'
-          cleanupInterceptor = attachInterceptor(selector, doSearch)
+          cleanupInterceptor = attachInterceptor(selector, debouncedSearch)
 
           // Auto-trigger if input already has a query (e.g. navigated from homepage search)
           const existingInput = document.querySelector<HTMLInputElement>(selector)
@@ -181,6 +212,7 @@ function boot() {
       })
       .catch((err) => {
         console.error("[xtal.js] Failed to fetch config:", err)
+        beaconError(apiBase, shopId, String(err), "config")
       })
   } catch (err) {
     // Top-level catch — never throw into merchant's global scope

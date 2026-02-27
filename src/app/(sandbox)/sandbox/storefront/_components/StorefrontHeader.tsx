@@ -8,6 +8,7 @@ export type DomScenario =
   | "bigcommerce"
   | "shopify-details"
   | "spa-delayed"
+  | "angular-ngsubmit"
   | "generic"
 
 interface Props {
@@ -145,6 +146,9 @@ function SearchInput({ scenario }: { scenario: DomScenario }) {
     case "spa-delayed":
       return <DelayedSearch />
 
+    case "angular-ngsubmit":
+      return <AngularNgSubmitSearch />
+
     case "generic":
     default:
       return (
@@ -164,6 +168,45 @@ function SearchInput({ scenario }: { scenario: DomScenario }) {
         </form>
       )
   }
+}
+
+function AngularNgSubmitSearch() {
+  // Simulate Angular's ng-submit: a bubble-phase submit listener that navigates away.
+  // If the SDK's capture-phase fix works, this handler never fires.
+  const formRef = (form: HTMLFormElement | null) => {
+    if (!form) return
+    const handler = () => {
+      // Canary: if this runs, Angular would have won the race
+      window.location.href = window.location.pathname + "?angular-leaked=true"
+    }
+    form.addEventListener("submit", handler) // bubble phase — should lose to SDK's capture
+  }
+
+  return (
+    <form ref={formRef} action="/search" method="get">
+      <div className="relative flex items-center gap-2">
+        <input
+          type="text"
+          id="search_field"
+          name="q"
+          placeholder="Search products..."
+          className="border rounded-md pl-9 pr-3 py-1.5 text-sm w-48 focus:outline-none focus:ring-1 focus:ring-[#8B7D6B]"
+          style={{ borderColor: "#E5E2DC" }}
+        />
+        <Search
+          size={14}
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B7D6B]"
+        />
+        <button
+          type="submit"
+          className="px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50"
+          style={{ borderColor: "#E5E2DC", color: "#4A4A4A" }}
+        >
+          Submit
+        </button>
+      </div>
+    </form>
+  )
 }
 
 function DetailsSearch() {

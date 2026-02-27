@@ -107,7 +107,8 @@ export function renderTemplatedCard(
   product: Product,
   query: string,
   shopId: string,
-  handlers: CardHandlers
+  handlers: CardHandlers,
+  cartAdapterName?: string
 ): HTMLElement {
   const data = buildTemplateData(product)
 
@@ -141,6 +142,11 @@ export function renderTemplatedCard(
   // Wire data-xtal-action="add-to-cart" elements
   el.querySelectorAll<HTMLElement>('[data-xtal-action="add-to-cart"]').forEach(
     (node) => {
+      // Override button text for fallback adapter (opens product page, not real cart)
+      if (cartAdapterName === "fallback") {
+        node.textContent = "View Product"
+      }
+
       node.addEventListener("click", async (e) => {
         e.preventDefault()
         e.stopPropagation()
