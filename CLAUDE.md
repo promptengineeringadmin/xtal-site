@@ -46,6 +46,7 @@ Load env: `export $(grep -v '^#' .env.local | grep -v '^\s*$' | xargs)`
 - Granular commits — one feature per PR, don't bundle unrelated changes
 - Use sonnet subagents for efficiency when possible
 - Plan titles: identifiable within ~25 chars (card truncation width)
+- **When something goes wrong, STOP and re-enter plan mode immediately.** Never iterate through failures — replan from scratch, understand the root cause, then execute the fix.
 
 ## Constraints
 - NEVER use `--skip-ai` for production ingestion
