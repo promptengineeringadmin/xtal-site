@@ -98,16 +98,16 @@ function injectFilterCSS() {
 .xtal-facet-list { display: flex; flex-direction: column; gap: 4px; }
 .xtal-facet-label {
   display: flex; align-items: center; gap: 8px; padding: 2px 0;
-  cursor: pointer; font-size: 13px; color: #444;
+  cursor: pointer; font-size: 13px; color: #444 !important;
 }
-.xtal-facet-label:hover { color: #1d1d1b; }
+.xtal-facet-label:hover { color: #1d1d1b !important; }
 .xtal-facet-disabled { opacity: 0.4; pointer-events: none; }
 .xtal-facet-checkbox {
   width: 14px; height: 14px; border-radius: 3px;
   accent-color: #1d1d1b; cursor: pointer; flex-shrink: 0;
 }
-.xtal-facet-text { flex: 1; }
-.xtal-facet-count { font-size: 11px; color: #999; }
+.xtal-facet-text { flex: 1; color: inherit !important; }
+.xtal-facet-count { font-size: 11px; color: #999 !important; }
 .xtal-show-more {
   background: none; border: none; cursor: pointer;
   font-size: 12px; color: #1d1d1b; padding: 4px 0;
