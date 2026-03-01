@@ -1,6 +1,5 @@
 # Large catalog files (keep small .json files needed for build)
-data/*.jsonl
-data/*.csv
+data/
 grader-output/
 mockups/
 teardown-output/
@@ -12,6 +11,7 @@ playwright.config.ts
 
 # Misc untracked files
 *.csv
+*.png
 scripts/gift-cards-raw.json
 scripts/delete-bestbuy-junk.mjs
 
