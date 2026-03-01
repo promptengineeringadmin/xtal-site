@@ -284,11 +284,6 @@ function boot() {
           document.head.appendChild(style)
         }
 
-        // Cart adapter — detects platform once at boot
-        let lastQuery = ""
-        const cartAdapter = detectCartAdapter(shopId, () => lastQuery)
-        console.log(`[xtal.js] Cart adapter: ${cartAdapter.name}`)
-
         /** Resolve product URL — use pattern if configured, else siteUrl prefix */
         function resolveProductUrl(product: Product): string {
           if (config.productUrlPattern) {
@@ -305,6 +300,11 @@ function boot() {
           if (config.siteUrl) return config.siteUrl.replace(/\/$/, "") + rawUrl
           return rawUrl
         }
+
+        // Cart adapter — detects platform once at boot
+        let lastQuery = ""
+        const cartAdapter = detectCartAdapter(shopId, () => lastQuery, resolveProductUrl)
+        console.log(`[xtal.js] Cart adapter: ${cartAdapter.name}`)
 
         // Determine mode: inline vs overlay
         const isInline =
@@ -418,7 +418,7 @@ function boot() {
                   resolveProductUrl(product)
                 )
               }
-              return renderProductCard(product, lastQuery, shopId!, null, cardHandlers)
+              return renderProductCard(product, lastQuery, shopId!, null, cardHandlers, resolveProductUrl(product))
             })
           }
 

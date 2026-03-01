@@ -20,7 +20,8 @@ export function renderProductCard(
   query: string,
   shopId: string,
   template?: CardTemplate | null,
-  handlers?: CardHandlers
+  handlers?: CardHandlers,
+  resolvedUrl?: string
 ): HTMLElement {
   if (template && handlers) {
     return renderTemplatedCard(template.html, product, query, shopId, handlers)
@@ -31,7 +32,7 @@ export function renderProductCard(
 
   const link = document.createElement("a")
   link.className = "xtal-card"
-  link.href = appendUtm(product.product_url || "#", {
+  link.href = appendUtm(resolvedUrl || product.product_url || "#", {
     shopId,
     productId: product.id,
     query,
