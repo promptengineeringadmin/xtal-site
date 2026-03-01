@@ -35,7 +35,8 @@
       "Bash(gh repo view:*)",
       "WebFetch(domain:github.com)",
       "Bash(git status:*)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(npm run build:client)"
     ],
     "deny": [],
     "ask": []
