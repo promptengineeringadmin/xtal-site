@@ -178,6 +178,7 @@ export function generateCSS(additionalCSS?: string): string {
       -webkit-box-orient: vertical;
       overflow: hidden;
       line-height: 1.4;
+      min-height: 2.8em;
     }
 
     .xtal-card-price {

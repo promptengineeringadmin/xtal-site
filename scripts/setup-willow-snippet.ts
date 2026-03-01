@@ -62,7 +62,7 @@ const TEMPLATE_CSS = `@import url('https://fonts.googleapis.com/css2?family=Manr
 }
 .product-image img { width: 100%; height: 100%; object-fit: contain; }
 .product-sku { font-size: 14px; color: #787878; margin-bottom: 2px; }
-.product-name { font-size: 16px; font-weight: 600; color: #1d1d1b; margin-bottom: 2px; }
+.product-name { font-size: 16px; font-weight: 600; color: #1d1d1b; margin-bottom: 2px; line-height: 1.3; min-height: 2.6em; }
 .product-dims { font-size: 14px; color: #1d1d1b; }
 .product-price-row {
   display: flex;
