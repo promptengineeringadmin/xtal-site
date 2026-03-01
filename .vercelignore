@@ -1,5 +1,7 @@
 # Large catalog files (keep small .json files needed for build)
-data/
+data/*.jsonl
+data/*.csv
+data/deferred-large/
 grader-output/
 mockups/
 teardown-output/
