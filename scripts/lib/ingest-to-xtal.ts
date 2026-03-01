@@ -96,8 +96,8 @@ async function uploadJsonl(
     throw new Error("Missing env var: XTAL_BACKEND_URL")
   }
 
-  const MAX_RETRIES = 3
-  const BACKOFF_MS = [15_000, 30_000, 60_000]
+  const MAX_RETRIES = 5
+  const BACKOFF_MS = [30_000, 60_000, 120_000, 180_000, 300_000]
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
@@ -124,8 +124,8 @@ async function uploadJsonl(
       if (!res.ok) {
         const text = await res.text()
         const status = res.status
-        // Retry on 502/503 (transient backend errors)
-        if ((status === 502 || status === 503) && attempt < MAX_RETRIES - 1) {
+        // Retry on 502/503/504 (transient backend errors)
+        if ((status === 502 || status === 503 || status === 504) && attempt < MAX_RETRIES - 1) {
           const delay = BACKOFF_MS[attempt]
           log(`  Upload got ${status}, retrying in ${delay / 1000}s...`)
           await new Promise((r) => setTimeout(r, delay))
@@ -156,11 +156,11 @@ async function uploadJsonl(
 
 async function pollTaskStatus(
   taskId: string,
-  timeoutMs: number = 30 * 60 * 1000,
+  timeoutMs: number = 120 * 60 * 1000,
 ): Promise<{ status: string; productsProcessed?: number }> {
   const backendUrl = process.env.XTAL_BACKEND_URL!
   const startTime = Date.now()
-  const pollInterval = 30_000 // 30 seconds
+  const pollInterval = 60_000 // 60 seconds (backend is slow under AI load)
 
   let consecutiveErrors = 0
 
@@ -170,7 +170,7 @@ async function pollTaskStatus(
 
       const res = await fetch(`${backendUrl}/api/demo/task/${taskId}`, {
         headers: { Authorization: `Bearer ${token}` },
-        signal: AbortSignal.timeout(15_000),
+        signal: AbortSignal.timeout(30_000),
       })
 
       if (!res.ok) {
@@ -181,7 +181,7 @@ async function pollTaskStatus(
         }
         consecutiveErrors++
         log(`  Task poll error: HTTP ${res.status} (${consecutiveErrors} consecutive errors)`)
-        if (consecutiveErrors >= 10) {
+        if (consecutiveErrors >= 20) {
           throw new Error(`Task poll failed ${consecutiveErrors} consecutive times, giving up`)
         }
         await new Promise((r) => setTimeout(r, pollInterval))
@@ -213,7 +213,7 @@ async function pollTaskStatus(
       consecutiveErrors++
       const msg = err instanceof Error ? err.message : String(err)
       log(`  Poll error (attempt will retry): ${msg} (${consecutiveErrors} consecutive)`)
-      if (consecutiveErrors >= 10) {
+      if (consecutiveErrors >= 20) {
         throw new Error(`Task poll failed ${consecutiveErrors} consecutive times: ${msg}`)
       }
     }
@@ -314,6 +314,15 @@ export async function ingestToXtal(opts: IngestOptions): Promise<IngestResult> {
     log(
       `  Ingestion complete: ${result.productsProcessed ?? "?"} products processed`,
     )
+
+    // Verify data actually landed in Qdrant (catches silent task failures)
+    log(`  Verifying data in collection...`)
+    await new Promise((r) => setTimeout(r, 5_000)) // brief wait for Qdrant sync
+    const verified = await collectionAlreadyIngested(opts.slug)
+    if (!verified) {
+      log(`  WARNING: Task reported complete but no data found in collection`)
+      return { taskId, status: "failed", error: "Task completed but no data found — backend may have failed silently" }
+    }
 
     // Register collection metadata
     await registerCollection(opts)

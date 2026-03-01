@@ -388,6 +388,9 @@ async function main() {
       await processVendor(vendor, catalogPath, vertical, progress, opts)
       completed++
       log(`[${vendor.slug}] COMPLETED`)
+      // Cooldown between vendors to let backend recover after AI processing
+      log(`  Cooling down 15s before next vendor...`)
+      await new Promise((r) => setTimeout(r, 15_000))
     } catch (err) {
       failed++
       const msg = err instanceof Error ? err.message : String(err)
@@ -398,6 +401,9 @@ async function main() {
         error: msg,
       }
       saveProgress(progress)
+      // Longer cooldown after failure (backend may be overwhelmed)
+      log(`  Cooling down 30s after failure...`)
+      await new Promise((r) => setTimeout(r, 30_000))
     }
   }
 
