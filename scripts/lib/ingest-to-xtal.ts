@@ -21,6 +21,7 @@ interface IngestOptions {
   vertical?: Vertical
   source?: CollectionSource
   sourceUrl?: string
+  force?: boolean
 }
 
 interface IngestResult {
@@ -286,11 +287,15 @@ export async function ingestToXtal(opts: IngestOptions): Promise<IngestResult> {
   log(`Ingesting ${opts.slug} from ${opts.jsonlPath}`)
 
   // Check if already ingested (saves BatchPipeline AI costs)
-  const alreadyExists = await collectionAlreadyIngested(opts.slug)
-  if (alreadyExists) {
-    log(`  Collection ${opts.slug} already has data — skipping ingest`)
-    await registerCollection(opts)
-    return { taskId: null, status: "completed", productsProcessed: 0 }
+  if (!opts.force) {
+    const alreadyExists = await collectionAlreadyIngested(opts.slug)
+    if (alreadyExists) {
+      log(`  Collection ${opts.slug} already has data — skipping ingest`)
+      await registerCollection(opts)
+      return { taskId: null, status: "completed", productsProcessed: 0 }
+    }
+  } else {
+    log(`  Force mode: skipping collectionAlreadyIngested check`)
   }
 
   // Validate

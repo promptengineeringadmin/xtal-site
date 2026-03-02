@@ -17,6 +17,7 @@
  *   npx tsx scripts/bulk-store-setup.ts --skip-ingest         # register + optimize (no ingest)
  *   npx tsx scripts/bulk-store-setup.ts --batch 5             # 5 concurrent ingests
  *   npx tsx scripts/bulk-store-setup.ts --dry-run             # show what would be done
+ *   npx tsx scripts/bulk-store-setup.ts --force               # re-ingest even if data exists
  */
 
 import * as fs from "fs"
@@ -87,6 +88,7 @@ function parseArgs() {
     skipIngest: false,
     batch: 1,
     dryRun: false,
+    force: false,
   }
 
   for (let i = 0; i < args.length; i++) {
@@ -96,6 +98,7 @@ function parseArgs() {
       case "--skip-ingest": opts.skipIngest = true; break
       case "--batch": opts.batch = parseInt(args[++i], 10); break
       case "--dry-run": opts.dryRun = true; break
+      case "--force": opts.force = true; break
     }
   }
 
@@ -115,10 +118,6 @@ function saveProgress(progress: BulkProgress): void {
   progress.lastUpdated = new Date().toISOString()
   fs.writeFileSync(PROGRESS_PATH, JSON.stringify(progress, null, 2))
 }
-
-// ── Hardcoded collection IDs to skip ─────────────────────────
-
-const SKIP_IDS = new Set(["xtaldemo", "shopify_products", "willow", "bestbuy", "goldcanna", "dennis"])
 
 // ── Step: Register ───────────────────────────────────────────
 
@@ -166,6 +165,7 @@ async function stepIngest(
   vendor: ProbeResult,
   catalogPath: string,
   vertical: Vertical,
+  force: boolean = false,
 ): Promise<{ productsProcessed?: number; taskId?: string }> {
   const result = await ingestToXtal({
     slug: vendor.slug,
@@ -174,6 +174,7 @@ async function stepIngest(
     vertical,
     source: "shopify-import",
     sourceUrl: vendor.site,
+    force,
   })
 
   if (result.status === "failed") {
@@ -267,7 +268,7 @@ async function processVendor(
         await stepRegister(vendor, catalogPath, vertical)
         break
       case "ingest": {
-        const result = await stepIngest(vendor, catalogPath, vertical)
+        const result = await stepIngest(vendor, catalogPath, vertical, opts.force)
         progress.vendors[vendor.slug].productsProcessed = result.productsProcessed
         progress.vendors[vendor.slug].taskId = result.taskId
         break
@@ -313,7 +314,6 @@ async function main() {
 
   // Build target list
   let targets = ready.filter((p) => {
-    if (SKIP_IDS.has(p.slug)) return false
     if (!catalogSlugs.has(p.slug)) return false
     return true
   })
