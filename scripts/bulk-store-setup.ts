@@ -68,8 +68,24 @@ interface BulkProgress {
 // ── Paths ────────────────────────────────────────────────────
 
 const DATA_DIR = path.resolve(__dirname, "../data")
+const DEFERRED_DIR = path.join(DATA_DIR, "deferred-large")
 const PROBE_RESULTS_PATH = path.join(DATA_DIR, "prospect-probe-results.json")
 const PROGRESS_PATH = path.join(DATA_DIR, "bulk-setup-progress.json")
+
+/** Build a slug→path map scanning both data/ and data/deferred-large/ */
+function buildCatalogMap(): Map<string, string> {
+  const map = new Map<string, string>()
+  for (const dir of [DATA_DIR, DEFERRED_DIR]) {
+    if (!fs.existsSync(dir)) continue
+    for (const f of fs.readdirSync(dir)) {
+      if (f.endsWith("-catalog.jsonl")) {
+        const slug = f.replace("-catalog.jsonl", "")
+        if (!map.has(slug)) map.set(slug, path.join(dir, f))
+      }
+    }
+  }
+  return map
+}
 
 // ── Logging ──────────────────────────────────────────────────
 
@@ -308,22 +324,17 @@ async function main() {
   const ready = probes.filter((p) => p.teardownReady)
   log(`Probe results: ${probes.length} total, ${ready.length} teardown-ready`)
 
-  // Find catalog files
-  const catalogFiles = fs.readdirSync(DATA_DIR).filter((f) => f.endsWith("-catalog.jsonl"))
-  const catalogSlugs = new Set(catalogFiles.map((f) => f.replace("-catalog.jsonl", "")))
+  // Find catalog files (data/ + data/deferred-large/)
+  const catalogMap = buildCatalogMap()
 
   // Build target list
-  let targets = ready.filter((p) => {
-    if (!catalogSlugs.has(p.slug)) return false
-    return true
-  })
+  let targets = ready.filter((p) => catalogMap.has(p.slug))
 
   if (opts.vendor) {
     targets = targets.filter((p) => p.slug === opts.vendor)
     if (targets.length === 0) {
       // Try to find even if not in probe results (manual catalog)
-      const manualPath = path.join(DATA_DIR, `${opts.vendor}-catalog.jsonl`)
-      if (fs.existsSync(manualPath)) {
+      if (catalogMap.has(opts.vendor)) {
         targets = [{
           slug: opts.vendor,
           domain: "",
@@ -351,11 +362,12 @@ async function main() {
     log("\n--- DRY RUN ---")
     for (const t of targets) {
       const v = categoryToVertical(t.category)
-      const catalogPath = path.join(DATA_DIR, `${t.slug}-catalog.jsonl`)
-      const lineCount = fs.existsSync(catalogPath)
+      const catalogPath = catalogMap.get(t.slug) ?? ""
+      const lineCount = catalogPath && fs.existsSync(catalogPath)
         ? fs.readFileSync(catalogPath, "utf-8").split("\n").filter(Boolean).length
         : 0
-      log(`  ${t.slug}: ${t.name} | ${t.category} → ${v} | ${lineCount} products`)
+      const deferred = catalogPath.includes("deferred-large") ? " [deferred]" : ""
+      log(`  ${t.slug}: ${t.name} | ${t.category} → ${v} | ${lineCount} products${deferred}`)
     }
     log(`\nWould process ${targets.length} vendors.`)
     return
@@ -377,7 +389,7 @@ async function main() {
     }
 
     const vertical = categoryToVertical(vendor.category)
-    const catalogPath = path.join(DATA_DIR, `${vendor.slug}-catalog.jsonl`)
+    const catalogPath = catalogMap.get(vendor.slug) ?? path.join(DATA_DIR, `${vendor.slug}-catalog.jsonl`)
 
     log(`\n${"═".repeat(50)}`)
     log(`[${vendor.slug}] ${vendor.name}`)

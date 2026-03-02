@@ -6,12 +6,14 @@
  * Usage: node scripts/apply-search-settings.mjs <command> [args]
  *
  * Commands:
- *   read-settings <collection>          Read current backend settings
- *   read-prompts <collection>           Read current backend prompts
- *   apply-settings <collection> <json>  Apply dial settings
- *   apply-marketing <collection> <text> Apply marketing prompt
- *   apply-brand <collection> <text>     Apply brand prompt
- *   apply-all <collection>              Apply all recommended settings from config below
+ *   read-settings <collection>                   Read current backend settings
+ *   read-prompts <collection>                    Read current backend prompts
+ *   apply-settings <collection> <json>           Apply dial settings
+ *   apply-marketing <collection> <text>          Apply marketing prompt
+ *   apply-brand <collection> <text>              Apply brand prompt
+ *   apply-all <collection>                       Apply all recommended settings (bestbuy/xtaldemo only)
+ *   list-collections                             List all Qdrant collections with point counts + config
+ *   apply-collection-config <collection|--all>   Apply preset dials + store_type from COLLECTION_CONFIG
  */
 
 import { readFileSync } from "fs"
@@ -28,6 +30,7 @@ for (const line of envLines) {
 }
 
 const BACKEND_URL = env.XTAL_BACKEND_URL
+const QDRANT_URL = env.QDRANT_URL
 const COGNITO_URL = env.COGNITO_URL
 const COGNITO_CLIENT_ID = env.COGNITO_CLIENT_ID
 const COGNITO_CLIENT_SECRET = env.COGNITO_CLIENT_SECRET
@@ -249,6 +252,140 @@ async function applyBrandPrompt(collection, prompt) {
   }
 }
 
+// ─── Per-collection preset config ───────────────────────────
+
+const DIAL_PRESETS = {
+  willow:   { bm25_weight: 0.8, merch_rerank_strength: 0.5,  keyword_rerank_strength: 0.2, query_enhancement_enabled: false },
+  bestbuy:  { bm25_weight: 2.5, merch_rerank_strength: 0.15, keyword_rerank_strength: 0.6, query_enhancement_enabled: true  },
+  xtaldemo: { bm25_weight: 2.0, merch_rerank_strength: 0.25, keyword_rerank_strength: 0.5, query_enhancement_enabled: true  },
+}
+
+// Collections already tuned — skip during --all batch
+const SKIP_COLLECTIONS = new Set(["bestbuy", "xtaldemo", "goldcanna", "willow"])
+
+const COLLECTION_CONFIG = {
+  // Home & Furniture → willow preset
+  sixpenny:               { preset: "willow",   store_type: "Modern modular furniture retailer" },
+  arhaus:                 { preset: "willow",   store_type: "Luxury home furnishings retailer" },
+  parachute:              { preset: "willow",   store_type: "Sustainable home goods retailer" },
+  "maiden-home":          { preset: "willow",   store_type: "Custom upholstered furniture retailer" },
+  revival:                { preset: "willow",   store_type: "Vintage rug marketplace" },
+  "lulu-and-georgia":     { preset: "willow",   store_type: "Contemporary home decor retailer" },
+  "the-citizenry":        { preset: "willow",   store_type: "Artisan home goods retailer" },
+  "abc-carpet-and-home":  { preset: "willow",   store_type: "Home furnishings and decor retailer" },
+  floyd:                  { preset: "willow",   store_type: "Modular furniture retailer" },
+  brooklinen:             { preset: "willow",   store_type: "Premium bedding and linens retailer" },
+  "dania-furniture":      { preset: "willow",   store_type: "Modern furniture retailer" },
+  "clive-coffee":         { preset: "willow",   store_type: "Espresso equipment specialty retailer" },
+  "simon-pearce":         { preset: "willow",   store_type: "Handblown glass artisan retailer" },
+  // Apparel & Fashion → xtaldemo preset
+  threadheads:            { preset: "xtaldemo", store_type: "Graphic t-shirt retailer" },
+  micas:                  { preset: "xtaldemo", store_type: "Women's fashion apparel retailer" },
+  bloomchic:              { preset: "xtaldemo", store_type: "Plus-size fashion retailer" },
+  volcom:                 { preset: "xtaldemo", store_type: "Surf and skate apparel brand" },
+  "tony-bianco":          { preset: "xtaldemo", store_type: "Women's footwear retailer" },
+  "nine-west":            { preset: "xtaldemo", store_type: "Women's footwear retailer" },
+  veiled:                 { preset: "xtaldemo", store_type: "Modest fashion apparel retailer" },
+  "lola-and-the-boys":    { preset: "xtaldemo", store_type: "Kids' fashion apparel retailer" },
+  "jenni-kayne":          { preset: "xtaldemo", store_type: "Contemporary apparel and home goods retailer" },
+  "260-sample-sale":      { preset: "xtaldemo", store_type: "Luxury sample sale marketplace" },
+  // Beauty & Cosmetics → xtaldemo preset
+  kosas:                  { preset: "xtaldemo", store_type: "Clean beauty retailer" },
+  colourpop:              { preset: "xtaldemo", store_type: "Makeup and cosmetics retailer" },
+  glossier:               { preset: "xtaldemo", store_type: "Prestige beauty brand" },
+  "rare-beauty-rare-beauty-brands": { preset: "xtaldemo", store_type: "Prestige beauty brand" },
+  "fenty-beauty-kendo-brands":      { preset: "xtaldemo", store_type: "Prestige beauty brand" },
+  "kylie-cosmetics":      { preset: "xtaldemo", store_type: "Celebrity beauty brand" },
+  "pacifica-beauty":      { preset: "xtaldemo", store_type: "Natural beauty and skincare retailer" },
+  morphe:                 { preset: "xtaldemo", store_type: "Makeup and cosmetics retailer" },
+  "khy-by-kylie-jenner":  { preset: "xtaldemo", store_type: "Celebrity fashion and beauty brand" },
+  // Electronics & Audio → bestbuy preset
+  nonda:                  { preset: "bestbuy",  store_type: "Car tech accessories retailer" },
+  skullcandy:             { preset: "bestbuy",  store_type: "Consumer audio brand" },
+  "turtle-beach":         { preset: "bestbuy",  store_type: "Gaming headset manufacturer" },
+  jlab:                   { preset: "bestbuy",  store_type: "Audio equipment retailer" },
+  "headphones-com":       { preset: "bestbuy",  store_type: "Audio equipment specialty retailer" },
+  wyze:                   { preset: "bestbuy",  store_type: "Smart home device manufacturer" },
+  casely:                 { preset: "bestbuy",  store_type: "Phone case and tech accessories retailer" },
+  bluetti:                { preset: "bestbuy",  store_type: "Portable power station manufacturer" },
+  "speck-products":       { preset: "bestbuy",  store_type: "Phone case manufacturer" },
+  plugable:               { preset: "bestbuy",  store_type: "USB and docking station specialist" },
+  "alien-gear-holsters":  { preset: "bestbuy",  store_type: "Gun holster manufacturer" },
+  spyderco:               { preset: "bestbuy",  store_type: "Tactical knife and EDC gear retailer" },
+  "pair-eyewear":         { preset: "bestbuy",  store_type: "Online eyewear retailer" },
+  "goal-zero":            { preset: "bestbuy",  store_type: "Portable solar power equipment manufacturer" },
+  "shop-solar-kits":      { preset: "bestbuy",  store_type: "Solar panel systems retailer" },
+  "mustang-survival":     { preset: "bestbuy",  store_type: "Marine safety equipment retailer" },
+  westinghouse:           { preset: "bestbuy",  store_type: "Home appliance manufacturer" },
+  // Food & Beverage → xtaldemo preset
+  olipop:                 { preset: "xtaldemo", store_type: "Functional soda beverage brand" },
+  spindrift:              { preset: "xtaldemo", store_type: "Functional sparkling water brand" },
+  "liquid-death":         { preset: "xtaldemo", store_type: "Lifestyle beverage brand" },
+  "liquid-death-merch":   { preset: "xtaldemo", store_type: "Lifestyle merchandise brand" },
+  "supermarket-italy":    { preset: "xtaldemo", store_type: "Italian specialty foods retailer" },
+  // Specialty & Niche → xtaldemo preset
+  "new-era-cap":          { preset: "xtaldemo", store_type: "Licensed sports apparel and headwear retailer" },
+  "books-of-wonder":      { preset: "xtaldemo", store_type: "Children's bookstore" },
+  "film-art-gallery":     { preset: "xtaldemo", store_type: "Vintage entertainment memorabilia retailer" },
+  gspawn:                 { preset: "xtaldemo", store_type: "Numismatic and rare coins retailer" },
+  ohuhu:                  { preset: "xtaldemo", store_type: "Art supplies and markers retailer" },
+  "heirloom-roses":       { preset: "xtaldemo", store_type: "Heirloom plant nursery" },
+  "uncommon-goods":       { preset: "xtaldemo", store_type: "Unique gift and lifestyle retailer" },
+  "bonus-home-heatonist": { preset: "xtaldemo", store_type: "Hot sauce specialty retailer" },
+}
+
+// ─── Qdrant helpers ──────────────────────────────────────────
+
+async function listCollections() {
+  if (!QDRANT_URL) throw new Error("QDRANT_URL not set in .env.local")
+
+  const listRes = await fetch(`${QDRANT_URL}/collections`)
+  if (!listRes.ok) throw new Error(`Qdrant list failed: ${listRes.status}`)
+  const { result } = await listRes.json()
+  const names = result.collections.map(c => c.name)
+
+  // Fetch point counts in parallel
+  const details = await Promise.all(names.map(async name => {
+    const res = await fetch(`${QDRANT_URL}/collections/${name}`)
+    if (!res.ok) return { name, points: 0 }
+    const { result: r } = await res.json()
+    return { name, points: r.points_count ?? r.vectors_count ?? 0 }
+  }))
+
+  // Sort ascending by points
+  details.sort((a, b) => a.points - b.points)
+
+  const rows = details.map(({ name, points }) => {
+    const truncated = points > 0 && points % 500 === 0 ? "⚠ yes" : "no"
+    const cfg = COLLECTION_CONFIG[name]
+    const preset = cfg?.preset ?? (SKIP_COLLECTIONS.has(name) ? "(tuned)" : "xtaldemo*")
+    const store_type = cfg?.store_type ?? (SKIP_COLLECTIONS.has(name) ? "(custom)" : "—")
+    return { name, points: points.toLocaleString(), truncated, preset, store_type }
+  })
+
+  // Print table
+  const cols = ["name", "points", "truncated", "preset", "store_type"]
+  const widths = cols.map(c => Math.max(c.length, ...rows.map(r => String(r[c]).length)))
+  const fmt = row => cols.map((c, i) => String(row[c]).padEnd(widths[i])).join("  ")
+  console.log("\n" + fmt(Object.fromEntries(cols.map(c => [c, c]))))
+  console.log(widths.map(w => "-".repeat(w)).join("  "))
+  for (const row of rows) console.log(fmt(row))
+  console.log(`\n${rows.length} collections. ⚠ = likely truncated (points % 500 === 0). * = fallback preset.`)
+}
+
+// ─── Apply collection config ─────────────────────────────────
+
+async function applyCollectionConfig(name) {
+  const cfg = COLLECTION_CONFIG[name]
+  if (!cfg) {
+    console.warn(`  ⚠ No config found for "${name}" — skipping`)
+    return
+  }
+  const dials = { ...DIAL_PRESETS[cfg.preset], store_type: cfg.store_type }
+  console.log(`\n[${name}] preset=${cfg.preset}, store_type="${cfg.store_type}"`)
+  await applySettings(name, dials)
+}
+
 // ─── Recommended configurations ─────────────────────────────
 
 const BESTBUY_MARKETING_PROMPT = `Expand the user's intent toward specific product categories, technical specifications, and use-case scenarios.
@@ -328,7 +465,7 @@ const [,, command, collection, ...rest] = process.argv
 async function main() {
   if (!command) {
     console.log("Usage: node apply-search-settings.mjs <command> <collection> [args]")
-    console.log("Commands: read-settings, read-prompts, apply-settings, apply-marketing, apply-brand, apply-all")
+    console.log("Commands: read-settings, read-prompts, apply-settings, apply-marketing, apply-brand, apply-all, list-collections, apply-collection-config")
     process.exit(1)
   }
 
@@ -370,7 +507,7 @@ async function main() {
           bm25_weight: 2.0,
           keyword_rerank_strength: 0.5,
           merch_rerank_strength: 0.25,
-          store_type: "online retailer",
+          store_type: "amazon-like retailer",
         })
         await applyMarketingPrompt(collection, XTALDEMO_MARKETING_PROMPT)
         await applyBrandPrompt(collection, XTALDEMO_BRAND_PROMPT)
@@ -379,6 +516,25 @@ async function main() {
         process.exit(1)
       }
       console.log(`\n✅ All settings applied for "${collection}"`)
+      break
+    }
+
+    case "list-collections":
+      await listCollections()
+      break
+
+    case "apply-collection-config": {
+      if (collection === "--all") {
+        const all = Object.keys(COLLECTION_CONFIG).filter(n => !SKIP_COLLECTIONS.has(n))
+        console.log(`Applying collection config to ${all.length} collections...`)
+        for (const name of all) {
+          await applyCollectionConfig(name)
+        }
+        console.log(`\n✅ Done. Applied config to ${all.length} collections.`)
+      } else {
+        await applyCollectionConfig(collection)
+        console.log(`\n✅ Done.`)
+      }
       break
     }
 
