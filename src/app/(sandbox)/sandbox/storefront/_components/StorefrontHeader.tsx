@@ -83,6 +83,7 @@ function SearchInput({ scenario }: { scenario: DomScenario }) {
           <div className="search__input relative">
             <input
               type="search"
+              id="search_field"
               name="q"
               placeholder="Search products..."
               className="border rounded-md pl-9 pr-3 py-1.5 text-sm w-48 focus:outline-none focus:ring-1 focus:ring-[#8B7D6B]"

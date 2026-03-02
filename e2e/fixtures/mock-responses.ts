@@ -4,7 +4,7 @@ export const MOCK_CONFIG = {
   enabled: true,
   searchSelector: "#search_field",
   displayMode: "inline",
-  resultsSelector: "shopping-multi-view",
+  resultsSelector: "#products",
   siteUrl: "https://www.willowgroupltd.com",
   features: { aspects: false, explain: false },
   cardTemplate: {
