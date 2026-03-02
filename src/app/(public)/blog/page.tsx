@@ -3,6 +3,7 @@ import { getAllPosts } from '@/lib/blog';
 import { BlogCard } from '@/components/blog/BlogCard';
 import { CategoryTabs } from '@/components/blog/CategoryTabs';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Suspense } from 'react';
 
 export const metadata: Metadata = {
@@ -53,9 +54,9 @@ export default async function BlogPage({
           <Link href={`/blog/${featured.slug}`} className="group block mb-12">
             <article className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xtal transition-shadow">
               <div className="grid md:grid-cols-2 gap-0">
-                <div className={`aspect-[16/9] md:aspect-auto ${featured.image ? '' : 'bg-gradient-to-br from-xtal-navy/5 to-xtal-ice flex items-center justify-center'}`}>
+                <div className={`relative aspect-[16/9] ${featured.image ? '' : 'bg-gradient-to-br from-xtal-navy/5 to-xtal-ice flex items-center justify-center'}`}>
                   {featured.image ? (
-                    <img src={featured.image} alt={featured.title} className="w-full h-full object-cover" />
+                    <Image src={featured.image} alt={featured.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" priority />
                   ) : (
                     <span className="text-6xl text-xtal-navy/20 font-bold">XTAL</span>
                   )}

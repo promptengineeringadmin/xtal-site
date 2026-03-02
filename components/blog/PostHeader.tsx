@@ -33,7 +33,7 @@ export function PostHeader({ post }: { post: BlogPost }) {
       </div>
       {post.image && (
         <div className="relative aspect-[2/1] rounded-xl overflow-hidden mt-8">
-          <Image src={post.image} alt={post.title} fill className="object-cover" priority />
+          <Image src={post.image} alt={post.title} fill sizes="(max-width: 1280px) 100vw, 1280px" className="object-cover" priority />
         </div>
       )}
     </header>

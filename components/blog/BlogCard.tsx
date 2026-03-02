@@ -8,7 +8,7 @@ export function BlogCard({ post }: { post: BlogPost }) {
       <article className="bg-white rounded-xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xtal transition-shadow h-full flex flex-col">
         {post.image ? (
           <div className="relative aspect-[16/9] overflow-hidden">
-            <Image src={post.image} alt={post.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+            <Image src={post.image} alt={post.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-300" />
           </div>
         ) : (
           <div className="aspect-[16/9] bg-gradient-to-br from-xtal-navy/5 to-xtal-ice flex items-center justify-center">
