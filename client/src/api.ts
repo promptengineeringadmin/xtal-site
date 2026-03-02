@@ -55,6 +55,7 @@ export interface XtalConfig {
   productUrlPattern?: string
   observerTimeoutMs?: number
   pricePresets?: { label: string; min?: number; max?: number }[]
+  resultsPerPage?: number
 }
 
 export class XtalAPI {
