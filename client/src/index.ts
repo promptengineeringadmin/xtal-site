@@ -485,7 +485,7 @@ function boot() {
                 .searchFiltered(lastQuery, searchContext!, {
                   facetFilters,
                   priceRange,
-                  limit: 24,
+                  limit: config.resultsPerPage ?? 24,
                 })
                 .then((res) => {
                   lastTotal = res.total
@@ -523,7 +523,7 @@ function boot() {
             inline.showLoading(query)
 
             api
-              .searchFull(query, 24)
+              .searchFull(query, config.resultsPerPage ?? 24)
               .then((res) => {
                 lastTotal = res.total
                 lastFacets = res.computed_facets || {}

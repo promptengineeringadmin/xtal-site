@@ -11,6 +11,7 @@ import {
   getProductUrlPattern,
   getFiltersEnabled,
   getPricePresets,
+  getResultsPerPage,
 } from "@/lib/admin/admin-settings"
 
 export async function OPTIONS() {
@@ -28,7 +29,7 @@ export async function GET(request: Request) {
     )
   }
 
-  const [enabled, searchSelector, displayMode, resultsSelector, siteUrl, cardTemplate, productUrlPattern, filtersEnabled, pricePresets] =
+  const [enabled, searchSelector, displayMode, resultsSelector, siteUrl, cardTemplate, productUrlPattern, filtersEnabled, pricePresets, resultsPerPage] =
     await Promise.all([
       getSnippetEnabled(shopId),
       getSnippetSearchSelector(shopId),
@@ -39,6 +40,7 @@ export async function GET(request: Request) {
       getProductUrlPattern(shopId),
       getFiltersEnabled(shopId),
       getPricePresets(shopId),
+      getResultsPerPage(shopId),
     ])
 
   return NextResponse.json(
@@ -52,6 +54,7 @@ export async function GET(request: Request) {
       ...(cardTemplate ? { cardTemplate } : {}),
       ...(productUrlPattern ? { productUrlPattern } : {}),
       ...(pricePresets ? { pricePresets } : {}),
+      resultsPerPage,
     },
     {
       headers: {
