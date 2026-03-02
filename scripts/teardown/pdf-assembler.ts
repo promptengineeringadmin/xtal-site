@@ -1,11 +1,11 @@
 import type { Page } from "playwright-core"
 
-const SLIDE_W = 1080
-const SLIDE_H = 1350
+const SLIDE_W = 1920
+const SLIDE_H = 1080
 
 /**
  * Assemble slide PNG buffers into a multi-page carousel PDF.
- * Each PNG becomes one full-bleed page at 1080x1350px.
+ * Each PNG becomes one full-bleed page at 1920x1080px.
  */
 export async function assemblePdf(
   slides: Buffer[],

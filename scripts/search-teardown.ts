@@ -190,7 +190,7 @@ export async function runTeardown(
         } catch (err) {
           const msg = err instanceof Error ? err.message : String(err)
           log(`    ${merchant.name}: ERROR - ${msg}`)
-          merchantResult = { results: [], count: 0, responseTime: 0 }
+          merchantResult = { results: [], count: 0, responseTime: 0, error: msg }
         }
 
         // XTAL search (use xtalCollection, not merchant.id)
@@ -265,7 +265,7 @@ export async function runTeardown(
     log("Step 3: Rendering slides...")
 
     const page = await browser.newPage({
-      viewport: { width: 1080, height: 1350 },
+      viewport: { width: 1920, height: 1080 },
     })
 
     const totalComparisonSlides = comparisons.length
