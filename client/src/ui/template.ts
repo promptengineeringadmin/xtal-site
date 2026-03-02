@@ -86,18 +86,50 @@ function processConditionals(
   return result
 }
 
-/** Replace {{field}} tokens with values from data */
+/** Escape HTML special characters to prevent XSS via product data interpolation */
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
+
+/**
+ * Strip XSS vectors from an HTML string:
+ *  - <script> and <iframe> tags and their content
+ *  - on* event handler attributes (onerror, onload, onmouseover, ontoggle, etc.)
+ *  - javascript: and data: URIs in href/src/action attributes
+ */
+function sanitizeTemplate(html: string): string {
+  // Remove <script>...</script> blocks
+  let result = html.replace(/<script\b[\s\S]*?<\/script>/gi, "")
+  // Remove <iframe>...</iframe> blocks
+  result = result.replace(/<iframe\b[\s\S]*?<\/iframe>/gi, "")
+  // Strip on* event handler attributes (e.g. onclick="...", onerror='...', onload=foo)
+  result = result.replace(/\bon\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, "")
+  // Strip javascript: and data: URIs from href/src/action attributes (double-quoted)
+  result = result.replace(/(href|src|action)\s*=\s*"(?:javascript|data):[^"]*"/gi, '$1=""')
+  // Single-quoted
+  result = result.replace(/(href|src|action)\s*=\s*'(?:javascript|data):[^']*'/gi, "$1=''")
+  // Unquoted
+  result = result.replace(/(href|src|action)\s*=\s*(?:javascript|data):[^\s>]*/gi, '$1=""')
+  return result
+}
+
+/** Replace {{field}} tokens with HTML-escaped values from data */
 function interpolateTokens(
   template: string,
   data: Record<string, string>
 ): string {
-  return template.replace(/\{\{(\w+)\}\}/g, (_, key) => data[key] ?? "")
+  return template.replace(/\{\{(\w+)\}\}/g, (_, key) => escapeHtml(data[key] ?? ""))
 }
 
-/** Parse an HTML string into a DOM element */
+/** Parse an HTML string into a DOM element — sanitizes before innerHTML assignment */
 function htmlToElement(html: string): HTMLElement {
   const wrapper = document.createElement("div")
-  wrapper.innerHTML = html.trim()
+  wrapper.innerHTML = sanitizeTemplate(html.trim())
   return (wrapper.firstElementChild as HTMLElement) || wrapper
 }
 

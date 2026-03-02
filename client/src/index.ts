@@ -7,6 +7,37 @@ import { attachInterceptor } from "./interceptor"
 import { appendUtm } from "./utm"
 import { detectCartAdapter } from "./cart/detect"
 
+/** Selectors that must never be used as resultsSelector (page-destruction risk) */
+const BLOCKED_SELECTORS = new Set(["body", "html", "head", "*"])
+
+/**
+ * Scope all CSS rules to a container selector to prevent global CSS injection.
+ * e.g. `header { display: none }` → `.xtal-layout header { display: none }`
+ * Since no `header` exists inside `.xtal-layout`, the rule is inert.
+ * Handles @media blocks by scoping their inner rules; passes @keyframes through.
+ */
+function scopeCSS(css: string, scope: string): string {
+  const stripped = css.replace(/\/\*[\s\S]*?\*\//g, "")
+  return stripped.replace(
+    /([^{}@][^{}]*)\{([^{}]*)\}/g,
+    (match, selectorBlock, declarations) => {
+      const sel = selectorBlock.trim()
+      if (!sel) return match
+      // Don't scope @keyframes steps (from, to, percentages)
+      if (/^(from|to|\d[\d.]*%)/.test(sel)) return match
+      const scoped = sel
+        .split(",")
+        .map((s: string) => {
+          const t = s.trim()
+          return t ? `${scope} ${t}` : ""
+        })
+        .filter(Boolean)
+        .join(", ")
+      return scoped ? `${scoped} { ${declarations} }` : match
+    }
+  )
+}
+
 /** Fire-and-forget error telemetry — sendBeacon with fetch fallback */
 function beaconError(apiBase: string, shopId: string, error: string, context?: string) {
   try {
@@ -274,13 +305,14 @@ function boot() {
         // Template system
         const cardTemplate: CardTemplate | null = config.cardTemplate ?? null
 
-        // Inject card template CSS into <head>
+        // Inject card template CSS into <head> — scoped to .xtal-layout to
+        // prevent injected CSS from affecting host page elements (e.g. header, body)
         if (cardTemplate?.css) {
           const existing = document.getElementById("xtal-card-styles")
           if (existing) existing.remove()
           const style = document.createElement("style")
           style.id = "xtal-card-styles"
-          style.textContent = cardTemplate.css
+          style.textContent = scopeCSS(cardTemplate.css, ".xtal-layout")
           document.head.appendChild(style)
         }
 
@@ -289,9 +321,13 @@ function boot() {
           if (config.productUrlPattern) {
             const sku = product.variants?.[0]?.sku || ""
             if (sku) {
-              return config.productUrlPattern
+              const url = config.productUrlPattern
                 .replace("{sku}", encodeURIComponent(sku))
                 .replace("{id}", product.id || "")
+              // Block javascript: and data: URIs from config injection
+              if (!/^javascript:/i.test(url) && !/^data:/i.test(url)) {
+                return url
+              }
             }
           }
           const rawUrl = product.product_url || "#"
@@ -307,14 +343,31 @@ function boot() {
         console.log(`[xtal.js] Cart adapter: ${cartAdapter.name}`)
 
         // Determine mode: inline vs overlay
+        // Block dangerous selectors that would replace the entire page
+        const resultsSel = config.resultsSelector ?? ""
+        const isSafeResultsSelector =
+          !!resultsSel && !BLOCKED_SELECTORS.has(resultsSel.trim().toLowerCase())
         const isInline =
-          config.displayMode === "inline" && !!config.resultsSelector
+          config.displayMode === "inline" && isSafeResultsSelector
         const gridTarget = isInline
-          ? document.querySelector<HTMLElement>(config.resultsSelector!)
+          ? document.querySelector<HTMLElement>(resultsSel)
           : null
 
-        if (isInline && !gridTarget) {
-          console.log(`[xtal.js] Inline mode: "${config.resultsSelector}" not found — standing by`)
+        if (!isInline || !gridTarget) {
+          // Standing-by: selector not found, blocked, or non-inline mode.
+          // Still expose window.XTAL so the SDK is detectable.
+          if (!isSafeResultsSelector && resultsSel) {
+            console.warn(`[xtal.js] resultsSelector "${resultsSel}" is blocked — SDK disabled`)
+          } else if (isInline && !gridTarget) {
+            console.log(`[xtal.js] Inline mode: "${resultsSel}" not found — standing by`)
+          }
+          ;(window as any).XTAL = {
+            destroy() {
+              const cardStyles = document.getElementById("xtal-card-styles")
+              if (cardStyles) cardStyles.remove()
+              ;(window as any).XTAL = undefined
+            },
+          }
           return
         }
 
@@ -498,8 +551,15 @@ function boot() {
                 beaconError(apiBase, shopId!, String(err), "search")
                 inline.restore()
                 // Fallback: navigate to merchant's native search
-                if (config.siteUrl && lastQuery) {
-                  window.location.href = `${config.siteUrl.replace(/\/$/, "")}/shop/?Search=${encodeURIComponent(lastQuery)}`
+                // Only use siteUrl if it has a safe http(s) protocol
+                const safeSiteUrl =
+                  config.siteUrl &&
+                  (config.siteUrl.startsWith("https://") ||
+                    config.siteUrl.startsWith("http://"))
+                    ? config.siteUrl
+                    : ""
+                if (safeSiteUrl && lastQuery) {
+                  window.location.href = `${safeSiteUrl.replace(/\/$/, "")}/shop/?Search=${encodeURIComponent(lastQuery)}`
                 }
               })
           }
