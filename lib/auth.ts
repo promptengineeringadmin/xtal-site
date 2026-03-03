@@ -1,6 +1,10 @@
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 
+const useSecureCookies = process.env.NODE_ENV === "production"
+const cookiePrefix = useSecureCookies ? "__Secure-" : ""
+const cookieDomain = useSecureCookies ? ".xtalsearch.com" : undefined
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Google({
@@ -15,6 +19,32 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
   pages: {
     error: "/auth/error",
+  },
+
+  // Share session across www + marketing subdomains
+  cookies: {
+    sessionToken: {
+      name: `${cookiePrefix}authjs.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: useSecureCookies,
+        domain: cookieDomain,
+      },
+    },
+    callbackUrl: {
+      name: `${cookiePrefix}authjs.callback-url`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: useSecureCookies,
+        domain: cookieDomain,
+      },
+    },
+    // CSRF token NOT overridden — __Host- prefix forbids domain attribute.
+    // Each subdomain generates its own CSRF token, which is correct.
   },
 
   callbacks: {

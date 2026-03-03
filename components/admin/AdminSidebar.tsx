@@ -17,15 +17,31 @@ import {
 import UserMenu from "@/components/admin/UserMenu"
 import CollectionCombobox from "@/components/admin/CollectionCombobox"
 
-const NAV_ITEMS = [
+import { MARKETING_HOST, WWW_HOST } from "@/lib/admin/subdomain-routes"
+
+const ADMIN_NAV_ITEMS = [
   { href: "/admin/dashboard", label: "Dashboard", icon: BarChart3 },
   { href: "/admin/activity", label: "Activity", icon: Activity },
-  { href: "/admin/demos", label: "Demos", icon: Boxes },
-  { href: "/admin/grader", label: "Grader", icon: Gauge },
   { href: "/admin/search-quality", label: "Search Quality", icon: Flag },
   { href: "/admin/api-keys", label: "API Keys", icon: KeyRound },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ]
+
+const MARKETING_NAV_ITEMS = [
+  { href: "/admin/demos", label: "Demos", icon: Boxes },
+  { href: "/admin/grader", label: "Grader", icon: Gauge },
+]
+
+function useIsMarketingSubdomain(): boolean {
+  const [isMarketing, setIsMarketing] = useState(false)
+  useEffect(() => {
+    setIsMarketing(
+      typeof window !== "undefined" &&
+        window.location.hostname === MARKETING_HOST
+    )
+  }, [])
+  return isMarketing
+}
 
 interface UserInfo {
   name?: string | null
@@ -33,18 +49,23 @@ interface UserInfo {
   image?: string | null
 }
 
-function SidebarContent({ pathname, user }: {
+function SidebarContent({ pathname, user, isMarketing }: {
   pathname: string
   user?: UserInfo
+  isMarketing: boolean
 }) {
+  const navItems = isMarketing ? MARKETING_NAV_ITEMS : ADMIN_NAV_ITEMS
+  const homeHref = isMarketing ? "/admin/demos" : "/admin/dashboard"
+  const label = isMarketing ? "Marketing" : "Admin"
+
   return (
     <>
       <div className="p-6 pb-4">
-        <Link href="/admin/dashboard" className="block">
+        <Link href={homeHref} className="block">
           <span className="text-lg font-bold text-white tracking-wide">
             XTAL
           </span>
-          <span className="text-xs text-white/50 ml-2 font-medium">Admin</span>
+          <span className="text-xs text-white/50 ml-2 font-medium">{label}</span>
         </Link>
       </div>
 
@@ -56,7 +77,7 @@ function SidebarContent({ pathname, user }: {
       </div>
 
       <nav className="flex-1 px-3 space-y-1">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+        {navItems.map(({ href, label: navLabel, icon: Icon }) => {
           const active = pathname === href || pathname.startsWith(href + "/")
           return (
             <Link
@@ -69,7 +90,7 @@ function SidebarContent({ pathname, user }: {
               }`}
             >
               <Icon className="w-[18px] h-[18px] shrink-0" />
-              {label}
+              {navLabel}
             </Link>
           )
         })}
@@ -77,6 +98,21 @@ function SidebarContent({ pathname, user }: {
 
       <div className="p-4 border-t border-white/10 space-y-3">
         {user && <UserMenu name={user.name} email={user.email} image={user.image} />}
+        {isMarketing ? (
+          <a
+            href={`https://${WWW_HOST}/admin/dashboard`}
+            className="text-xs text-white/40 hover:text-white/70 transition-colors block"
+          >
+            &rarr; Admin Panel
+          </a>
+        ) : (
+          <a
+            href={`https://${MARKETING_HOST}/admin/demos`}
+            className="text-xs text-white/40 hover:text-white/70 transition-colors block"
+          >
+            &rarr; Marketing Tools
+          </a>
+        )}
         <Link
           href="/"
           className="text-xs text-white/40 hover:text-white/70 transition-colors block"
@@ -90,6 +126,7 @@ function SidebarContent({ pathname, user }: {
 
 export default function AdminSidebar({ user }: { user?: UserInfo }) {
   const pathname = usePathname()
+  const isMarketing = useIsMarketingSubdomain()
   const [mobileOpen, setMobileOpen] = useState(false)
 
   // Close mobile sidebar on navigation
@@ -125,6 +162,7 @@ export default function AdminSidebar({ user }: { user?: UserInfo }) {
         <SidebarContent
           pathname={pathname}
           user={user}
+          isMarketing={isMarketing}
         />
       </aside>
 
@@ -155,6 +193,7 @@ export default function AdminSidebar({ user }: { user?: UserInfo }) {
         <SidebarContent
           pathname={pathname}
           user={user}
+          isMarketing={isMarketing}
         />
       </aside>
     </>
