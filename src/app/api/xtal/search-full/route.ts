@@ -4,6 +4,7 @@ import { getStoreType, getAspectsEnabled } from "@/lib/admin/admin-settings"
 import { corsHeaders, handleOptions } from "@/lib/api/cors"
 import { isValidCollection } from "@/lib/admin/demo-collections"
 import { logProxyTiming } from "@/lib/admin/proxy-timing"
+import { trackBillableEvent } from "@/lib/api/billing-usage"
 
 export async function OPTIONS() {
   return handleOptions()
@@ -111,6 +112,15 @@ export async function POST(request: Request) {
       backendMs,
       totalMs: Date.now() - t0,
       aspectsFailed: aspectsResult.status === "rejected",
+    })
+
+    // Fire-and-forget: track search as billable event (aspect generation is free)
+    trackBillableEvent(collection, {
+      type: "search",
+      query: body.query ?? "",
+      status: searchResult.status === "fulfilled" ? 200 : 500,
+      latency_ms: backendMs,
+      result_count: searchData.results?.length,
     })
 
     const response = {

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getRandomExplainPrompt } from "@/lib/admin/explain-prompt"
 import { corsHeaders, handleOptions } from "@/lib/api/cors"
 import { isValidCollection } from "@/lib/admin/demo-collections"
+import { trackBillableEvent } from "@/lib/api/billing-usage"
 
 export async function OPTIONS() {
   return handleOptions()
@@ -75,6 +76,16 @@ export async function POST(request: Request) {
     })
 
     const data = await res.json()
+
+    // Fire-and-forget: track explain as billable event
+    trackBillableEvent(collection, {
+      type: "explain",
+      query: body.query ?? "",
+      status: res.status,
+      latency_ms: 0,
+      product_id: body.product_id,
+    })
+
     return NextResponse.json(
       { ...data, prompt_hash },
       { status: res.status, headers: corsHeaders() }
