@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth"
 import AdminSidebar from "@/components/admin/AdminSidebar"
+import AdminContextBar from "@/components/admin/AdminContextBar"
 import { CollectionProvider } from "@/lib/admin/CollectionContext"
 
 export const metadata = {
@@ -19,7 +20,10 @@ export default async function AdminLayout({
       <div className="min-h-screen bg-slate-50">
         <AdminSidebar user={session?.user} />
         <main className="md:ml-60 min-h-screen">
-          <div className="p-4 pt-16 md:pt-8 md:p-8">{children}</div>
+          <div className="p-4 pt-16 md:pt-8 md:p-8">
+            <AdminContextBar />
+            {children}
+          </div>
         </main>
       </div>
     </CollectionProvider>

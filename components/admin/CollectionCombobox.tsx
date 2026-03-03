@@ -3,46 +3,8 @@
 import { useState, useRef, useEffect, useMemo } from "react"
 import { ChevronDown, Search, X } from "lucide-react"
 import { useCollection } from "@/lib/admin/CollectionContext"
-import type { CollectionConfig, Vertical } from "@/lib/admin/collections"
-
-const VERTICAL_LABELS: Record<string, string> = {
-  food: "Food",
-  home: "Home",
-  beauty: "Beauty",
-  outdoor: "Outdoor",
-  pet: "Pet",
-  electronics: "Electronics",
-  cannabis: "Cannabis",
-  niche: "Niche",
-  apparel: "Apparel",
-  general: "General",
-}
-
-const VERTICAL_COLORS: Record<string, string> = {
-  food: "bg-amber-500/20 text-amber-300",
-  home: "bg-blue-500/20 text-blue-300",
-  beauty: "bg-pink-500/20 text-pink-300",
-  outdoor: "bg-green-500/20 text-green-300",
-  pet: "bg-orange-500/20 text-orange-300",
-  electronics: "bg-cyan-500/20 text-cyan-300",
-  cannabis: "bg-emerald-500/20 text-emerald-300",
-  niche: "bg-purple-500/20 text-purple-300",
-  apparel: "bg-rose-500/20 text-rose-300",
-  general: "bg-slate-500/20 text-slate-300",
-}
-
-function VerticalBadge({ vertical }: { vertical?: Vertical }) {
-  if (!vertical) return null
-  const label = VERTICAL_LABELS[vertical] || vertical
-  const color = VERTICAL_COLORS[vertical] || "bg-slate-500/20 text-slate-300"
-  return (
-    <span
-      className={`text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded ${color}`}
-    >
-      {label}
-    </span>
-  )
-}
+import type { CollectionConfig } from "@/lib/admin/collections"
+import { VerticalBadge, VERTICAL_LABELS } from "@/components/admin/VerticalBadge"
 
 function CollectionItem({
   config,
@@ -96,23 +58,38 @@ export default function CollectionCombobox() {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
   const [highlightIndex, setHighlightIndex] = useState(-1)
+  const [activeVertical, setActiveVertical] = useState<string | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
 
   const selected = collections.find((c) => c.id === collection)
 
-  // Filter collections by search term
+  // Available verticals (in VERTICAL_LABELS order)
+  const availableVerticals = useMemo(() => {
+    const present = new Set<string>(collections.map((c) => c.vertical || "general"))
+    return Object.keys(VERTICAL_LABELS).filter((v) => present.has(v))
+  }, [collections])
+
+  // Filter collections by search term + active vertical
   const filtered = useMemo(() => {
-    if (!search.trim()) return collections
-    const q = search.toLowerCase()
-    return collections.filter(
-      (c) =>
-        c.label.toLowerCase().includes(q) ||
-        c.description.toLowerCase().includes(q) ||
-        (c.vertical && c.vertical.includes(q)),
-    )
-  }, [collections, search])
+    let result = collections
+    if (search.trim()) {
+      const q = search.toLowerCase()
+      result = result.filter(
+        (c) =>
+          c.label.toLowerCase().includes(q) ||
+          c.description.toLowerCase().includes(q) ||
+          (c.vertical && c.vertical.includes(q)),
+      )
+    }
+    if (activeVertical) {
+      result = result.filter(
+        (c) => (c.vertical || "general") === activeVertical,
+      )
+    }
+    return result
+  }, [collections, search, activeVertical])
 
   // Group into sections: Recent, Pinned, then by vertical
   const groups = useMemo((): GroupedCollections[] => {
@@ -181,6 +158,7 @@ export default function CollectionCombobox() {
       ) {
         setOpen(false)
         setSearch("")
+        setActiveVertical(null)
       }
     }
     document.addEventListener("mousedown", handleClick)
@@ -223,11 +201,13 @@ export default function CollectionCombobox() {
           setCollection(flatItems[highlightIndex].id)
           setOpen(false)
           setSearch("")
+          setActiveVertical(null)
         }
         break
       case "Escape":
         setOpen(false)
         setSearch("")
+        setActiveVertical(null)
         break
     }
   }
@@ -270,6 +250,7 @@ export default function CollectionCombobox() {
             onClick={() => {
               setOpen(false)
               setSearch("")
+              setActiveVertical(null)
             }}
             className="absolute right-2 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
           >
@@ -281,10 +262,33 @@ export default function CollectionCombobox() {
       {/* Dropdown list */}
       {open && (
         <div
-          ref={listRef}
-          role="listbox"
-          className="absolute left-0 right-0 top-full mt-1 max-h-64 overflow-y-auto bg-xtal-navy border border-white/15 rounded-lg shadow-xl z-50"
+          className="absolute left-0 right-0 top-full mt-1 bg-xtal-navy border border-white/15 rounded-lg shadow-xl z-50"
         >
+          {/* Vertical filter chips */}
+          <div className="px-2 pt-1.5 pb-1 flex gap-1 overflow-x-auto no-scrollbar border-b border-white/10">
+            {["all", ...availableVerticals].map((v) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => {
+                  setActiveVertical(v === "all" ? null : v)
+                  setHighlightIndex(0)
+                }}
+                className={`shrink-0 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded ${
+                  (v === "all" ? !activeVertical : activeVertical === v)
+                    ? "bg-white/20 text-white"
+                    : "bg-white/5 text-white/40 hover:text-white/70 hover:bg-white/10"
+                }`}
+              >
+                {v === "all" ? "All" : VERTICAL_LABELS[v] ?? v}
+              </button>
+            ))}
+          </div>
+          <div
+            ref={listRef}
+            role="listbox"
+            className="max-h-64 overflow-y-auto"
+          >
           {flatItems.length === 0 && (
             <div className="px-3 py-4 text-center text-sm text-white/40">
               No collections found
@@ -307,6 +311,7 @@ export default function CollectionCombobox() {
                       setCollection(config.id)
                       setOpen(false)
                       setSearch("")
+                      setActiveVertical(null)
                     }}
                     onMouseEnter={() => setHighlightIndex(flatIndex)}
                   />
@@ -314,6 +319,7 @@ export default function CollectionCombobox() {
               })}
             </div>
           ))}
+          </div>
         </div>
       )}
     </div>
