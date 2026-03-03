@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import * as XLSX from "xlsx"
-import { getCustomer } from "@/lib/api/billing-customer"
+import { getCustomer, getRatesForMonth } from "@/lib/api/billing-customer"
 import { getBillingUsage, getBillingEventLog } from "@/lib/api/billing-usage"
 
 // POST /api/admin/customers/invoice — body: { slug, month }
@@ -82,14 +82,17 @@ export async function POST(request: Request) {
       [],
     ]
 
-    if (customer.billing_model === "flat") {
+    // Use historical rates for the billing month
+    const rates = getRatesForMonth(customer, month)
+
+    if (rates.billing_model === "flat") {
       summaryData.push(
         ["Billing Model:", "Flat Fee"],
         [],
         ["Description", "Amount"],
-        ["Monthly Service Fee", customer.flat_monthly_fee ?? 0],
+        ["Monthly Service Fee", rates.flat_monthly_fee ?? 0],
         [],
-        ["TOTAL", customer.flat_monthly_fee ?? 0],
+        ["TOTAL", rates.flat_monthly_fee ?? 0],
         [],
         ["Event Summary (for reference):"],
         ["Event Type", "Count"],
@@ -99,9 +102,9 @@ export async function POST(request: Request) {
         ["Total Events", totalSearch + totalAspect + totalExplain]
       )
     } else {
-      const searchTotal = totalSearch * customer.price_per_search
-      const aspectTotal = totalAspect * customer.price_per_aspect_click
-      const explainTotal = totalExplain * customer.price_per_explain
+      const searchTotal = totalSearch * rates.price_per_search
+      const aspectTotal = totalAspect * rates.price_per_aspect_click
+      const explainTotal = totalExplain * rates.price_per_explain
       const grandTotal = searchTotal + aspectTotal + explainTotal
 
       summaryData.push(
@@ -111,19 +114,19 @@ export async function POST(request: Request) {
         [
           "Search Queries",
           totalSearch,
-          `$${customer.price_per_search.toFixed(2)}`,
+          `$${rates.price_per_search.toFixed(2)}`,
           `$${searchTotal.toFixed(2)}`,
         ],
         [
           "Aspect Clicks",
           totalAspect,
-          `$${customer.price_per_aspect_click.toFixed(2)}`,
+          `$${rates.price_per_aspect_click.toFixed(2)}`,
           `$${aspectTotal.toFixed(2)}`,
         ],
         [
           "Why This Result",
           totalExplain,
-          `$${customer.price_per_explain.toFixed(2)}`,
+          `$${rates.price_per_explain.toFixed(2)}`,
           `$${explainTotal.toFixed(2)}`,
         ],
         [],

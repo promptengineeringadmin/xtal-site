@@ -25,12 +25,12 @@ const ADMIN_NAV_ITEMS = [
   { href: "/admin/activity", label: "Activity", icon: Activity },
   { href: "/admin/search-quality", label: "Search Quality", icon: Flag },
   { href: "/admin/api-keys", label: "API Keys", icon: KeyRound },
-  { href: "/admin/customers", label: "Customers", icon: Users },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ]
 
 const MARKETING_NAV_ITEMS = [
   { href: "/admin/demos", label: "Demos", icon: Boxes },
+  { href: "/admin/customers", label: "Customers", icon: Users },
   { href: "/admin/grader", label: "Grader", icon: Gauge },
 ]
 

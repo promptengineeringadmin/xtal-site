@@ -8,13 +8,14 @@ export const MARKETING_HOST = "marketing.xtalsearch.com"
 export const WWW_HOST = "www.xtalsearch.com"
 
 // Admin pages that serve from marketing.xtalsearch.com
-const MARKETING_PAGE_PREFIXES = ["/admin/demos", "/admin/grader"] as const
+const MARKETING_PAGE_PREFIXES = ["/admin/demos", "/admin/grader", "/admin/customers"] as const
 
 // API routes that serve from marketing.xtalsearch.com
 const MARKETING_API_PREFIXES = [
   "/api/admin/demos",
   "/api/admin/collections",
   "/api/grader/admin",
+  "/api/admin/customers",
 ] as const
 
 const ALL_MARKETING_PREFIXES = [

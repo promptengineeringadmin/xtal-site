@@ -13,6 +13,16 @@ import {
 
 // ─── Types ──────────────────────────────────────────────────────────
 
+interface PricingChange {
+  effective_date: string
+  price_per_search: number
+  price_per_aspect_click: number
+  price_per_explain: number
+  flat_monthly_fee?: number
+  billing_model: "usage" | "flat"
+  changed_by?: string
+}
+
 interface BillingCustomer {
   slug: string
   company_name: string
@@ -25,11 +35,15 @@ interface BillingCustomer {
   status: "prospect" | "active" | "paused" | "churned"
   billing_start?: string
   billing_end?: string
+  website?: string
+  deployment_method?: "gtm" | "direct" | "shopify_app" | "other"
+  launch_date?: string
   billing_model: "usage" | "flat"
   price_per_search: number
   price_per_aspect_click: number
   price_per_explain: number
   flat_monthly_fee?: number
+  pricing_history?: PricingChange[]
   notes?: string
   created_at: string
   updated_at: string
@@ -529,6 +543,9 @@ function CustomerModal({
     collections: customer?.collections?.join(", ") || "",
     customer_type: customer?.customer_type || "demo",
     status: customer?.status || "prospect",
+    website: customer?.website || "",
+    deployment_method: customer?.deployment_method || "",
+    launch_date: customer?.launch_date || "",
     billing_model: customer?.billing_model || "usage",
     price_per_search: customer?.price_per_search ?? 0.1,
     price_per_aspect_click: customer?.price_per_aspect_click ?? 0.1,
@@ -545,6 +562,9 @@ function CustomerModal({
         .split(",")
         .map((s) => s.trim())
         .filter(Boolean),
+      deployment_method: (form.deployment_method || undefined) as BillingCustomer["deployment_method"],
+      launch_date: form.launch_date || undefined,
+      website: form.website || undefined,
       price_per_search: Number(form.price_per_search),
       price_per_aspect_click: Number(form.price_per_aspect_click),
       price_per_explain: Number(form.price_per_explain),
@@ -614,6 +634,33 @@ function CustomerModal({
             placeholder="willow"
           />
 
+          {/* Deployment */}
+          <div className="grid grid-cols-3 gap-3">
+            <Field
+              label="Website"
+              value={form.website}
+              onChange={(v) => setForm({ ...form, website: v })}
+              placeholder="www.example.com"
+            />
+            <Select
+              label="Deploy Method"
+              value={form.deployment_method}
+              onChange={(v) => setForm({ ...form, deployment_method: v })}
+              options={["", "gtm", "direct", "shopify_app", "other"]}
+            />
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Launch Date
+              </label>
+              <input
+                type="date"
+                value={form.launch_date}
+                onChange={(e) => setForm({ ...form, launch_date: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
+              />
+            </div>
+          </div>
+
           {/* Status/Type */}
           <div className="grid grid-cols-3 gap-3">
             <Select
@@ -661,6 +708,30 @@ function CustomerModal({
               value={form.flat_monthly_fee}
               onChange={(v) => setForm({ ...form, flat_monthly_fee: v })}
             />
+          )}
+
+          {/* Pricing History */}
+          {customer?.pricing_history && customer.pricing_history.length > 0 && (
+            <div className="border border-slate-200 rounded-lg p-3">
+              <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">
+                Rate History
+              </h3>
+              <div className="space-y-1.5">
+                {customer.pricing_history.map((h, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between text-xs text-slate-500"
+                  >
+                    <span>{h.effective_date}</span>
+                    <span>
+                      {h.billing_model === "flat"
+                        ? `Flat $${h.flat_monthly_fee?.toFixed(2)}/mo`
+                        : `$${h.price_per_search.toFixed(2)} / $${h.price_per_aspect_click.toFixed(2)} / $${h.price_per_explain.toFixed(2)}`}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
 
           {/* Notes */}
