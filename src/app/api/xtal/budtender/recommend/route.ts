@@ -3,7 +3,7 @@ import { corsHeaders, handleOptions } from "@/lib/api/cors"
 import { VIBE_MAP, VALID_VIBES, synthesizeQuery } from "@/lib/budtender/vibes"
 import { buildBudtenderPrompt } from "@/lib/budtender/prompt"
 import { validateApiKey } from "@/lib/api/api-key-auth"
-import { trackBudtenderUsage } from "@/lib/api/budtender-usage"
+import { trackApiUsage } from "@/lib/api/api-usage"
 
 export async function OPTIONS() {
   return handleOptions()
@@ -215,7 +215,7 @@ export async function POST(request: Request) {
     })
 
     // Fire-and-forget: track usage for billing
-    trackBudtenderUsage(auth.client, {
+    trackApiUsage(auth.client, {
       endpoint: "/api/xtal/budtender/recommend",
       status: 200,
       latency_ms: Date.now() - t0,

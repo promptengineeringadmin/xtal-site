@@ -45,7 +45,7 @@ export interface UsageLogEntry {
  * Increment the monthly counter and log the request.
  * Caller should NOT await this — fire-and-forget.
  */
-export function trackBudtenderUsage(
+export function trackApiUsage(
   client: string,
   entry: Omit<UsageLogEntry, "timestamp">
 ): Promise<void> {
@@ -71,7 +71,7 @@ export function trackBudtenderUsage(
 /**
  * Get the request count for a client in a given month (defaults to current).
  */
-export async function getBudtenderUsage(
+export async function getApiUsage(
   client: string,
   month?: string
 ): Promise<number> {
@@ -89,7 +89,7 @@ export async function getBudtenderUsage(
 /**
  * Get detailed request log entries within a time window.
  */
-export async function getBudtenderUsageHistory(
+export async function getApiUsageHistory(
   client: string,
   startMs: number,
   endMs: number
@@ -112,7 +112,7 @@ export async function getBudtenderUsageHistory(
 /**
  * Get usage counts for a client across multiple months.
  */
-export async function getBudtenderUsageMonths(
+export async function getApiUsageMonths(
   client: string,
   numMonths: number = 3
 ): Promise<{ month: string; count: number }[]> {
@@ -122,7 +122,7 @@ export async function getBudtenderUsageMonths(
   for (let i = 0; i < numMonths; i++) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
     const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
-    const count = await getBudtenderUsage(client, month)
+    const count = await getApiUsage(client, month)
     results.push({ month, count })
   }
 

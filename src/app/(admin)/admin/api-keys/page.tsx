@@ -147,7 +147,7 @@ export default function ApiKeysPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">API Keys</h1>
           <p className="text-sm text-slate-500 mt-1">
-            Manage API keys for the budtender recommendation API
+            Manage API keys for external integrations
           </p>
         </div>
         <button
@@ -177,7 +177,7 @@ export default function ApiKeysPage() {
             <Key className="w-10 h-10 text-slate-300 mx-auto mb-3" />
             <p className="text-slate-500">No API keys yet</p>
             <p className="text-sm text-slate-400 mt-1">
-              Create a key to get started with the budtender API
+              Create a key to get started
             </p>
           </div>
         ) : (

@@ -17,7 +17,7 @@ import {
 import UserMenu from "@/components/admin/UserMenu"
 import CollectionCombobox from "@/components/admin/CollectionCombobox"
 
-import { MARKETING_HOST, WWW_HOST } from "@/lib/admin/subdomain-routes"
+import { MARKETING_HOST } from "@/lib/admin/subdomain-routes"
 
 const ADMIN_NAV_ITEMS = [
   { href: "/admin/dashboard", label: "Dashboard", icon: BarChart3 },
@@ -98,21 +98,6 @@ function SidebarContent({ pathname, user, isMarketing }: {
 
       <div className="p-4 border-t border-white/10 space-y-3">
         {user && <UserMenu name={user.name} email={user.email} image={user.image} />}
-        {isMarketing ? (
-          <a
-            href={`https://${WWW_HOST}/admin/dashboard`}
-            className="text-xs text-white/40 hover:text-white/70 transition-colors block"
-          >
-            &rarr; Admin Panel
-          </a>
-        ) : (
-          <a
-            href={`https://${MARKETING_HOST}/admin/demos`}
-            className="text-xs text-white/40 hover:text-white/70 transition-colors block"
-          >
-            &rarr; Marketing Tools
-          </a>
-        )}
         <Link
           href="/"
           className="text-xs text-white/40 hover:text-white/70 transition-colors block"

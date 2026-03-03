@@ -243,6 +243,97 @@ Content-Type: application/json
         </div>
       </section>
 
+      {/* ──────────── API Reference: Search Full ──────────── */}
+      <section id="search-full-api" className="mb-16 print-break-before">
+        <div className="mb-10 print-avoid-break">
+          <div className="flex items-center gap-2.5 mb-3">
+            <MethodBadge method="POST" />
+            <code className="text-lg font-mono font-medium text-slate-900">/api/xtal/search-full</code>
+          </div>
+          <p className="text-slate-600 mb-4">
+            Combined search + aspects in a single request. Fires both in parallel
+            and returns search results with AI-generated aspects. This is what the JS snippet
+            uses internally.
+          </p>
+
+          <h4 className="text-sm font-semibold text-slate-700 mb-2">Request Body</h4>
+          <p className="text-sm text-slate-500 mb-3">
+            Same fields as <code className="bg-slate-100 px-1 rounded font-mono text-xs">/api/xtal/search</code>.
+          </p>
+
+          <h4 className="text-sm font-semibold text-slate-700 mt-6 mb-2">Response</h4>
+          <p className="text-sm text-slate-500 mb-3">
+            Returns the full search response merged with aspect data:
+          </p>
+          <CodeBlock language="json">{`{
+  "results": [...],
+  "total": 42,
+  "query_time": 187,
+  "relevance_scores": { ... },
+  "search_context": { ... },
+  "computed_facets": { ... },
+  "aspects": ["noise cancelling", "over-ear", "under $100"],
+  "aspects_enabled": true
+}`}</CodeBlock>
+        </div>
+      </section>
+
+      {/* ──────────── API Reference: Explain ──────────── */}
+      <section id="explain-api" className="mb-16 print-avoid-break">
+        <div className="mb-10 print-avoid-break">
+          <div className="flex items-center gap-2.5 mb-3">
+            <MethodBadge method="POST" />
+            <code className="text-lg font-mono font-medium text-slate-900">/api/xtal/explain</code>
+          </div>
+          <p className="text-slate-600 mb-4">
+            Generate an AI explanation for why a specific product was returned for a query.
+          </p>
+
+          <h4 className="text-sm font-semibold text-slate-700 mb-2">Request Body</h4>
+          <FieldTable fields={[
+            { name: "query", type: "string", required: true, description: "The original search query" },
+            { name: "collection", type: "string", required: true, description: "Collection identifier" },
+            { name: "product_id", type: "string", required: true, description: "The product to explain" },
+            { name: "score", type: "number", required: false, description: "Relevance score from the search response" },
+          ]} />
+
+          <h4 className="text-sm font-semibold text-slate-700 mt-6 mb-2">Example Response</h4>
+          <CodeBlock language="json">{`{
+  "explanation": "This product matches your search because it features wireless Bluetooth 5.0 connectivity and active noise cancellation, which are key attributes of premium wireless headphones."
+}`}</CodeBlock>
+        </div>
+      </section>
+
+      {/* ──────────── Authentication ──────────── */}
+      <section id="authentication" className="mb-16 print-break-before">
+        <h2 className="text-2xl font-bold text-slate-900 mb-6">Authentication</h2>
+
+        <div className="mb-10 print-avoid-break">
+          <h3 className="text-lg font-semibold text-slate-900 mb-2">API Key Authentication</h3>
+          <p className="text-slate-600 mb-4">
+            External API integrations (e.g., recommendation endpoints) require an API key.
+            Pass your key via the <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-xs">X-API-Key</code> header:
+          </p>
+          <CodeBlock language="bash">{`curl -X POST https://www.xtalsearch.com/api/xtal/budtender/recommend \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: xtal_your_api_key_here" \\
+  -d '{"vibe": "relax", "limit": 3}'`}</CodeBlock>
+          <p className="text-sm text-slate-500 mt-3">
+            API keys are scoped to a specific collection and follow the format{" "}
+            <code className="bg-slate-100 px-1 rounded font-mono text-xs">xtal_&lt;token&gt;</code>.
+            Keys are created and managed in the XTAL admin panel.
+          </p>
+        </div>
+
+        <div className="print-avoid-break">
+          <h3 className="text-lg font-semibold text-slate-900 mb-2">Public Endpoints</h3>
+          <p className="text-slate-600 mb-4">
+            The search, aspects, explain, and config endpoints do not require authentication.
+            They use CORS headers to allow direct browser access from any origin.
+          </p>
+        </div>
+      </section>
+
       {/* ──────────── API Reference: Config ──────────── */}
       <section id="config-api" className="mb-16 print-break-before">
         <div className="mb-10 print-avoid-break">
@@ -265,22 +356,25 @@ Content-Type: application/json
 
           <h4 className="text-sm font-semibold text-slate-700 mt-6 mb-2">Example Response</h4>
           <CodeBlock language="json">{`{
-  "shopId": "willow",
   "enabled": true,
   "searchSelector": "input[type=\\"search\\"]",
-  "resultsSelector": "",
   "displayMode": "overlay",
+  "siteUrl": "https://store.example.com",
   "resultsPerPage": 48,
-  "utm": {
-    "source": "xtal",
-    "medium": "search",
-    "campaign": "willow"
-  },
   "features": {
     "aspects": true,
-    "explain": true
+    "explain": true,
+    "filters": true
   }
 }`}</CodeBlock>
+          <p className="text-sm text-slate-500 mt-3">
+            Response is cached for 5 minutes. Additional optional fields
+            (<code className="bg-slate-100 px-1 rounded font-mono text-xs">resultsSelector</code>,{" "}
+            <code className="bg-slate-100 px-1 rounded font-mono text-xs">cardTemplate</code>,{" "}
+            <code className="bg-slate-100 px-1 rounded font-mono text-xs">productUrlPattern</code>,{" "}
+            <code className="bg-slate-100 px-1 rounded font-mono text-xs">pricePresets</code>)
+            are included when configured.
+          </p>
         </div>
       </section>
 
@@ -381,8 +475,8 @@ Content-Type: application/json
       <section id="utm-tracking" className="mb-10 print-avoid-break">
         <h3 className="text-lg font-semibold text-slate-900 mb-2">UTM Tracking</h3>
         <p className="text-slate-600 mb-4">
-          All product links generated by XTAL include UTM parameters for attribution tracking.
-          These are appended automatically:
+          The JS snippet automatically appends UTM parameters to product links for attribution tracking.
+          These are added client-side by the SDK — they are not part of the API response:
         </p>
         <div className="bg-slate-50 rounded-lg border border-slate-200 p-4 font-mono text-sm space-y-1">
           <div><span className="text-xtal-navy font-medium">utm_source</span><span className="text-slate-400">=</span>xtal</div>

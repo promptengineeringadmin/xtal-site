@@ -6,7 +6,7 @@ import {
   revokeApiKey,
   findTokenBySuffix,
 } from "@/lib/api/api-key-auth"
-import { getBudtenderUsage } from "@/lib/api/budtender-usage"
+import { getApiUsage } from "@/lib/api/api-usage"
 
 // GET /api/admin/api-keys?collection=goldcanna
 export async function GET(request: Request) {
@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     const enriched = await Promise.all(
       keys.map(async (key) => ({
         ...key,
-        usage_this_month: await getBudtenderUsage(key.client),
+        usage_this_month: await getApiUsage(key.client),
       }))
     )
 

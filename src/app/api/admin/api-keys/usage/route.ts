@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
 import {
-  getBudtenderUsageMonths,
-  getBudtenderUsageHistory,
-} from "@/lib/api/budtender-usage"
+  getApiUsageMonths,
+  getApiUsageHistory,
+} from "@/lib/api/api-usage"
 
 // GET /api/admin/api-keys/usage?client=goldcanna&months=3
 // GET /api/admin/api-keys/usage?client=goldcanna&start=<ms>&end=<ms>  (log entries)
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
 
     // If start/end provided, return detailed log entries
     if (startParam && endParam) {
-      const entries = await getBudtenderUsageHistory(
+      const entries = await getApiUsageHistory(
         client,
         parseInt(startParam, 10),
         parseInt(endParam, 10)
@@ -33,7 +33,7 @@ export async function GET(request: Request) {
 
     // Otherwise return monthly summary
     const months = parseInt(searchParams.get("months") || "6", 10)
-    const usage = await getBudtenderUsageMonths(client, months)
+    const usage = await getApiUsageMonths(client, months)
 
     return NextResponse.json({ client, usage })
   } catch (error) {
