@@ -15,8 +15,8 @@ function getRedis(): Redis {
 
 // ─── Constants ──────────────────────────────────────────────────────
 
-const COUNTER_PREFIX = "budtender:usage:"
-const LOG_PREFIX = "budtender:log:"
+const COUNTER_PREFIX = "api:usage:"
+const LOG_PREFIX = "api:log:"
 const LOG_TTL_MS = 90 * 24 * 60 * 60 * 1000 // 90 days
 
 function counterKey(client: string, yearMonth: string): string {
