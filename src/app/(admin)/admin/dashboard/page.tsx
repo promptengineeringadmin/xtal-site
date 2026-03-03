@@ -8,6 +8,7 @@ import {
   TrendingUp,
   ShoppingCart,
   Target,
+  Loader2,
 } from "lucide-react"
 import StatCard from "@/components/admin/StatCard"
 import TimeRangeSelector from "@/components/admin/TimeRangeSelector"
@@ -23,23 +24,28 @@ export default function DashboardPage() {
   const [data, setData] = useState<AnalyticsDashboard | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [warmingUp, setWarmingUp] = useState(false)
 
   const fetchDashboard = useCallback(async () => {
     if (!collection) return
     setLoading(true)
     setError(null)
+    setWarmingUp(false)
 
     const url = `/api/admin/analytics/dashboard?days=${days}&collection=${encodeURIComponent(collection)}`
-    const maxAttempts = 2
+    const maxAttempts = 5
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         const res = await fetch(url)
         if (!res.ok) {
-          // Retry once on transient backend errors
-          if (attempt < maxAttempts && res.status >= 502 && res.status <= 504) {
-            await new Promise((r) => setTimeout(r, 1000))
-            continue
+          // Transient backend errors — show warming-up state and retry
+          if (res.status >= 502 && res.status <= 504) {
+            setWarmingUp(true)
+            if (attempt < maxAttempts) {
+              await new Promise((r) => setTimeout(r, 3000))
+              continue
+            }
           }
           const body = await res.json().catch(() => null)
           const detail = body?.detail || body?.error || `Status ${res.status}`
@@ -47,14 +53,13 @@ export default function DashboardPage() {
         }
         const json: AnalyticsDashboard = await res.json()
         setData(json)
+        setWarmingUp(false)
         setLoading(false)
         return
       } catch (err) {
-        if (attempt < maxAttempts) {
-          await new Promise((r) => setTimeout(r, 1000))
-          continue
+        if (attempt === maxAttempts) {
+          setError(err instanceof Error ? err.message : "Failed to load analytics")
         }
-        setError(err instanceof Error ? err.message : "Failed to load analytics")
       }
     }
     setLoading(false)
@@ -74,9 +79,22 @@ export default function DashboardPage() {
         <TimeRangeSelector value={days} onChange={setDays} />
       </div>
 
+      {warmingUp && loading && (
+        <div className="mb-6 p-4 bg-sky-50 border border-sky-200 rounded-lg flex items-center gap-3 text-sm text-sky-700">
+          <Loader2 className="animate-spin shrink-0" size={18} />
+          Backend is warming up — analytics will appear shortly. You can navigate to other pages meanwhile.
+        </div>
+      )}
+
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-          {error}
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 flex items-center justify-between">
+          <span>{error}</span>
+          <button
+            onClick={fetchDashboard}
+            className="ml-4 shrink-0 px-3 py-1 bg-red-100 hover:bg-red-200 rounded text-red-700 font-medium transition-colors"
+          >
+            Retry
+          </button>
         </div>
       )}
 
