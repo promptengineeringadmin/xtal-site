@@ -1,5 +1,5 @@
 import type { Browser, Page } from "playwright-core"
-import type { MerchantConfig, QueryComparison, MerchantResult, XtalResult, TeardownReport } from "./types"
+import type { MerchantConfig, QueryComparison, QueryAnalysis, MerchantResult, XtalResult, TeardownReport } from "./types"
 import type { DimensionSummary } from "./query-grader"
 import { readFileSync } from "fs"
 import { resolve } from "path"
@@ -114,6 +114,36 @@ function xtalResultCard(r: XtalResult, idx: number): string {
   </div>`
 }
 
+// ── Compact card functions for 2×3 grid layout ──────────────
+
+function merchantCardCompact(r: MerchantResult): string {
+  const img = r.imageUrl
+    ? `<img src="${escapeHtml(r.imageUrl)}" style="width:70px;height:70px;object-fit:contain;border-radius:6px;background:#f5f5f5;flex-shrink:0;" onerror="this.style.display='none'">`
+    : `<div style="width:70px;height:70px;border-radius:6px;background:#f0f0f0;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:9px;">No img</div>`
+
+  return `<div style="display:flex;gap:10px;align-items:flex-start;padding:6px 0;">
+    ${img}
+    <div style="min-width:0;flex:1;">
+      <div style="font-size:13px;font-weight:500;color:#1a1a1a;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escapeHtml(truncate(r.title, 50))}</div>
+      ${r.price ? `<div style="font-size:14px;font-weight:700;color:#1a1a1a;margin-top:3px;">${formatPrice(r.price)}</div>` : ""}
+    </div>
+  </div>`
+}
+
+function xtalCardCompact(r: XtalResult): string {
+  const img = r.imageUrl
+    ? `<img src="${escapeHtml(r.imageUrl)}" style="width:70px;height:70px;object-fit:contain;border-radius:6px;background:#f5f5f5;flex-shrink:0;" onerror="this.style.display='none'">`
+    : `<div style="width:70px;height:70px;border-radius:6px;background:#f0f0f0;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:9px;">No img</div>`
+
+  return `<div style="display:flex;gap:10px;align-items:flex-start;padding:6px 0;">
+    ${img}
+    <div style="min-width:0;flex:1;">
+      <div style="font-size:13px;font-weight:500;color:#1a1a1a;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escapeHtml(truncate(r.title, 50))}</div>
+      ${r.price ? `<div style="font-size:14px;font-weight:700;color:#1a1a1a;margin-top:3px;">${formatPrice(r.price)}</div>` : ""}
+    </div>
+  </div>`
+}
+
 export function buildComparisonSlideHtml(
   comparison: QueryComparison,
   slideIndex: number,
@@ -121,22 +151,77 @@ export function buildComparisonSlideHtml(
   merchant: MerchantConfig,
 ): string {
   const categoryLabel = CATEGORY_LABELS[comparison.category] || comparison.category
-  const merchantResults = comparison.merchant.results.slice(0, 4)
-  const xtalResults = comparison.xtal.results.slice(0, 4)
+  const merchantResults = comparison.merchant.results.slice(0, 6)
+  const xtalResults = comparison.xtal.results.slice(0, 6)
+  const analysis = comparison.analysis
 
   const merchantError = comparison.merchant.error
-    ? `<div style="padding:20px;text-align:center;color:#999;font-style:italic;">${escapeHtml(comparison.merchant.error)}</div>`
+    ? `<div style="padding:16px;text-align:center;color:#999;font-style:italic;font-size:13px;">${escapeHtml(comparison.merchant.error)}</div>`
     : ""
 
   const merchantEmpty =
     !comparison.merchant.error && merchantResults.length === 0
-      ? `<div style="padding:40px 20px;text-align:center;color:#cc0000;font-weight:600;">0 results found</div>`
+      ? `<div style="padding:24px 16px;text-align:center;color:#cc0000;font-weight:600;font-size:14px;">0 results found</div>`
       : ""
 
   const xtalEmpty =
     xtalResults.length === 0
-      ? `<div style="padding:40px 20px;text-align:center;color:#cc0000;font-weight:600;">0 results found</div>`
+      ? `<div style="padding:24px 16px;text-align:center;color:#cc0000;font-weight:600;font-size:14px;">0 results found</div>`
       : ""
+
+  // Build 2×3 grid for merchant results
+  const merchantGrid = merchantResults.length > 0
+    ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;">
+        ${merchantResults.map((r) => merchantCardCompact(r)).join("")}
+      </div>`
+    : ""
+
+  // Build 2×3 grid for XTAL results
+  const xtalGrid = xtalResults.length > 0
+    ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;">
+        ${xtalResults.map((r) => xtalCardCompact(r)).join("")}
+      </div>`
+    : ""
+
+  // Analysis panel — natural height, generous padding. No flex:1.
+  const analysisPanel = analysis
+    ? `<div style="padding:20px 40px 16px;border-top:2px solid #e2e8f0;">
+        <div style="background:#f8fafc;border-left:3px solid #1B2D5B;border-radius:0 8px 8px 0;padding:24px 28px;">
+          <div style="margin-bottom:16px;">
+            <span style="font-size:12px;font-weight:700;color:#1B2D5B;letter-spacing:0.05em;">SHOPPER INTENT</span>
+            <div style="font-size:15px;color:#333;line-height:1.55;margin-top:4px;">${escapeHtml(analysis.shopperIntent)}</div>
+          </div>
+          <div style="margin-bottom:16px;">
+            <span style="font-size:12px;font-weight:700;color:#1B2D5B;letter-spacing:0.05em;">WHAT HAPPENED</span>
+            <div style="font-size:15px;color:#333;line-height:1.55;margin-top:4px;">${escapeHtml(analysis.whatHappened)}</div>
+          </div>
+          <div>
+            <span style="font-size:12px;font-weight:700;color:#dc2626;letter-spacing:0.05em;">CUSTOMER IMPACT</span>
+            <div style="font-size:15px;color:#333;line-height:1.55;margin-top:4px;">${escapeHtml(analysis.customerImpact)}</div>
+          </div>
+        </div>
+      </div>`
+    : comparison.grade
+      ? `<div style="padding:20px 40px 16px;border-top:2px solid #e2e8f0;">
+          <div style="background:#f8fafc;border-left:3px solid #1B2D5B;border-radius:0 8px 8px 0;padding:24px 28px;">
+            <div style="font-size:15px;color:#555;line-height:1.55;">${escapeHtml(comparison.grade.reason)}</div>
+          </div>
+        </div>`
+      : ""
+
+  // Grade bar
+  const gradeBar = comparison.grade
+    ? (() => {
+        const gc = gradeColor(comparison.grade.letter)
+        return `<div style="display:flex;align-items:center;gap:16px;padding:10px 40px;border-top:1px solid #e2e8f0;background:#fafbfc;">
+          <div style="width:40px;height:40px;border-radius:50%;background:${gc.bg};color:${gc.text};font-size:20px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${comparison.grade.letter}</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#333;">${escapeHtml(comparison.grade.reason)}</div>
+            <div style="font-size:12px;color:#888;">Score: ${comparison.grade.score}/100</div>
+          </div>
+        </div>`
+      })()
+    : ""
 
   return `<!DOCTYPE html>
 <html>
@@ -152,52 +237,57 @@ export function buildComparisonSlideHtml(
 <div style="width:${SLIDE_W}px;height:${SLIDE_H}px;display:flex;flex-direction:column;">
 
   <!-- Header -->
-  <div style="background:#0F1A35;padding:24px 48px 18px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-      <span style="color:rgba(255,255,255,0.5);font-size:14px;font-weight:500;letter-spacing:0.05em;">SEARCH TEARDOWN</span>
-      <span style="color:rgba(255,255,255,0.4);font-size:14px;">${slideIndex} / ${totalSlides}</span>
+  <div style="background:#0F1A35;padding:18px 48px 14px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <span style="color:rgba(255,255,255,0.5);font-size:13px;font-weight:500;letter-spacing:0.05em;">SEARCH TEARDOWN</span>
+      <span style="color:rgba(255,255,255,0.4);font-size:13px;">${slideIndex} / ${totalSlides}</span>
     </div>
-    <div style="color:white;font-size:30px;font-weight:700;line-height:1.2;margin-bottom:10px;">"${escapeHtml(truncate(comparison.query, 80))}"</div>
-    <div style="display:inline-block;background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.8);font-size:12px;font-weight:500;padding:4px 12px;border-radius:100px;letter-spacing:0.03em;">${categoryLabel}</div>
+    <div style="color:white;font-size:26px;font-weight:700;line-height:1.2;margin-bottom:8px;">"${escapeHtml(truncate(comparison.query, 80))}"</div>
+    <div style="display:inline-block;background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.8);font-size:11px;font-weight:500;padding:3px 10px;border-radius:100px;letter-spacing:0.03em;">${categoryLabel}</div>
   </div>
 
   <!-- Column Headers -->
   <div style="display:flex;border-bottom:2px solid #eee;">
-    <div style="flex:1;padding:14px 36px;display:flex;align-items:center;justify-content:space-between;border-right:1px solid #eee;">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <div style="width:10px;height:10px;border-radius:50%;background:${merchant.primaryColor};"></div>
-        <span style="font-size:16px;font-weight:700;color:#333;">${escapeHtml(merchant.name)}</span>
-      </div>
-      ${comparison.grade ? gradeBadgeHtml(comparison.grade) : ""}
+    <div style="flex:1;padding:8px 28px;display:flex;align-items:center;gap:8px;border-right:1px solid #eee;">
+      <div style="width:8px;height:8px;border-radius:50%;background:${merchant.primaryColor};"></div>
+      <span style="font-size:14px;font-weight:700;color:#333;">${escapeHtml(merchant.name)}</span>
+      <span style="font-size:12px;color:#888;margin-left:auto;">${comparison.merchant.resultCount} results</span>
     </div>
-    <div style="flex:1;padding:14px 36px;display:flex;align-items:center;gap:8px;">
-      <div style="width:10px;height:10px;border-radius:50%;background:#1B2D5B;"></div>
-      <span style="font-size:16px;font-weight:700;color:#1B2D5B;">XTAL Search</span>
+    <div style="flex:1;padding:8px 28px;display:flex;align-items:center;gap:8px;">
+      <div style="width:8px;height:8px;border-radius:50%;background:#1B2D5B;"></div>
+      <span style="font-size:14px;font-weight:700;color:#1B2D5B;">XTAL Search</span>
+      <span style="font-size:12px;color:#888;margin-left:auto;">${comparison.xtal.resultCount} results</span>
     </div>
   </div>
 
-  <!-- Results Columns -->
-  <div style="display:flex;flex:1;overflow:hidden;">
+  <!-- Results Grid (2×3 per side) -->
+  <div style="display:flex;overflow:hidden;">
     <!-- Merchant Column -->
-    <div style="flex:1;padding:10px 36px;border-right:1px solid #eee;">
+    <div style="flex:1;padding:12px 28px;border-right:1px solid #eee;">
       ${merchantError}
       ${merchantEmpty}
-      ${merchantResults.map((r, i) => merchantResultCard(r, i)).join("")}
+      ${merchantGrid}
     </div>
     <!-- XTAL Column -->
-    <div style="flex:1;padding:10px 36px;background:rgba(27,45,91,0.02);">
+    <div style="flex:1;padding:12px 28px;background:rgba(27,45,91,0.02);">
       ${xtalEmpty}
-      ${xtalResults.map((r, i) => xtalResultCard(r, i)).join("")}
+      ${xtalGrid}
     </div>
   </div>
 
-  <!-- Footer -->
-  <div style="background:#0F1A35;padding:10px 48px;display:flex;align-items:center;justify-content:space-between;">
+  <!-- Analysis Panel -->
+  ${analysisPanel}
+
+  <!-- Grade Bar -->
+  ${gradeBar}
+
+  <!-- Footer (margin-top:auto pins to bottom) -->
+  <div style="margin-top:auto;background:#0F1A35;padding:8px 48px;display:flex;align-items:center;justify-content:space-between;">
     <div style="display:flex;align-items:center;gap:8px;">
-      ${xtalLogoImg(28, 28)}
-      <span style="color:white;font-size:14px;font-weight:600;letter-spacing:0.15em;">XTAL</span>
+      ${xtalLogoImg(24, 24)}
+      <span style="color:white;font-size:13px;font-weight:600;letter-spacing:0.15em;">XTAL</span>
     </div>
-    <span style="color:rgba(255,255,255,0.5);font-size:12px;">xtalsearch.com</span>
+    <span style="color:rgba(255,255,255,0.5);font-size:11px;">xtalsearch.com</span>
   </div>
 </div>
 </body>

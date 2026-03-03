@@ -35,6 +35,7 @@ import {
 } from "./teardown/slide-renderer"
 import { assemblePdf } from "./teardown/pdf-assembler"
 import { gradeQuery, computeTeardownScore } from "./teardown/query-grader"
+import { analyzeComparisons } from "./teardown/query-analyzer"
 import { estimateRevenueImpact } from "../lib/grader/scoring"
 import type { TeardownQuery, QueryComparison, TeardownReport, MerchantConfig } from "./teardown/types"
 
@@ -115,9 +116,22 @@ export async function runTeardown(
     }
   }
 
-  // Output directory
-  const date = new Date().toISOString().slice(0, 10)
-  const outDir = opts.outDir || path.join(process.cwd(), "teardown-output", merchant.id, date)
+  // Output directory — when reusing data, find the most recent existing output
+  let date = new Date().toISOString().slice(0, 10)
+  const baseOutDir = path.join(process.cwd(), "teardown-output", merchant.id)
+
+  if (opts.reuseData && !opts.outDir && fs.existsSync(baseOutDir)) {
+    const dirs = fs.readdirSync(baseOutDir)
+      .filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d))
+      .sort()
+      .reverse()
+    const latest = dirs.find((d) =>
+      fs.existsSync(path.join(baseOutDir, d, "comparisons.json")),
+    )
+    if (latest) date = latest
+  }
+
+  const outDir = opts.outDir || path.join(baseOutDir, date)
   const slidesDir = path.join(outDir, "slides")
   fs.mkdirSync(slidesDir, { recursive: true })
 
@@ -260,6 +274,33 @@ export async function runTeardown(
     const revenueImpact = estimateRevenueImpact(teardownScores.overallScore)
     log(`Overall score: ${teardownScores.overallScore}/100 (${teardownScores.overallGrade})`)
     log(`Est. revenue impact: $${revenueImpact.monthlyLostRevenue.toLocaleString()}/mo`)
+
+    // ── Step 2.5: LLM analysis ──
+    const needsAnalysis = comparisons.some((c) => !c.analysis)
+    if (needsAnalysis && process.env.ANTHROPIC_API_KEY) {
+      log("Step 2.5: Generating LLM analysis...")
+      try {
+        const analyses = await analyzeComparisons(comparisons, merchant.name, merchant.id)
+        for (let i = 0; i < comparisons.length; i++) {
+          comparisons[i].analysis = analyses[i]
+        }
+        log(`  Generated ${analyses.length} query analyses`)
+
+        // Re-save comparisons with analysis included
+        fs.writeFileSync(
+          path.join(outDir, "comparisons.json"),
+          JSON.stringify(comparisons, null, 2),
+        )
+        log("  Saved comparisons with analysis")
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        log(`  Analysis failed (slides will render without): ${msg}`)
+      }
+    } else if (needsAnalysis) {
+      log("Skipping LLM analysis (no ANTHROPIC_API_KEY)")
+    } else {
+      log("Analysis already cached — skipping")
+    }
 
     // ── Step 3: Render slides ──
     log("Step 3: Rendering slides...")
@@ -545,6 +586,26 @@ async function main() {
 
     args.merchantId = slug
     log(`  Registered as: ${slug}`)
+  } else if (!MERCHANTS[args.merchantId]) {
+    // Slug mode: try to auto-register from probe results
+    const probePath = path.join(process.cwd(), "data", "prospect-probe-results.json")
+    if (fs.existsSync(probePath)) {
+      const probes = JSON.parse(fs.readFileSync(probePath, "utf-8")) as Array<{
+        slug: string; domain: string; name: string; primaryColor: string
+      }>
+      const probe = probes.find((p) => p.slug === args.merchantId)
+      if (probe) {
+        registerMerchant(
+          buildShopifyMerchantConfig({
+            slug: probe.slug,
+            name: probe.name,
+            domain: probe.domain,
+            primaryColor: probe.primaryColor !== "#FFFFFF" ? probe.primaryColor : undefined,
+          }),
+        )
+        log(`Auto-registered "${probe.name}" from probe results`)
+      }
+    }
   }
 
   await runTeardown(args.merchantId, {

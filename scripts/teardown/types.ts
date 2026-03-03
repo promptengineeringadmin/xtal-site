@@ -48,6 +48,15 @@ export interface XtalResult {
   agentReasoning?: string
 }
 
+export interface QueryAnalysis {
+  /** What a real shopper expects from this query — 1 sentence */
+  shopperIntent: string
+  /** What the merchant actually returned vs what XTAL returned — 2-3 sentences */
+  whatHappened: string
+  /** Why this matters for revenue/conversion — 1 sentence */
+  customerImpact: string
+}
+
 export interface QueryComparison {
   query: string
   category: string
@@ -70,6 +79,7 @@ export interface QueryComparison {
     score: number
     reason: string
   }
+  analysis?: QueryAnalysis
 }
 
 export interface TeardownReport {
