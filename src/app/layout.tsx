@@ -60,7 +60,9 @@ export default function RootLayout({
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', '${GA_MEASUREMENT_ID}');
+            if (!window.location.pathname.startsWith('/sandbox')) {
+              gtag('config', '${GA_MEASUREMENT_ID}');
+            }
           `}
         </Script>
       </head>
