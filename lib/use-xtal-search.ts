@@ -103,7 +103,7 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
 
     try {
       // Fire search + aspects in parallel
-      const searchBody = JSON.stringify({ query: trimmed, limit: resultsPerPage, ...(collection && { collection }) })
+      const searchBody = JSON.stringify({ query: trimmed, limit: resultsPerPage, is_demo: true, ...(collection && { collection }) })
       const searchInit: RequestInit = {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -210,6 +210,7 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
           facet_filters: hasActiveFacets ? expandedFacets : undefined,
           price_range: priceRangeForApi,
           limit: resultsPerPage,
+          is_demo: true,
           ...(collection && { collection }),
         }),
         signal: controller.signal,
@@ -323,6 +324,7 @@ export function useXtalSearch(collection?: string, initialQuery?: string, initia
             facet_filters: hasActiveFacets ? expandedFacets : undefined,
             price_range: priceRangeForApi,
             limit: value,
+            is_demo: true,
             ...(collection && { collection }),
           }),
           signal: controller.signal,

@@ -15,6 +15,8 @@ import {
   saveAspectsEnabled,
   getResultsPerPage,
   saveResultsPerPage,
+  getAllowedOrigins,
+  saveAllowedOrigins,
 } from "@/lib/admin/admin-settings"
 
 export async function GET(request: Request) {
@@ -48,7 +50,7 @@ export async function GET(request: Request) {
   // Fallback: read from Redis (scoped by collection)
   try {
     const fallbackCollection = collection ?? "default"
-    const [queryEnhancementEnabled, merchRerankStrength, bm25Weight, keywordRerankStrength, storeType, aspectsEnabled, resultsPerPage] = await Promise.all([
+    const [queryEnhancementEnabled, merchRerankStrength, bm25Weight, keywordRerankStrength, storeType, aspectsEnabled, resultsPerPage, allowedOrigins] = await Promise.all([
       getQueryEnhancement(fallbackCollection),
       getMerchRerankStrength(fallbackCollection),
       getBm25Weight(fallbackCollection),
@@ -56,6 +58,7 @@ export async function GET(request: Request) {
       getStoreType(fallbackCollection),
       getAspectsEnabled(fallbackCollection),
       getResultsPerPage(fallbackCollection),
+      getAllowedOrigins(fallbackCollection),
     ])
     return NextResponse.json({
       query_enhancement_enabled: queryEnhancementEnabled,
@@ -65,6 +68,7 @@ export async function GET(request: Request) {
       store_type: storeType,
       aspects_enabled: aspectsEnabled,
       results_per_page: resultsPerPage,
+      allowed_origins: allowedOrigins,
       _source: "redis_fallback",
     })
   } catch (redisError) {
@@ -112,6 +116,9 @@ export async function PUT(request: Request) {
       }
       if (body.results_per_page !== undefined) {
         await saveResultsPerPage(fallbackCollection, body.results_per_page)
+      }
+      if (body.allowed_origins !== undefined) {
+        await saveAllowedOrigins(fallbackCollection, body.allowed_origins)
       }
     } catch (e) {
       console.error("Redis settings save error:", e)

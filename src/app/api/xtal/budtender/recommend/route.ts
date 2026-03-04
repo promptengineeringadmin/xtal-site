@@ -43,24 +43,28 @@ async function doSearch(
 
 export async function POST(request: Request) {
   const t0 = Date.now()
+  const origin = request.headers.get("Origin")
 
   // --- API key auth ---
   const auth = await validateApiKey(request)
   if (!auth.valid) {
+    const cors = await corsHeaders(undefined, origin)
     return NextResponse.json(
       { error: "Missing or invalid API key. Pass a valid X-API-Key header." },
-      { status: 401, headers: corsHeaders() }
+      { status: 401, headers: cors }
     )
   }
 
   try {
     const body = await request.json()
     const backendUrl = process.env.XTAL_BACKEND_URL
+    const collection = "goldcanna"
+    const cors = await corsHeaders(collection, origin)
 
     if (!backendUrl) {
       return NextResponse.json(
         { error: "XTAL_BACKEND_URL not configured" },
-        { status: 500, headers: corsHeaders() }
+        { status: 500, headers: cors }
       )
     }
 
@@ -72,7 +76,7 @@ export async function POST(request: Request) {
     if (vibe && !VALID_VIBES.includes(vibe)) {
       return NextResponse.json(
         { error: `Invalid vibe. Valid options: ${VALID_VIBES.join(", ")}` },
-        { status: 400, headers: corsHeaders() }
+        { status: 400, headers: cors }
       )
     }
 
@@ -82,7 +86,7 @@ export async function POST(request: Request) {
     if (!query && !vibe && !hasStructured) {
       return NextResponse.json(
         { error: "Provide at least one of: query, vibe, terpenes, strains, effects, formats" },
-        { status: 400, headers: corsHeaders() }
+        { status: 400, headers: cors }
       )
     }
 
@@ -116,7 +120,6 @@ export async function POST(request: Request) {
       query || vibeProfile?.query || synthesizeQuery({ terpenes, strains, effects, formats })
 
     // --- Search (pass 1: with filters) ---
-    const collection = "goldcanna"
     const overFetchLimit = limit * 3
     const hasFilters = Object.keys(resolvedFilters).length > 0
 
@@ -159,7 +162,7 @@ export async function POST(request: Request) {
             fallback_reason: "No products matched your preferences. Try a broader search.",
           },
         },
-        { headers: corsHeaders() }
+        { headers: cors }
       )
     }
 
@@ -237,22 +240,23 @@ export async function POST(request: Request) {
       },
       {
         headers: {
-          ...corsHeaders(),
+          ...cors,
           "Server-Timing": `total;dur=${Date.now() - t0}`,
         },
       }
     )
   } catch (error: unknown) {
+    const cors = await corsHeaders(undefined, origin)
     if (error instanceof Error && error.name === "TimeoutError") {
       return NextResponse.json(
         { error: "Backend timeout" },
-        { status: 504, headers: corsHeaders() }
+        { status: 504, headers: cors }
       )
     }
     console.error("Budtender recommend error:", error)
     return NextResponse.json(
       { error: "Recommendation failed" },
-      { status: 502, headers: corsHeaders() }
+      { status: 502, headers: cors }
     )
   }
 }

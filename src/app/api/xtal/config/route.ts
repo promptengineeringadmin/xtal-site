@@ -21,11 +21,13 @@ export async function OPTIONS() {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const shopId = searchParams.get("shopId")
+  const origin = request.headers.get("Origin")
+  const cors = await corsHeaders(shopId || undefined, origin)
 
   if (!shopId || !(await isValidCollection(shopId))) {
     return NextResponse.json(
       { error: "Unknown shopId" },
-      { status: 404, headers: corsHeaders() }
+      { status: 404, headers: cors }
     )
   }
 
@@ -58,7 +60,7 @@ export async function GET(request: Request) {
     },
     {
       headers: {
-        ...corsHeaders(),
+        ...cors,
         "Cache-Control": "public, max-age=300",
       },
     }

@@ -63,6 +63,9 @@ function filtersEnabledKey(collection: string) {
 function pricePresetsKey(collection: string) {
   return `admin:settings:${collection}:price_presets`
 }
+function allowedOriginsKey(collection: string) {
+  return `admin:settings:${collection}:allowed_origins`
+}
 
 // ─── Query Enhancement ─────────────────────────────────────
 
@@ -410,4 +413,27 @@ export async function savePricePresets(
 ): Promise<void> {
   const kv = getRedis()
   await kv.set(pricePresetsKey(collection), presets)
+}
+
+// ─── Allowed Origins ────────────────────────────────────
+
+export async function getAllowedOrigins(
+  collection: string
+): Promise<string[]> {
+  try {
+    const kv = getRedis()
+    const stored = await kv.get<string[]>(allowedOriginsKey(collection))
+    if (stored && Array.isArray(stored) && stored.length > 0) return stored
+  } catch {
+    // Redis unavailable
+  }
+  return [] // default: empty (allow all)
+}
+
+export async function saveAllowedOrigins(
+  collection: string,
+  origins: string[]
+): Promise<void> {
+  const kv = getRedis()
+  await kv.set(allowedOriginsKey(collection), origins)
 }

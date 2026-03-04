@@ -9,22 +9,25 @@ export async function OPTIONS() {
 }
 
 export async function POST(request: Request) {
+  const origin = request.headers.get("Origin")
+
   try {
     const body = await request.json()
     const backendUrl = process.env.XTAL_BACKEND_URL
     const collection = body.collection || process.env.XTAL_COLLECTION
+    const cors = await corsHeaders(collection, origin)
 
     if (!backendUrl) {
       return NextResponse.json(
         { error: "XTAL_BACKEND_URL not configured" },
-        { status: 500, headers: corsHeaders() }
+        { status: 500, headers: cors }
       )
     }
 
     if (!(await isValidCollection(collection))) {
       return NextResponse.json(
         { error: "Invalid collection" },
-        { status: 400, headers: corsHeaders() }
+        { status: 400, headers: cors }
       )
     }
 
@@ -69,8 +72,10 @@ export async function POST(request: Request) {
       totalMs: backendMs,
     })
 
-    // Fire-and-forget: track billable events
-    if (!body.search_context) {
+    // Fire-and-forget: track billable events (skip demo page searches)
+    if (body.is_demo) {
+      // Demo page — no billing
+    } else if (!body.search_context) {
       // New search query — billable
       trackBillableEvent(collection, {
         type: "search",
@@ -93,19 +98,20 @@ export async function POST(request: Request) {
 
     return NextResponse.json(data, {
       status: res.status,
-      headers: { ...corsHeaders(), "Server-Timing": `backend;dur=${backendMs}` },
+      headers: { ...cors, "Server-Timing": `backend;dur=${backendMs}` },
     })
   } catch (error: unknown) {
+    const cors = await corsHeaders(undefined, origin)
     if (error instanceof Error && error.name === "TimeoutError") {
       return NextResponse.json(
         { error: "Backend timeout" },
-        { status: 504, headers: corsHeaders() }
+        { status: 504, headers: cors }
       )
     }
     console.error("Search proxy error:", error)
     return NextResponse.json(
       { error: "Search failed" },
-      { status: 502, headers: corsHeaders() }
+      { status: 502, headers: cors }
     )
   }
 }

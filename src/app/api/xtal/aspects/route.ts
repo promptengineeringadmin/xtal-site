@@ -9,22 +9,25 @@ export async function OPTIONS() {
 }
 
 export async function POST(request: Request) {
+  const origin = request.headers.get("Origin")
+
   try {
     const body = await request.json()
     const backendUrl = process.env.XTAL_BACKEND_URL
     const collection = body.collection || process.env.XTAL_COLLECTION
+    const cors = await corsHeaders(collection, origin)
 
     if (!backendUrl) {
       return NextResponse.json(
         { error: "XTAL_BACKEND_URL not configured" },
-        { status: 500, headers: corsHeaders() }
+        { status: 500, headers: cors }
       )
     }
 
     if (!(await isValidCollection(collection))) {
       return NextResponse.json(
         { error: "Invalid collection" },
-        { status: 400, headers: corsHeaders() }
+        { status: 400, headers: cors }
       )
     }
 
@@ -61,19 +64,20 @@ export async function POST(request: Request) {
     const data = await res.json()
     return NextResponse.json({ ...data, aspects_enabled: aspectsEnabled }, {
       status: res.status,
-      headers: { ...corsHeaders(), "Server-Timing": `redis;dur=${redisMs}, backend;dur=${backendMs}` },
+      headers: { ...cors, "Server-Timing": `redis;dur=${redisMs}, backend;dur=${backendMs}` },
     })
   } catch (error: unknown) {
+    const cors = await corsHeaders(undefined, origin)
     if (error instanceof Error && error.name === "TimeoutError") {
       return NextResponse.json(
         { error: "Backend timeout" },
-        { status: 504, headers: corsHeaders() }
+        { status: 504, headers: cors }
       )
     }
     console.error("Aspects proxy error:", error)
     return NextResponse.json(
       { error: "Aspects failed" },
-      { status: 502, headers: corsHeaders() }
+      { status: 502, headers: cors }
     )
   }
 }
