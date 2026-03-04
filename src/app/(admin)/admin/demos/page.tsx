@@ -608,12 +608,23 @@ function CreateDemoForm({
     }
   }, [])
 
+  const MAX_SELF_SERVE_PRODUCTS = 3000
+
   const handleSubmit = async () => {
     if (!name.trim() || !file || !slug) return
     setSubmitting(true)
     setError(null)
 
     try {
+      // Count CSV rows (subtract 1 for header)
+      const text = await file.text()
+      const lineCount = text.split("\n").filter((l) => l.trim()).length - 1
+      if (lineCount > MAX_SELF_SERVE_PRODUCTS) {
+        throw new Error(
+          `This catalog has ~${lineCount.toLocaleString()} products. Self-serve upload supports up to ${MAX_SELF_SERVE_PRODUCTS.toLocaleString()} products. For larger catalogs, contact us at hello@xtalsearch.com for a managed setup.`
+        )
+      }
+
       const formData = new FormData()
       formData.append("file", file)
       formData.append("collection_name", slug)

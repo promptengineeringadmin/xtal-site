@@ -16,9 +16,26 @@ export async function POST(request: Request) {
       )
     }
 
+    // Enforce self-serve product limit
+    const MAX_SELF_SERVE_PRODUCTS = 3000
+    const fileText = await file.text()
+    const lineCount = fileText.split("\n").filter((l) => l.trim()).length - 1 // subtract header
+    if (lineCount > MAX_SELF_SERVE_PRODUCTS) {
+      return NextResponse.json(
+        {
+          error: `Catalog has ~${lineCount.toLocaleString()} products. Self-serve upload supports up to ${MAX_SELF_SERVE_PRODUCTS.toLocaleString()}. Contact hello@xtalsearch.com for larger catalogs.`,
+        },
+        { status: 413 }
+      )
+    }
+
+    // Re-create File from text since we consumed it above
+    const fileBlob = new Blob([fileText], { type: file.type || "text/csv" })
+    const rebuiltFile = new File([fileBlob], file.name, { type: file.type || "text/csv" })
+
     const provider = getAuthProvider()
     const backendForm = new FormData()
-    backendForm.append("file", file)
+    backendForm.append("file", rebuiltFile)
     backendForm.append("collection_name", collectionName)
 
     let responseData
