@@ -29,7 +29,8 @@ import {
   buildTitleSlideHtml,
   buildComparisonSlideHtml,
   buildCtaSlideHtml,
-  buildCoverSheetHtml,
+  buildIntroSlideHtml,
+  buildQueryPreviewSlideHtml,
   buildScorecardHtml,
   renderSlideToBuffer,
 } from "./teardown/slide-renderer"
@@ -192,6 +193,10 @@ export async function runTeardown(
         userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
       })
 
+      // Duplicate result detection — abort if merchant returns same default set
+      const seenFingerprints = new Set<string>()
+      let consecutiveDupes = 0
+
       for (let i = 0; i < queries.length; i++) {
         const q = queries[i]
         log(`  [${i + 1}/${queries.length}] "${q.text}"`)
@@ -205,6 +210,28 @@ export async function runTeardown(
           const msg = err instanceof Error ? err.message : String(err)
           log(`    ${merchant.name}: ERROR - ${msg}`)
           merchantResult = { results: [], count: 0, responseTime: 0, error: msg }
+        }
+
+        // Check for duplicate/default result sets
+        if (merchantResult.results.length > 0) {
+          const fingerprint = merchantResult.results
+            .map((r: { title: string }) => r.title)
+            .sort()
+            .join("|")
+          if (seenFingerprints.has(fingerprint)) {
+            consecutiveDupes++
+          } else {
+            consecutiveDupes = 0
+          }
+          seenFingerprints.add(fingerprint)
+
+          if (consecutiveDupes >= 2) {
+            await scrapePage.close()
+            throw new Error(
+              `ABORT: ${merchant.name} returning identical default results for ${consecutiveDupes + 1} consecutive queries. ` +
+              `Site likely has no working search or no search bar.`,
+            )
+          }
         }
 
         // XTAL search (use xtalCollection, not merchant.id)
@@ -319,11 +346,17 @@ export async function runTeardown(
     slides.push(await renderSlideToBuffer(page, titleHtml))
     fs.writeFileSync(path.join(slidesDir, `${String(slideNum++).padStart(2, "0")}-title.png`), slides[slides.length - 1])
 
-    // 2. Cover sheet slide
-    log("  Rendering cover sheet...")
-    const coverHtml = buildCoverSheetHtml(merchant, totalComparisonSlides)
-    slides.push(await renderSlideToBuffer(page, coverHtml))
-    fs.writeFileSync(path.join(slidesDir, `${String(slideNum++).padStart(2, "0")}-cover.png`), slides[slides.length - 1])
+    // 2. Intro slide ("Why This Report Exists")
+    log("  Rendering intro slide...")
+    const introHtml = buildIntroSlideHtml(merchant)
+    slides.push(await renderSlideToBuffer(page, introHtml))
+    fs.writeFileSync(path.join(slidesDir, `${String(slideNum++).padStart(2, "0")}-intro.png`), slides[slides.length - 1])
+
+    // 3. Query preview slide ("The 20 Queries We Tested")
+    log("  Rendering query preview slide...")
+    const queryPreviewHtml = buildQueryPreviewSlideHtml(merchant, comparisons)
+    slides.push(await renderSlideToBuffer(page, queryPreviewHtml))
+    fs.writeFileSync(path.join(slidesDir, `${String(slideNum++).padStart(2, "0")}-queries.png`), slides[slides.length - 1])
 
     // 3. Comparison slides (with grade badges)
     for (let i = 0; i < comparisons.length; i++) {
@@ -350,10 +383,7 @@ export async function runTeardown(
       teardownScores.overallScore,
       teardownScores.overallGrade,
       teardownScores.dimensionScores,
-      {
-        monthlyLost: revenueImpact.monthlyLostRevenue,
-        annualLost: revenueImpact.annualLostRevenue,
-      },
+      comparisons,
     )
     slides.push(await renderSlideToBuffer(page, scorecardHtml))
     fs.writeFileSync(path.join(slidesDir, `${String(slideNum++).padStart(2, "0")}-scorecard.png`), slides[slides.length - 1])
@@ -379,7 +409,7 @@ export async function runTeardown(
     log(`  Teardown complete: ${merchant.name}`)
     log(`  ${comparisons.length} queries compared`)
     log(`  Overall score: ${teardownScores.overallScore}/100 (${teardownScores.overallGrade})`)
-    log(`  ${slides.length} slides (title + cover + ${comparisons.length} comparisons + scorecard + CTA)`)
+    log(`  ${slides.length} slides (title + intro + queries + ${comparisons.length} comparisons + scorecard + CTA)`)
     log(`  PDF: ${pdfPath} (${pdfSize} MB)`)
     log(`  Slides: ${slidesDir}/`)
     log("═══════════════════════════════════════════")
