@@ -80,14 +80,16 @@ export async function POST(request: Request) {
 
     const data = await res.json()
 
-    // Fire-and-forget: track explain as billable event
-    trackBillableEvent(collection, {
-      type: "explain",
-      query: body.query ?? "",
-      status: res.status,
-      latency_ms: 0,
-      product_id: body.product_id,
-    })
+    // Fire-and-forget: track explain as billable event (skip for demo pages)
+    if (!body.is_demo) {
+      trackBillableEvent(collection, {
+        type: "explain",
+        query: body.query ?? "",
+        status: res.status,
+        latency_ms: 0,
+        product_id: body.product_id,
+      })
+    }
 
     return NextResponse.json(
       { ...data, prompt_hash },

@@ -1,4 +1,5 @@
 import { Redis } from "@upstash/redis"
+import { getCustomer } from "./billing-customer"
 
 // ─── Redis client (lazy init, same pattern as api-usage.ts) ────────
 
@@ -56,10 +57,21 @@ export interface BillableEvent {
  * Increment the monthly counter for this event type and log the event.
  * Caller should NOT await this — fire-and-forget.
  */
-export function trackBillableEvent(
+export async function trackBillableEvent(
   collection: string,
   event: Omit<BillableEvent, "timestamp">
 ): Promise<void> {
+  // Gate: skip if billing hasn't started yet for this customer
+  try {
+    const customer = await getCustomer(collection)
+    if (customer?.billing_start) {
+      const startDate = new Date(customer.billing_start)
+      if (new Date() < startDate) return
+    }
+  } catch {
+    // Redis lookup failed — proceed with tracking to avoid silent data loss
+  }
+
   const kv = getRedis()
   const month = currentYearMonth()
   const now = Date.now()

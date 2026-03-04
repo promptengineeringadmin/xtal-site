@@ -71,12 +71,14 @@ function SidebarContent({ pathname, user, isMarketing }: {
         </Link>
       </div>
 
-      <div className="px-3 pb-3">
-        <label className="block text-[10px] font-medium text-white/40 uppercase tracking-wider mb-1.5 px-1">
-          Experience
-        </label>
-        <CollectionCombobox />
-      </div>
+      {!isMarketing && (
+        <div className="px-3 pb-3">
+          <label className="block text-[10px] font-medium text-white/40 uppercase tracking-wider mb-1.5 px-1">
+            Experience
+          </label>
+          <CollectionCombobox />
+        </div>
+      )}
 
       <nav className="flex-1 px-3 space-y-1">
         {navItems.map(({ href, label: navLabel, icon: Icon }) => {
