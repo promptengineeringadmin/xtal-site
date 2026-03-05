@@ -193,15 +193,16 @@ export async function runTeardown(
         userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
       })
 
-      // Duplicate result detection — abort if merchant returns same default set
+      // ── Phase 2a: Merchant scrapes (with duplicate detection) ──
+      log("  Phase 1: Scraping merchant results...")
       const seenFingerprints = new Set<string>()
       let consecutiveDupes = 0
+      const merchantResults: Array<{ results: any[]; count: number; responseTime: number; error?: string }> = []
 
       for (let i = 0; i < queries.length; i++) {
         const q = queries[i]
         log(`  [${i + 1}/${queries.length}] "${q.text}"`)
 
-        // Merchant search (scrapes the actual website)
         let merchantResult
         try {
           merchantResult = await searchMerchant(merchant, q.text, scrapePage)
@@ -234,14 +235,30 @@ export async function runTeardown(
           }
         }
 
-        // XTAL search (use xtalCollection, not merchant.id)
+        merchantResults.push(merchantResult)
+
+        // Brief pause between scrapes
+        if (i < queries.length - 1) {
+          await new Promise((r) => setTimeout(r, 1500 + Math.random() * 1000))
+        }
+      }
+
+      // Close scrape page before XTAL searches (avoids Node socket conflicts with Playwright)
+      await scrapePage.close()
+
+      // ── Phase 2b: XTAL searches (after browser page closed) ──
+      log("  Phase 2: Running XTAL searches...")
+      for (let i = 0; i < queries.length; i++) {
+        const q = queries[i]
+        const merchantResult = merchantResults[i]
+
         let xtalResult
         try {
           xtalResult = await searchXtal(q.text, xtalCollection)
-          log(`    XTAL: ${xtalResult.resultCount} results`)
+          log(`    [${i + 1}/${queries.length}] "${q.text}" → XTAL: ${xtalResult.resultCount} results`)
         } catch (err) {
           const msg = err instanceof Error ? err.message : String(err)
-          log(`    XTAL: ERROR - ${msg}`)
+          log(`    [${i + 1}/${queries.length}] "${q.text}" → XTAL: ERROR - ${msg}`)
           xtalResult = {
             results: [],
             resultCount: 0,
@@ -267,13 +284,7 @@ export async function runTeardown(
           },
         })
 
-        // Brief pause between scrape navigations
-        if (i < queries.length - 1) {
-          await sleep(2000)
-        }
       }
-
-      await scrapePage.close()
 
       // Save comparison data
       fs.writeFileSync(

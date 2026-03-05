@@ -39,7 +39,7 @@ export async function searchXtal(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ query, collection, limit }),
-    signal: AbortSignal.timeout(15_000),
+    signal: AbortSignal.timeout(30_000),
   })
 
   if (!res.ok) {
