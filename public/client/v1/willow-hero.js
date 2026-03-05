@@ -1,14 +1,19 @@
-// Paste this entire block into the browser console on www.willowgroupltd.com
+// XTAL Search Hero Banner for Willow Group
+// Supports two modes:
+// 1. Hydration: GTM pre-renders CSS+HTML inline → this script adds interactivity (zero CLS)
+// 2. Injection: Console/fallback → this script creates everything from scratch
 // Run window.xtalHeroRemove() to remove the banner
 (function(){
   if(window.location.pathname !== '/') return;
-  if(document.getElementById('xtal-hero-banner')){console.log('Banner already injected');return;}
 
-  // Inject styles
-  var s=document.createElement('style');
-  s.id='xtal-hero-styles';
-  s.textContent=`
-/* Added margin-top: 40px to isolate it from the hero image above */
+  var banner = document.getElementById('xtal-hero-banner');
+  var hydrating = !!banner;
+
+  if (!hydrating) {
+    // ─── INJECTION MODE (console / no pre-rendered HTML) ───
+    var s=document.createElement('style');
+    s.id='xtal-hero-styles';
+    s.textContent=`
 .xtal-hero-wrapper{margin-top:40px;width:100%;background:#f8f6f2;padding:40px clamp(16px,4vw,64px) 16px;font-family:"Manrope",sans-serif;box-sizing:border-box}
 .xtal-hero-wrapper *{box-sizing:border-box}
 
@@ -64,42 +69,48 @@
   .xtal-hero-powered-by{justify-content:flex-end}
 }
 `;
-  document.head.appendChild(s);
+    document.head.appendChild(s);
 
-  // Inject HTML
-  var html = '<div class="xtal-hero-wrapper" role="search" aria-label="Product search" id="xtal-hero-banner">'
-    + '<div class="xtal-hero-container">'
-    + '<div class="xtal-hero-left">'
-    + '<h2 class="xtal-hero-headline">Try Our Intuitive Catalog Search:</h2>'
-    + '<p class="xtal-hero-subtext">Search by SKU, keyword, or just describe what you need.</p>'
-    + '</div>'
-    + '<div class="xtal-hero-right">'
-    + '<form class="xtal-hero-form" role="search">'
-    + '<div class="xtal-hero-input-group">'
-    + '<svg class="xtal-hero-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.34-4.34"/></svg>'
-    + '<input type="text" class="xtal-hero-input" placeholder="Search our catalog..." aria-label="Search Willow Group products" autocomplete="off">'
-    + '<button type="submit" class="xtal-hero-submit">Search</button>'
-    + '</div></form>'
-    + '<div class="xtal-hero-chips-wrap"><div class="xtal-hero-chips" role="group" aria-label="Example search queries"></div></div>'
-    + '<a href="https://www.xtalsearch.com" class="xtal-hero-powered-by" target="_blank" rel="noopener noreferrer">'
-    + '<span class="xtal-hero-powered-label">Powered by</span>'
-    + '<span class="xtal-hero-powered-logo"><svg viewBox="0 0 100 100" fill="#1B2D5B" xmlns="http://www.w3.org/2000/svg"><rect x="42" y="10" width="16" height="35" rx="8" transform="rotate(45 50 50)"/><rect x="42" y="55" width="16" height="35" rx="8" transform="rotate(45 50 50)"/><rect x="10" y="42" width="35" height="16" rx="8" transform="rotate(45 50 50)"/><rect x="55" y="42" width="35" height="16" rx="8" transform="rotate(45 50 50)"/></svg><span>XTAL</span></span>'
-    + '</a>'
-    + '</div>'
-    + '</div></div>';
+    var html = '<div class="xtal-hero-wrapper" role="search" aria-label="Product search" id="xtal-hero-banner">'
+      + '<div class="xtal-hero-container">'
+      + '<div class="xtal-hero-left">'
+      + '<h2 class="xtal-hero-headline">Try Our Intuitive Catalog Search:</h2>'
+      + '<p class="xtal-hero-subtext">Search by SKU, keyword, or just describe what you need.</p>'
+      + '</div>'
+      + '<div class="xtal-hero-right">'
+      + '<form class="xtal-hero-form" role="search">'
+      + '<div class="xtal-hero-input-group">'
+      + '<svg class="xtal-hero-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.34-4.34"/></svg>'
+      + '<input type="text" class="xtal-hero-input" placeholder="Search our catalog..." aria-label="Search Willow Group products" autocomplete="off">'
+      + '<button type="submit" class="xtal-hero-submit">Search</button>'
+      + '</div></form>'
+      + '<div class="xtal-hero-chips-wrap"><div class="xtal-hero-chips" role="group" aria-label="Example search queries"></div></div>'
+      + '<a href="https://www.xtalsearch.com" class="xtal-hero-powered-by" target="_blank" rel="noopener noreferrer">'
+      + '<span class="xtal-hero-powered-label">Powered by</span>'
+      + '<span class="xtal-hero-powered-logo"><svg viewBox="0 0 100 100" fill="#1B2D5B" xmlns="http://www.w3.org/2000/svg"><rect x="42" y="10" width="16" height="35" rx="8" transform="rotate(45 50 50)"/><rect x="42" y="55" width="16" height="35" rx="8" transform="rotate(45 50 50)"/><rect x="10" y="42" width="35" height="16" rx="8" transform="rotate(45 50 50)"/><rect x="55" y="42" width="35" height="16" rx="8" transform="rotate(45 50 50)"/></svg><span>XTAL</span></span>'
+      + '</a>'
+      + '</div>'
+      + '</div></div>';
 
-  var target = document.querySelector('#pos_6829') || document.querySelector('main > section:first-child');
-  if (target) {
-    target.insertAdjacentHTML('afterend', html);
+    var target = document.querySelector('#pos_6829') || document.querySelector('main > section:first-child');
+    if (target) {
+      target.insertAdjacentHTML('afterend', html);
+    } else {
+      var main = document.querySelector('main');
+      if (main) main.insertAdjacentHTML('afterbegin', html);
+      else { console.error('No injection target found'); return; }
+    }
+
+    banner = document.getElementById('xtal-hero-banner');
+    if (!banner) return;
   } else {
-    var main = document.querySelector('main');
-    if (main) main.insertAdjacentHTML('afterbegin', html);
-    else { console.error('No injection target found'); return; }
+    // ─── HYDRATION MODE (GTM pre-rendered the CSS + HTML) ───
+    // The inline relocation script in the GTM tag already positioned and
+    // revealed the banner. We just add interactivity (chips, animation).
+    console.log('[xtal-hero] Hydrating pre-rendered banner');
   }
 
-  var banner = document.getElementById('xtal-hero-banner');
-  if (!banner) return;
-
+  // ─── SHARED: chips, form handler, placeholder animation ───
   var queries = [
     { text: "what's new this spring", label: "New" },
     { text: "something to display wine bottles", label: "Display" },
@@ -129,11 +140,9 @@
     e.preventDefault();
     var val = input.value.trim();
     if (val) {
-      // Use XTAL SDK if loaded (navigates to /shop/ with XTAL results)
       if (window.XTAL && typeof window.XTAL.search === 'function') {
         window.XTAL.search(val);
       } else {
-        // Fallback: navigate to search page directly
         window.location.href = '/shop/?Search=' + encodeURIComponent(val);
       }
     }

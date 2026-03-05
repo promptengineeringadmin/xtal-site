@@ -7,7 +7,6 @@
   var s=document.createElement('style');
   s.id='xtal-hero-styles';
   s.textContent=`
-/* Added margin-top: 40px to isolate it from the hero image above */
 .xtal-hero-wrapper{margin-top:40px;width:100%;background:#f8f6f2;padding:40px clamp(16px,4vw,64px) 16px;font-family:"Manrope",sans-serif;box-sizing:border-box}
 .xtal-hero-wrapper *{box-sizing:border-box}
 

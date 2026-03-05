@@ -248,6 +248,7 @@ export default function SnippetSettingsPage() {
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
                   Copy this snippet and add it to Google Tag Manager using the steps below.
+                  {collection === "willow" && " Includes inline hero banner for zero-CLS home page rendering."}
                 </p>
               </div>
               <button
@@ -268,7 +269,72 @@ export default function SnippetSettingsPage() {
             </div>
             <div className="bg-slate-900 rounded-xl p-4 overflow-x-auto">
               <pre id="gtm-snippet-content" className="text-xs text-slate-100 font-mono whitespace-pre-wrap break-all">
-{`<script>window.XTAL_CONFIG = { shopId: "${collection}" };</script>
+{collection === "willow" ? `<!-- XTAL Search SDK + Hero Banner (zero-CLS) -->
+<style id="xtal-hero-styles">
+.xtal-hero-wrapper{margin-top:40px;width:100%;background:#f8f6f2;padding:40px clamp(16px,4vw,64px) 16px;font-family:"Manrope",sans-serif;box-sizing:border-box}
+.xtal-hero-wrapper *{box-sizing:border-box}
+.xtal-hero-container{display:grid;grid-template-columns:40% 1fr;gap:48px;align-items:end;margin:0 auto;max-width:1920px;text-align:left}
+.xtal-hero-left{margin-bottom:0}
+.xtal-hero-right{display:flex;flex-direction:column}
+.xtal-hero-headline{font-size:clamp(32px,3.5vw + 10px,50px);font-weight:500;color:#1D1D1B;margin:0 0 8px 0;line-height:1.1;letter-spacing:-0.01em;font-family:"SpratFont",serif}
+.xtal-hero-subtext{font-size:clamp(14px,1.2vw + 6px,16px);color:#545454;margin:0;line-height:1.5;font-family:"Manrope",sans-serif}
+.xtal-hero-form{margin:0 0 12px 0;position:relative}
+.xtal-hero-input-group{display:flex;align-items:center;background:#FFF;border:1.5px solid #2E4324;border-radius:8px;height:52px;position:relative;overflow:hidden;transition:box-shadow .2s ease}
+.xtal-hero-input-group:focus-within{box-shadow:0 0 0 3px rgba(46,67,36,.15);border-color:#2E4324}
+.xtal-hero-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:#5C5C5C;pointer-events:none}
+.xtal-hero-input{flex-grow:1;height:100%;border:none;background:transparent;padding:0 16px 0 44px;font-size:16px;font-family:"Manrope",sans-serif;color:#1D1D1B;outline:none;width:100%}
+.xtal-hero-input::placeholder{color:#5C5C5C}
+.xtal-hero-submit{background:#2E4324;color:#FFF;border:none;height:100%;padding:0 20px;font-size:15px;font-weight:400;cursor:pointer;transition:background .15s ease;font-family:"Manrope",sans-serif}
+.xtal-hero-submit:hover{background:#1F2E18}
+.xtal-hero-chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding-left:36px;padding-right:90px;margin-bottom:12px}
+.xtal-hero-chip{background:#FFF;color:#2E4324;border:1px solid #2E4324;border-radius:20px;font-size:13px;padding:6px 14px;cursor:pointer;transition:all .2s ease;font-family:"Manrope",sans-serif;white-space:nowrap;outline:none}
+.xtal-hero-chip:hover{background:#F2F4EF}
+.xtal-hero-chip.xtal-hero-chip-active{background:#2E4324;color:#FFF}
+.xtal-hero-powered-by{display:flex;justify-content:flex-end;align-items:center;gap:6px;margin:0;text-decoration:none;font-family:"Manrope",sans-serif;transition:opacity .2s ease}
+.xtal-hero-powered-by:hover{opacity:.7}
+.xtal-hero-powered-by::after{display:none!important;content:none!important}
+.xtal-hero-powered-label{font-size:11px;color:#787878}
+.xtal-hero-powered-logo{display:flex;align-items:center;gap:3px}
+.xtal-hero-powered-logo svg{width:12px;height:12px}
+.xtal-hero-powered-logo span{font-size:12px;font-weight:700;color:#1B2D5B;letter-spacing:0.25em}
+@media(max-width:992px){.xtal-hero-container{grid-template-columns:1fr;align-items:center;text-align:center;gap:24px}.xtal-hero-subtext{margin:0 auto;max-width:600px}.xtal-hero-chips{justify-content:center;padding-right:0}.xtal-hero-powered-by{justify-content:center}}
+@media(max-width:768px){.xtal-hero-wrapper{margin-top:32px}.xtal-hero-input-group{height:48px}}
+@media(max-width:480px){.xtal-hero-wrapper{margin-top:24px;overflow:hidden}.xtal-hero-input-group{height:44px}.xtal-hero-submit{padding:0 16px}.xtal-hero-chips-wrap{position:relative}.xtal-hero-chips-wrap::after{content:"";position:absolute;right:0;top:0;bottom:0;width:40px;background:linear-gradient(to right,transparent,#f8f6f2);pointer-events:none;z-index:1}.xtal-hero-chips{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;scrollbar-width:none}.xtal-hero-chips::-webkit-scrollbar{display:none}.xtal-hero-chip{font-size:12px;padding:5px 12px}.xtal-hero-powered-by{justify-content:flex-end}}
+</style>
+<div class="xtal-hero-wrapper" role="search" aria-label="Product search" id="xtal-hero-banner" style="display:none">
+<div class="xtal-hero-container">
+<div class="xtal-hero-left">
+<h2 class="xtal-hero-headline">Try Our Intuitive Catalog Search:</h2>
+<p class="xtal-hero-subtext">Search by SKU, keyword, or just describe what you need.</p>
+</div>
+<div class="xtal-hero-right">
+<form class="xtal-hero-form" role="search">
+<div class="xtal-hero-input-group">
+<svg class="xtal-hero-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.34-4.34"/></svg>
+<input type="text" class="xtal-hero-input" placeholder="Search our catalog..." aria-label="Search Willow Group products" autocomplete="off">
+<button type="submit" class="xtal-hero-submit">Search</button>
+</div></form>
+<div class="xtal-hero-chips-wrap"><div class="xtal-hero-chips" role="group" aria-label="Example search queries"></div></div>
+<a href="https://www.xtalsearch.com" class="xtal-hero-powered-by" target="_blank" rel="noopener noreferrer">
+<span class="xtal-hero-powered-label">Powered by</span>
+<span class="xtal-hero-powered-logo"><svg viewBox="0 0 100 100" fill="#1B2D5B" xmlns="http://www.w3.org/2000/svg"><rect x="42" y="10" width="16" height="35" rx="8" transform="rotate(45 50 50)"/><rect x="42" y="55" width="16" height="35" rx="8" transform="rotate(45 50 50)"/><rect x="10" y="42" width="35" height="16" rx="8" transform="rotate(45 50 50)"/><rect x="55" y="42" width="35" height="16" rx="8" transform="rotate(45 50 50)"/></svg><span>XTAL</span></span>
+</a>
+</div>
+</div></div>
+<script>
+// Relocate banner to correct DOM position and reveal (runs synchronously)
+(function(){
+  if(location.pathname!=='/') return;
+  var b=document.getElementById('xtal-hero-banner');if(!b) return;
+  var t=document.querySelector('#pos_6829')||document.querySelector('main > section:first-child');
+  if(t) t.insertAdjacentElement('afterend',b);
+  else{var m=document.querySelector('main');if(m) m.insertBefore(b,m.firstChild);}
+  b.style.display='';
+})();
+</script>
+<script>window.XTAL_CONFIG = { shopId: "willow" };</script>
+<script src="https://www.xtalsearch.com/client/v1/xtal.js"></script>
+<script src="https://www.xtalsearch.com/client/v1/willow-hero.js"></script>` : `<script>window.XTAL_CONFIG = { shopId: "${collection}" };</script>
 <script src="https://www.xtalsearch.com/client/v1/xtal.js"></script>`}
               </pre>
             </div>
