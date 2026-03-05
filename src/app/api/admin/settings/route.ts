@@ -40,6 +40,9 @@ export async function GET(request: Request) {
       if (data.results_per_page === undefined || data.results_per_page === null) {
         data.results_per_page = await getResultsPerPage(fallbackCollection)
       }
+      if (!data.allowed_origins || !Array.isArray(data.allowed_origins) || data.allowed_origins.length === 0) {
+        data.allowed_origins = await getAllowedOrigins(fallbackCollection)
+      }
       return NextResponse.json(data)
     }
     // Backend returned an error — fall back to Redis
