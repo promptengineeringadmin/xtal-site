@@ -83,7 +83,7 @@ export class InlineRenderer {
 
     const wrap = document.createElement("div")
     wrap.style.cssText =
-      "display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;width:100%;"
+      "display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;width:100%;min-height:50vh;"
 
     // Spinner ring with sparkle icon
     const ring = document.createElement("div")
