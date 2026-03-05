@@ -324,15 +324,17 @@ function boot() {
       }
     }
 
-    // Early hide: if we have a cached config with a resultsSelector and
-    // the URL contains a search query, hide the native results container
-    // immediately to prevent flash of native content.
+    // Early hide: inject a CSS rule that hides the native results container
+    // the instant it appears in the DOM. This works even for late-rendering
+    // elements (e.g. Angular directives) unlike querySelector-based hiding.
     if (cachedConfig?.resultsSelector) {
       const urlParams = new URLSearchParams(window.location.search)
       const hasSearch = urlParams.has("Search") || urlParams.has("search")
       if (hasSearch) {
-        const el = document.querySelector<HTMLElement>(cachedConfig.resultsSelector)
-        if (el) el.style.visibility = "hidden"
+        const earlyHideStyle = document.createElement("style")
+        earlyHideStyle.id = "xtal-early-hide"
+        earlyHideStyle.textContent = `${cachedConfig.resultsSelector} { visibility: hidden !important; }`
+        document.head.appendChild(earlyHideStyle)
       }
     }
 

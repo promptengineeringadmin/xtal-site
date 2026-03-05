@@ -27,8 +27,9 @@ export class InlineRenderer {
       this.originalDisplay = this.target.style.display
       this.target.style.display = "block"
       this.target.style.width = "100%"
-      // Clear early-hide from SDK config cache (visibility:hidden set before config fetch)
-      this.target.style.visibility = ""
+      // Remove CSS-based early-hide style tag (injected before config fetch)
+      const earlyHide = document.getElementById("xtal-early-hide")
+      if (earlyHide) earlyHide.remove()
     }
   }
 
@@ -171,6 +172,9 @@ export class InlineRenderer {
     this.layoutEl = null
     this.railSlot = null
     this.gridSlot = null
+    // Remove early-hide if still present
+    const earlyHide = document.getElementById("xtal-early-hide")
+    if (earlyHide) earlyHide.remove()
     if (this.originalHTML !== null) {
       this.target.innerHTML = this.originalHTML
       this.target.style.display = this.originalDisplay
