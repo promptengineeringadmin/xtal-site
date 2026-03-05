@@ -133,4 +133,5 @@ export interface AnalyticsDashboard {
   daily_volume: DailyVolume[]
   top_queries: TopQuery[]
   top_products: TopProduct[]
+  launch_date?: string // ISO date — set when customer has a launch_date, used to clamp date range
 }

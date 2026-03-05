@@ -161,7 +161,9 @@ export default function DashboardPage() {
 
       {data && !loading && (
         <div className="mt-6 text-xs text-slate-400">
-          Showing last {days} days
+          {data.launch_date
+            ? `Showing data since launch (${new Date(data.launch_date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })})`
+            : `Showing last ${days} days`}
         </div>
       )}
     </div>
