@@ -114,6 +114,10 @@
     console.log('[xtal-hero] Hydrating pre-rendered banner');
   }
 
+  // Remove CMS spacer now that real hero is present
+  var spacer = document.getElementById('xtal-hero-spacer');
+  if (spacer) spacer.remove();
+
   // ─── SHARED: chips, form handler, placeholder animation ───
   var queries = [
     { text: "what's new this spring", label: "New" },
