@@ -30,6 +30,9 @@ export class InlineRenderer {
       // Remove CSS-based early-hide style tag (injected before config fetch)
       const earlyHide = document.getElementById("xtal-early-hide")
       if (earlyHide) earlyHide.remove()
+      // Remove CMS-injected loading container (Umbraco Header Scripts)
+      const searchLoading = document.getElementById("xtal-search-loading")
+      if (searchLoading) searchLoading.remove()
     }
   }
 
@@ -172,9 +175,11 @@ export class InlineRenderer {
     this.layoutEl = null
     this.railSlot = null
     this.gridSlot = null
-    // Remove early-hide if still present
+    // Remove early-hide and CMS loading container if still present
     const earlyHide = document.getElementById("xtal-early-hide")
     if (earlyHide) earlyHide.remove()
+    const searchLoading = document.getElementById("xtal-search-loading")
+    if (searchLoading) searchLoading.remove()
     if (this.originalHTML !== null) {
       this.target.innerHTML = this.originalHTML
       this.target.style.display = this.originalDisplay

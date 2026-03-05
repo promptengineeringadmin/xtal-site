@@ -291,15 +291,6 @@ export default function SnippetSettingsPage() {
   if(b)requestAnimationFrame(function(){try{localStorage.setItem('xtal:hero:height',String(b.offsetHeight))}catch(e){}});
 })();
 </script>
-<script>
-// Anti-flicker: hide native results on search pages (no cache needed)
-if(/[?&](Search|search)=/.test(location.search)){
-  var s=document.createElement('style');s.id='xtal-early-hide';
-  s.textContent='shopping-multi-view{visibility:hidden!important;min-height:400px}';
-  document.head.appendChild(s);
-  setTimeout(function(){var e=document.getElementById('xtal-early-hide');if(e)e.remove()},5000);
-}
-</script>
 <script>window.XTAL_CONFIG = { shopId: "willow" };</script>
 <script src="https://www.xtalsearch.com/client/v1/xtal.js"></script>
 <script src="https://www.xtalsearch.com/client/v1/willow-hero.js"></script>` : `<script>window.XTAL_CONFIG = { shopId: "${collection}" };</script>
