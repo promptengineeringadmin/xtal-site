@@ -77,6 +77,7 @@ export class FilterRail {
   private onPriceChange: (range: { min?: number; max?: number } | null) => void
   private onClearAll: () => void
   private pricePresets: { label: string; min?: number; max?: number }[]
+  private hiddenFacets: Set<string>
 
   // Desktop rail element
   private railEl: HTMLElement
@@ -98,13 +99,15 @@ export class FilterRail {
     onFacetToggle: (prefix: string, value: string) => void,
     onPriceChange: (range: { min?: number; max?: number } | null) => void,
     onClearAll: () => void,
-    pricePresets?: { label: string; min?: number; max?: number }[]
+    pricePresets?: { label: string; min?: number; max?: number }[],
+    hiddenFacets?: string[]
   ) {
     this.container = container
     this.onFacetToggle = onFacetToggle
     this.onPriceChange = onPriceChange
     this.onClearAll = onClearAll
     this.pricePresets = pricePresets || PRICE_PRESETS
+    this.hiddenFacets = new Set(hiddenFacets || [])
 
     // ── Desktop rail ──
     this.railEl = document.createElement("aside")
@@ -293,6 +296,7 @@ export class FilterRail {
 
     // ── Facet sections ──
     const facetEntries = Object.entries(facets)
+      .filter(([prefix]) => !this.hiddenFacets.has(prefix))
     for (const [prefix, values] of facetEntries) {
       const activeValues = activeFacetFilters[prefix] || []
       const activeCount = activeValues.length

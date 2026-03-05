@@ -66,6 +66,9 @@ function pricePresetsKey(collection: string) {
 function allowedOriginsKey(collection: string) {
   return `admin:settings:${collection}:allowed_origins`
 }
+function hiddenFacetsKey(collection: string) {
+  return `admin:settings:${collection}:hidden_facets`
+}
 
 // ─── Query Enhancement ─────────────────────────────────────
 
@@ -436,4 +439,27 @@ export async function saveAllowedOrigins(
 ): Promise<void> {
   const kv = getRedis()
   await kv.set(allowedOriginsKey(collection), origins)
+}
+
+// ─── Hidden Facets ────────────────────────────────────
+
+export async function getHiddenFacets(
+  collection: string
+): Promise<string[]> {
+  try {
+    const kv = getRedis()
+    const stored = await kv.get<string[]>(hiddenFacetsKey(collection))
+    if (stored && Array.isArray(stored) && stored.length > 0) return stored
+  } catch {
+    // Redis unavailable
+  }
+  return [] // default: show all facets
+}
+
+export async function saveHiddenFacets(
+  collection: string,
+  facets: string[]
+): Promise<void> {
+  const kv = getRedis()
+  await kv.set(hiddenFacetsKey(collection), facets)
 }

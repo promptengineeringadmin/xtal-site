@@ -327,7 +327,7 @@ function boot() {
     // Early hide: inject a CSS rule that hides the native results container
     // the instant it appears in the DOM. This works even for late-rendering
     // elements (e.g. Angular directives) unlike querySelector-based hiding.
-    if (cachedConfig?.resultsSelector) {
+    if (cachedConfig?.resultsSelector && !document.getElementById("xtal-early-hide")) {
       const urlParams = new URLSearchParams(window.location.search)
       const hasSearch = urlParams.has("Search") || urlParams.has("search")
       if (hasSearch) {
@@ -475,7 +475,8 @@ function boot() {
                 priceRange = null
                 doFilter()
               },
-              config.pricePresets
+              config.pricePresets,
+              config.hiddenFacets
             )
           }
 
@@ -595,9 +596,15 @@ function boot() {
 
             inline!.showLoading(query)
 
-            api
-              .searchFull(query, config.resultsPerPage ?? 24)
-              .then((res) => {
+            // Use prefetched results from GTM inline script if available
+            const prefetch = (window as any).__xtalPrefetch as Promise<any> | undefined
+            const searchPromise = prefetch
+              ? (delete (window as any).__xtalPrefetch, prefetch)
+              : api.searchFull(query, config.resultsPerPage ?? 24)
+
+            searchPromise
+              .then((res: any) => {
+                if (!res) throw new Error("Prefetch returned null")
                 lastTotal = res.total
                 lastFacets = res.computed_facets || {}
                 searchContext = res.search_context || null

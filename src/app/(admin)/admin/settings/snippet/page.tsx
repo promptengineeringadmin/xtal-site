@@ -291,9 +291,53 @@ export default function SnippetSettingsPage() {
   if(b)requestAnimationFrame(function(){try{localStorage.setItem('xtal:hero:height',String(b.offsetHeight))}catch(e){}});
 })();
 </script>
+<script>
+// Early hide + search prefetch (runs before SDK CDN load)
+(function(){
+  var id="willow",k="xtal:config:"+id,r;
+  try{r=JSON.parse(localStorage.getItem(k))}catch(e){}
+  if(!r||!r.config||Date.now()-r.ts>300000) return;
+  var sel=r.config.resultsSelector;
+  if(!sel) return;
+  var ps=new URLSearchParams(location.search);
+  var q=ps.get("Search")||ps.get("search");
+  if(!q) return;
+  var s=document.createElement("style");
+  s.id="xtal-early-hide";
+  s.textContent=sel+" { visibility: hidden !important; min-height: 400px; }";
+  document.head.appendChild(s);
+  var base="https://www.xtalsearch.com";
+  window.__xtalPrefetch=fetch(base+"/api/xtal/search-full",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({query:q.trim(),collection:id,limit:r.config.resultsPerPage||24})
+  }).then(function(r){return r.json()}).catch(function(){return null});
+})();
+</script>
 <script>window.XTAL_CONFIG = { shopId: "willow" };</script>
 <script src="https://www.xtalsearch.com/client/v1/xtal.js"></script>
-<script src="https://www.xtalsearch.com/client/v1/willow-hero.js"></script>` : `<script>window.XTAL_CONFIG = { shopId: "${collection}" };</script>
+<script src="https://www.xtalsearch.com/client/v1/willow-hero.js"></script>` : `<script>
+// Early hide + search prefetch (runs before SDK CDN load)
+(function(){
+  var id="${collection}",k="xtal:config:"+id,r;
+  try{r=JSON.parse(localStorage.getItem(k))}catch(e){}
+  if(!r||!r.config||Date.now()-r.ts>300000) return;
+  var sel=r.config.resultsSelector;
+  if(!sel) return;
+  var ps=new URLSearchParams(location.search);
+  var q=ps.get("Search")||ps.get("search");
+  if(!q) return;
+  var s=document.createElement("style");
+  s.id="xtal-early-hide";
+  s.textContent=sel+" { visibility: hidden !important; min-height: 400px; }";
+  document.head.appendChild(s);
+  var base="https://www.xtalsearch.com";
+  window.__xtalPrefetch=fetch(base+"/api/xtal/search-full",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({query:q.trim(),collection:id,limit:r.config.resultsPerPage||24})
+  }).then(function(r){return r.json()}).catch(function(){return null});
+})();
+</script>
+<script>window.XTAL_CONFIG = { shopId: "${collection}" };</script>
 <script src="https://www.xtalsearch.com/client/v1/xtal.js"></script>`}
               </pre>
             </div>
