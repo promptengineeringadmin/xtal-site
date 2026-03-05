@@ -262,33 +262,36 @@ function injectFilterCSS() {
 
 function boot() {
   try {
-    // Find our script tag
+    // Find our script tag or fall back to window.XTAL_CONFIG (GTM compatibility)
     const scriptTag = document.querySelector<HTMLScriptElement>(
       "script[data-shop-id]"
     )
-    if (!scriptTag) {
-      console.warn("[xtal.js] No <script data-shop-id> tag found")
-      return
-    }
+    const globalConfig = (window as any).XTAL_CONFIG as
+      | { shopId?: string; apiBase?: string }
+      | undefined
 
-    const shopId = scriptTag.getAttribute("data-shop-id") ?? ""
+    const shopId =
+      scriptTag?.getAttribute("data-shop-id") || globalConfig?.shopId || ""
     if (!shopId) {
-      console.warn("[xtal.js] data-shop-id is empty")
+      console.warn(
+        "[xtal.js] No shopId found — need <script data-shop-id> or window.XTAL_CONFIG = { shopId: '...' }"
+      )
       return
     }
 
-    // Derive apiBase from script src
+    // Derive apiBase from script src, XTAL_CONFIG, or default
     let apiBase = ""
-    const src = scriptTag.getAttribute("src")
+    const src = scriptTag?.getAttribute("src")
     if (src) {
       try {
         const url = new URL(src, window.location.href)
         apiBase = url.origin
       } catch {
-        apiBase = window.location.origin
+        // fall through
       }
-    } else {
-      apiBase = window.location.origin
+    }
+    if (!apiBase) {
+      apiBase = globalConfig?.apiBase || "https://www.xtalsearch.com"
     }
 
     const api = new XtalAPI(apiBase, shopId)

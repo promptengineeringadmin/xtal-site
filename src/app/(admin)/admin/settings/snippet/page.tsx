@@ -268,8 +268,8 @@ export default function SnippetSettingsPage() {
             </div>
             <div className="bg-slate-900 rounded-xl p-4 overflow-x-auto">
               <pre id="gtm-snippet-content" className="text-xs text-slate-100 font-mono whitespace-pre-wrap break-all">
-{`<script src="https://www.xtalsearch.com/client/v1/xtal.js" data-shop-id="${collection}"></script>
-<script src="https://www.xtalsearch.com/client/v1/willow-hero.js"></script>`}
+{`<script>window.XTAL_CONFIG = { shopId: "${collection}" };</script>
+<script src="https://www.xtalsearch.com/client/v1/xtal.js"></script>`}
               </pre>
             </div>
           </div>
@@ -299,7 +299,7 @@ export default function SnippetSettingsPage() {
                 {
                   step: 4,
                   title: "Paste the snippet",
-                  detail: "Copy the code above and paste it into the HTML field. Make sure Support document.write is unchecked.",
+                  detail: "Copy the code above and paste it into the HTML field. Check the Support document.write checkbox.",
                 },
                 {
                   step: 5,
