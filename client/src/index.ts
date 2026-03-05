@@ -1,4 +1,4 @@
-import { XtalAPI, type Product, type SearchContext } from "./api"
+import { XtalAPI, type Product, type SearchContext, type XtalConfig } from "./api"
 import { InlineRenderer } from "./ui/inline"
 import { FilterRail } from "./ui/filter-rail"
 import { renderTemplatedCard, type CardHandlers, type CardTemplate } from "./ui/template"
@@ -716,11 +716,6 @@ function boot() {
         .catch((err) => {
           console.error("[xtal.js] Failed to fetch config:", err)
           beaconError(apiBase, shopId, String(err), "config")
-          // Un-hide if we hid early
-          if (cachedConfig?.resultsSelector) {
-            const el = document.querySelector<HTMLElement>(cachedConfig.resultsSelector)
-            if (el) el.style.visibility = ""
-          }
         })
     }
   } catch (err) {
