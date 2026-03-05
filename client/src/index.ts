@@ -644,19 +644,15 @@ function boot() {
             }, config.observerTimeoutMs ?? 10000)
           }
 
-          // Auto-trigger if input already has a query (e.g. navigated from homepage search)
-          const existingInput = document.querySelector<HTMLInputElement>(selector)
-          if (existingInput?.value?.trim()) {
-            doSearch(existingInput.value.trim())
-          } else {
-            // Auto-trigger from URL ?Search= param (e.g. navigated from homepage hero)
-            const urlParams = new URLSearchParams(window.location.search)
-            const urlQuery = urlParams.get("Search") || urlParams.get("search")
-            if (urlQuery?.trim()) {
-              const searchInput = document.querySelector<HTMLInputElement>(selector)
-              if (searchInput) searchInput.value = urlQuery.trim()
-              doSearch(urlQuery.trim())
-            }
+          // Auto-trigger from URL ?Search= param (e.g. navigated from homepage hero)
+          // Only use URL param — never the input value alone, because browsers
+          // restore form values on navigation (bfcache) which causes false triggers.
+          const urlParams = new URLSearchParams(window.location.search)
+          const urlQuery = urlParams.get("Search") || urlParams.get("search")
+          if (urlQuery?.trim()) {
+            const searchInput = document.querySelector<HTMLInputElement>(selector)
+            if (searchInput) searchInput.value = urlQuery.trim()
+            doSearch(urlQuery.trim())
           }
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
