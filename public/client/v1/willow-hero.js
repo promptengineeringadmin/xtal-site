@@ -9,16 +9,16 @@
   s.id='xtal-hero-styles';
   s.textContent=`
 /* Added margin-top: 40px to isolate it from the hero image above */
-.xtal-hero-wrapper{margin-top:40px;width:100%;background:#f8f6f2;padding:40px 64px 16px;font-family:"Manrope",sans-serif;box-sizing:border-box}
+.xtal-hero-wrapper{margin-top:40px;width:100%;background:#f8f6f2;padding:40px clamp(16px,4vw,64px) 16px;font-family:"Manrope",sans-serif;box-sizing:border-box}
 .xtal-hero-wrapper *{box-sizing:border-box}
 
-.xtal-hero-container{display:grid;grid-template-columns:40% 1fr;gap:48px;align-items:end;margin:0 auto;max-width:1400px;text-align:left}
+.xtal-hero-container{display:grid;grid-template-columns:40% 1fr;gap:48px;align-items:end;margin:0 auto;max-width:1920px;text-align:left}
 
 .xtal-hero-left{margin-bottom:0}
 .xtal-hero-right{display:flex;flex-direction:column}
 
-.xtal-hero-headline{font-size:50px;font-weight:500;color:#1D1D1B;margin:0 0 8px 0;line-height:1.1;letter-spacing:-0.01em;font-family:"SpratFont",serif}
-.xtal-hero-subtext{font-size:16px;color:#545454;margin:0;line-height:1.5;font-family:"Manrope",sans-serif}
+.xtal-hero-headline{font-size:clamp(32px,3.5vw + 10px,50px);font-weight:500;color:#1D1D1B;margin:0 0 8px 0;line-height:1.1;letter-spacing:-0.01em;font-family:"SpratFont",serif}
+.xtal-hero-subtext{font-size:clamp(14px,1.2vw + 6px,16px);color:#545454;margin:0;line-height:1.5;font-family:"Manrope",sans-serif}
 
 .xtal-hero-form{margin:0 0 12px 0;position:relative}
 .xtal-hero-input-group{display:flex;align-items:center;background:#FFF;border:1.5px solid #2E4324;border-radius:8px;height:52px;position:relative;overflow:hidden;transition:box-shadow .2s ease}
@@ -49,14 +49,11 @@
   .xtal-hero-powered-by{justify-content:center}
 }
 @media(max-width:768px){
-  .xtal-hero-wrapper{padding:32px 32px 16px;margin-top:32px}
-  .xtal-hero-headline{font-size:40px}
+  .xtal-hero-wrapper{margin-top:32px}
   .xtal-hero-input-group{height:48px}
 }
 @media(max-width:480px){
-  .xtal-hero-wrapper{padding:24px 16px 12px;margin-top:24px;overflow:hidden}
-  .xtal-hero-headline{font-size:32px}
-  .xtal-hero-subtext{font-size:14px}
+  .xtal-hero-wrapper{margin-top:24px;overflow:hidden}
   .xtal-hero-input-group{height:44px}
   .xtal-hero-submit{padding:0 16px}
   .xtal-hero-chips-wrap{position:relative}
