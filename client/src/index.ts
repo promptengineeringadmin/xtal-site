@@ -296,10 +296,48 @@ function boot() {
 
     const api = new XtalAPI(apiBase, shopId)
 
-    // Fetch config
-    api
-      .fetchConfig()
-      .then((config) => {
+    // ── Config cache (localStorage) ──
+    // Eliminates flash of native content on repeat visits by allowing
+    // the SDK to hide the results container before the network fetch returns.
+    const CONFIG_CACHE_TTL = 300_000 // 5 minutes
+    const cacheKey = `xtal:config:${shopId}`
+
+    let cachedConfig: XtalConfig | null = null
+    try {
+      const raw = localStorage.getItem(cacheKey)
+      if (raw) {
+        const parsed = JSON.parse(raw) as { config: XtalConfig; ts: number }
+        if (Date.now() - parsed.ts < CONFIG_CACHE_TTL) {
+          cachedConfig = parsed.config
+        }
+      }
+    } catch {
+      // Private browsing, corrupt data, etc.
+    }
+
+    /** Save config to localStorage (fire-and-forget) */
+    const cacheConfig = (config: XtalConfig) => {
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify({ config, ts: Date.now() }))
+      } catch {
+        // Storage full or private browsing
+      }
+    }
+
+    // Early hide: if we have a cached config with a resultsSelector and
+    // the URL contains a search query, hide the native results container
+    // immediately to prevent flash of native content.
+    if (cachedConfig?.resultsSelector) {
+      const urlParams = new URLSearchParams(window.location.search)
+      const hasSearch = urlParams.has("Search") || urlParams.has("search")
+      if (hasSearch) {
+        const el = document.querySelector<HTMLElement>(cachedConfig.resultsSelector)
+        if (el) el.style.visibility = "hidden"
+      }
+    }
+
+    /** Process config and set up inline mode */
+    const initWithConfig = (config: XtalConfig) => {
         if (!config.enabled) {
           console.log(`[xtal.js] Snippet disabled for ${shopId}`)
           return
@@ -658,11 +696,33 @@ function boot() {
             `[xtal.js] Initialized INLINE for ${shopId}. Search: ${selector}, Grid: ${config.resultsSelector}${gridTarget ? "" : " (deferred)"}${filtersEnabled ? ", Filters: ON" : ""}`
           )
         }
-      })
-      .catch((err) => {
-        console.error("[xtal.js] Failed to fetch config:", err)
-        beaconError(apiBase, shopId, String(err), "config")
-      })
+    }
+
+    // Use cached config immediately if available, fetch in background to refresh
+    let initialized = false
+    if (cachedConfig) {
+      initWithConfig(cachedConfig)
+      initialized = true
+      // Background refresh — don't re-init, just update cache
+      api.fetchConfig().then(cacheConfig).catch(() => {})
+    } else {
+      // No cache — must wait for fetch
+      api
+        .fetchConfig()
+        .then((config) => {
+          cacheConfig(config)
+          if (!initialized) initWithConfig(config)
+        })
+        .catch((err) => {
+          console.error("[xtal.js] Failed to fetch config:", err)
+          beaconError(apiBase, shopId, String(err), "config")
+          // Un-hide if we hid early
+          if (cachedConfig?.resultsSelector) {
+            const el = document.querySelector<HTMLElement>(cachedConfig.resultsSelector)
+            if (el) el.style.visibility = ""
+          }
+        })
+    }
   } catch (err) {
     // Top-level catch — never throw into merchant's global scope
     console.error("[xtal.js] Boot error:", err)
