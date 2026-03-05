@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, Store, Sparkles, MessageSquareText, BookType, Code } from "lucide-react"
+import { ArrowRight, Store, Sparkles, MessageSquareText, BookType, Code, SlidersHorizontal } from "lucide-react"
 
 const SETTINGS_PAGES = [
   {
@@ -31,6 +31,13 @@ const SETTINGS_PAGES = [
     description:
       "Merge duplicate facet values so customers see clean, organized filters.",
     icon: BookType,
+  },
+  {
+    href: "/admin/settings/facets",
+    label: "Facet Visibility",
+    description:
+      "Control which filter facets are shown or hidden in the search overlay.",
+    icon: SlidersHorizontal,
   },
   {
     href: "/admin/settings/snippet",

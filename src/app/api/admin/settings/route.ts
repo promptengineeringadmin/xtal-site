@@ -17,6 +17,8 @@ import {
   saveResultsPerPage,
   getAllowedOrigins,
   saveAllowedOrigins,
+  getHiddenFacets,
+  saveHiddenFacets,
 } from "@/lib/admin/admin-settings"
 
 export async function GET(request: Request) {
@@ -43,6 +45,9 @@ export async function GET(request: Request) {
       if (!data.allowed_origins || !Array.isArray(data.allowed_origins) || data.allowed_origins.length === 0) {
         data.allowed_origins = await getAllowedOrigins(fallbackCollection)
       }
+      if (!data.hidden_facets || !Array.isArray(data.hidden_facets) || data.hidden_facets.length === 0) {
+        data.hidden_facets = await getHiddenFacets(fallbackCollection)
+      }
       return NextResponse.json(data)
     }
     // Backend returned an error — fall back to Redis
@@ -53,7 +58,7 @@ export async function GET(request: Request) {
   // Fallback: read from Redis (scoped by collection)
   try {
     const fallbackCollection = collection ?? "default"
-    const [queryEnhancementEnabled, merchRerankStrength, bm25Weight, keywordRerankStrength, storeType, aspectsEnabled, resultsPerPage, allowedOrigins] = await Promise.all([
+    const [queryEnhancementEnabled, merchRerankStrength, bm25Weight, keywordRerankStrength, storeType, aspectsEnabled, resultsPerPage, allowedOrigins, hiddenFacets] = await Promise.all([
       getQueryEnhancement(fallbackCollection),
       getMerchRerankStrength(fallbackCollection),
       getBm25Weight(fallbackCollection),
@@ -62,6 +67,7 @@ export async function GET(request: Request) {
       getAspectsEnabled(fallbackCollection),
       getResultsPerPage(fallbackCollection),
       getAllowedOrigins(fallbackCollection),
+      getHiddenFacets(fallbackCollection),
     ])
     return NextResponse.json({
       query_enhancement_enabled: queryEnhancementEnabled,
@@ -72,6 +78,7 @@ export async function GET(request: Request) {
       aspects_enabled: aspectsEnabled,
       results_per_page: resultsPerPage,
       allowed_origins: allowedOrigins,
+      hidden_facets: hiddenFacets,
       _source: "redis_fallback",
     })
   } catch (redisError) {
@@ -122,6 +129,9 @@ export async function PUT(request: Request) {
       }
       if (body.allowed_origins !== undefined) {
         await saveAllowedOrigins(fallbackCollection, body.allowed_origins)
+      }
+      if (body.hidden_facets !== undefined) {
+        await saveHiddenFacets(fallbackCollection, body.hidden_facets)
       }
     } catch (e) {
       console.error("Redis settings save error:", e)
