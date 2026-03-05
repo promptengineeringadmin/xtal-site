@@ -1,6 +1,7 @@
 // Paste this entire block into the browser console on www.willowgroupltd.com
 // Run window.xtalHeroRemove() to remove the banner
 (function(){
+  if(window.location.pathname !== '/') return;
   if(document.getElementById('xtal-hero-banner')){console.log('Banner already injected');return;}
 
   // Inject styles
