@@ -374,7 +374,7 @@ function boot() {
           let cleanupInterceptor: (() => void) | null = null
 
           /** Lazily find the results container and create InlineRenderer */
-          function resolveInline(): InlineRenderer | null {
+          const resolveInline = (): InlineRenderer | null => {
             if (inline) return inline
             gridTarget = document.querySelector<HTMLElement>(resultsSel)
             if (gridTarget) {
