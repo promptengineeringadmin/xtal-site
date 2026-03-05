@@ -247,7 +247,7 @@ export default function SnippetSettingsPage() {
                   GTM Snippet
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Add as a Custom HTML tag in Google Tag Manager. Trigger: All Pages.
+                  Copy this snippet and add it to Google Tag Manager using the steps below.
                 </p>
               </div>
               <button
@@ -272,6 +272,65 @@ export default function SnippetSettingsPage() {
 <script src="https://www.xtalsearch.com/client/v1/willow-hero.js"></script>`}
               </pre>
             </div>
+          </div>
+
+          {/* Installation Instructions */}
+          <div className="mt-8">
+            <h2 className="text-sm font-semibold text-slate-700 mb-3">
+              Installation Steps
+            </h2>
+            <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
+              {[
+                {
+                  step: 1,
+                  title: "Open Google Tag Manager",
+                  detail: "Go to tagmanager.google.com and select your website\u2019s container.",
+                },
+                {
+                  step: 2,
+                  title: "Create a new Tag",
+                  detail: "Click Tags in the left sidebar, then New in the top right.",
+                },
+                {
+                  step: 3,
+                  title: "Choose Custom HTML",
+                  detail: "Click Tag Configuration, then select Custom HTML as the tag type.",
+                },
+                {
+                  step: 4,
+                  title: "Paste the snippet",
+                  detail: "Copy the code above and paste it into the HTML field. Make sure Support document.write is unchecked.",
+                },
+                {
+                  step: 5,
+                  title: "Set the trigger to All Pages",
+                  detail: "Click Triggering, then select All Pages so the snippet loads on every page of your site.",
+                },
+                {
+                  step: 6,
+                  title: "Name and save",
+                  detail: "Name the tag \u201cXTAL Search\u201d (or similar), then click Save.",
+                },
+                {
+                  step: 7,
+                  title: "Preview and publish",
+                  detail: "Use GTM\u2019s Preview mode to verify the tag fires correctly. Once confirmed, click Submit to publish the container.",
+                },
+              ].map(({ step, title, detail }) => (
+                <div key={step} className="flex gap-4 p-4">
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-xtal-navy text-white text-xs font-bold shrink-0 mt-0.5">
+                    {step}
+                  </span>
+                  <div>
+                    <p className="text-sm font-medium text-slate-800">{title}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{detail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-slate-400 mt-3">
+              Changes typically appear within a few minutes of publishing. If you don&apos;t have GTM installed yet, ask your developer to add the GTM container snippet to your site first.
+            </p>
           </div>
         </>
       )}
