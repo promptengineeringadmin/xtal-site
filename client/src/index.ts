@@ -349,17 +349,11 @@ function boot() {
           !!resultsSel && !BLOCKED_SELECTORS.has(resultsSel.trim().toLowerCase())
         const isInline =
           config.displayMode === "inline" && isSafeResultsSelector
-        const gridTarget = isInline
-          ? document.querySelector<HTMLElement>(resultsSel)
-          : null
 
-        if (!isInline || !gridTarget) {
-          // Standing-by: selector not found, blocked, or non-inline mode.
-          // Still expose window.XTAL so the SDK is detectable.
+        if (!isInline) {
+          // Non-inline or blocked selector — stand by.
           if (!isSafeResultsSelector && resultsSel) {
             console.warn(`[xtal.js] resultsSelector "${resultsSel}" is blocked — SDK disabled`)
-          } else if (isInline && !gridTarget) {
-            console.log(`[xtal.js] Inline mode: "${resultsSel}" not found — standing by`)
           }
           ;(window as any).XTAL = {
             destroy() {
@@ -372,9 +366,24 @@ function boot() {
         }
 
         // ─── INLINE MODE ────────────────────────────────────
+        // gridTarget may be null (e.g. homepage has no results container).
+        // Resolved lazily — interceptor always attaches.
         {
-          const inline = new InlineRenderer(gridTarget!)
+          let gridTarget = document.querySelector<HTMLElement>(resultsSel)
+          let inline: InlineRenderer | null = gridTarget ? new InlineRenderer(gridTarget) : null
           let cleanupInterceptor: (() => void) | null = null
+
+          /** Lazily find the results container and create InlineRenderer */
+          function resolveInline(): InlineRenderer | null {
+            if (inline) return inline
+            gridTarget = document.querySelector<HTMLElement>(resultsSel)
+            if (gridTarget) {
+              inline = new InlineRenderer(gridTarget)
+              // Initialize filter layout if filters were already prepped
+              if (filtersEnabled) inline.initLayout()
+            }
+            return inline
+          }
 
           // ── Filter state ──
           const filtersEnabled = config.features?.filters === true
@@ -391,12 +400,12 @@ function boot() {
           // race condition where user clicks filter before searchContext exists)
           if (filtersEnabled) {
             injectFilterCSS()
-            inline.initLayout()
+            inline?.initLayout()
           }
 
           /** Lazily create FilterRail — called once after first search resolves */
           const ensureFilterRail = () => {
-            if (filterRail || !filtersEnabled) return
+            if (filterRail || !filtersEnabled || !inline) return
             const railSlot = inline.initLayout() // returns existing slot if already created
             filterRail = new FilterRail(
               railSlot,
@@ -477,10 +486,10 @@ function boot() {
 
           /** Filter-in-place — uses lightweight /api/xtal/search with search_context */
           const doFilter = () => {
-            if (!searchContext) return
+            if (!searchContext || !inline) return
             if (filterDebounceTimer) clearTimeout(filterDebounceTimer)
             filterDebounceTimer = setTimeout(() => {
-              inline.showLoading(lastQuery)
+              inline?.showLoading(lastQuery)
               api
                 .searchFiltered(lastQuery, searchContext!, {
                   facetFilters,
@@ -492,9 +501,9 @@ function boot() {
                   lastFacets = res.computed_facets || {}
 
                   if (res.results.length === 0) {
-                    inline.renderEmpty(lastQuery)
+                    inline?.renderEmpty(lastQuery)
                   } else {
-                    inline.renderCards(buildCards(res.results))
+                    inline?.renderCards(buildCards(res.results))
                   }
 
                   // Update filter rail with new facets
@@ -508,8 +517,26 @@ function boot() {
             }, 150)
           }
 
+          /** Safe siteUrl for navigation fallback */
+          const safeSiteUrl =
+            config.siteUrl &&
+            (config.siteUrl.startsWith("https://") ||
+              config.siteUrl.startsWith("http://"))
+              ? config.siteUrl.replace(/\/$/, "")
+              : ""
+
           const doSearch = (query: string) => {
             lastQuery = query
+
+            // Try to find the results container if not yet resolved
+            if (!resolveInline()) {
+              // No results container on this page (e.g. homepage) — navigate to search page
+              if (safeSiteUrl) {
+                console.log(`[xtal.js] No results container — navigating to search page`)
+                window.location.href = `${safeSiteUrl}/shop/?Search=${encodeURIComponent(query)}`
+              }
+              return
+            }
 
             // Reset filter state on new query
             searchContext = null
@@ -520,7 +547,7 @@ function boot() {
             filterRail?.closeDrawer()
             filterRail?.resetState()
 
-            inline.showLoading(query)
+            inline!.showLoading(query)
 
             api
               .searchFull(query, config.resultsPerPage ?? 24)
@@ -533,12 +560,12 @@ function boot() {
                 ensureFilterRail()
 
                 if (res.results.length === 0) {
-                  inline.renderEmpty(query)
+                  inline?.renderEmpty(query)
                   filterRail?.update({}, {}, null, 0)
                   return
                 }
 
-                inline.renderCards(buildCards(res.results))
+                inline?.renderCards(buildCards(res.results))
 
                 // Update filter rail with facets from initial search
                 filterRail?.update(lastFacets, facetFilters, priceRange, lastTotal)
@@ -549,17 +576,10 @@ function boot() {
                 }
                 console.error("[xtal.js] Search error:", err)
                 beaconError(apiBase, shopId!, String(err), "search")
-                inline.restore()
+                inline?.restore()
                 // Fallback: navigate to merchant's native search
-                // Only use siteUrl if it has a safe http(s) protocol
-                const safeSiteUrl =
-                  config.siteUrl &&
-                  (config.siteUrl.startsWith("https://") ||
-                    config.siteUrl.startsWith("http://"))
-                    ? config.siteUrl
-                    : ""
                 if (safeSiteUrl && lastQuery) {
-                  window.location.href = `${safeSiteUrl.replace(/\/$/, "")}/shop/?Search=${encodeURIComponent(lastQuery)}`
+                  window.location.href = `${safeSiteUrl}/shop/?Search=${encodeURIComponent(lastQuery)}`
                 }
               })
           }
@@ -574,14 +594,44 @@ function boot() {
           const selector = config.searchSelector || 'input[type="search"]'
           cleanupInterceptor = attachInterceptor(selector, debouncedSearch, config.observerTimeoutMs)
 
+          // Watch for late-rendered results container (e.g. Angular on /shop/)
+          let gridObserver: MutationObserver | null = null
+          if (!gridTarget) {
+            console.log(`[xtal.js] Inline mode: "${resultsSel}" not found — watching`)
+            gridObserver = new MutationObserver(() => {
+              if (resolveInline()) {
+                gridObserver?.disconnect()
+                gridObserver = null
+                if (lastQuery) doSearch(lastQuery)
+              }
+            })
+            gridObserver.observe(document.body, { childList: true, subtree: true })
+            setTimeout(() => {
+              gridObserver?.disconnect()
+              gridObserver = null
+            }, config.observerTimeoutMs ?? 10000)
+          }
+
           // Auto-trigger if input already has a query (e.g. navigated from homepage search)
           const existingInput = document.querySelector<HTMLInputElement>(selector)
           if (existingInput?.value?.trim()) {
             doSearch(existingInput.value.trim())
+          } else {
+            // Auto-trigger from URL ?Search= param (e.g. navigated from homepage hero)
+            const urlParams = new URLSearchParams(window.location.search)
+            const urlQuery = urlParams.get("Search") || urlParams.get("search")
+            if (urlQuery?.trim()) {
+              const searchInput = document.querySelector<HTMLInputElement>(selector)
+              if (searchInput) searchInput.value = urlQuery.trim()
+              doSearch(urlQuery.trim())
+            }
           }
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ;(window as any).XTAL = {
+            search(query: string) {
+              if (query?.trim()) debouncedSearch(query.trim())
+            },
             destroy() {
               // Cancel pending debounce + filter timers
               if (debounceTimer) clearTimeout(debounceTimer)
@@ -589,8 +639,9 @@ function boot() {
               // Abort any in-flight API request
               api.abort()
               cleanupInterceptor?.()
+              gridObserver?.disconnect()
               filterRail?.destroy()
-              inline.destroy()
+              inline?.destroy()
               const cardStyles = document.getElementById("xtal-card-styles")
               if (cardStyles) cardStyles.remove()
               const filterStyles = document.getElementById("xtal-filter-styles")
@@ -601,7 +652,7 @@ function boot() {
           }
 
           console.log(
-            `[xtal.js] Initialized INLINE for ${shopId}. Search: ${selector}, Grid: ${config.resultsSelector}${filtersEnabled ? ", Filters: ON" : ""}`
+            `[xtal.js] Initialized INLINE for ${shopId}. Search: ${selector}, Grid: ${config.resultsSelector}${gridTarget ? "" : " (deferred)"}${filtersEnabled ? ", Filters: ON" : ""}`
           )
         }
       })

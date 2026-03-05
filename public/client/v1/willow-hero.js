@@ -131,7 +131,13 @@
     e.preventDefault();
     var val = input.value.trim();
     if (val) {
-      window.location.href = '/shop/?Referrer=AppSearch&Search=' + encodeURIComponent(val) + '&orderBy=Featured,Id&context=shop&page=1';
+      // Use XTAL SDK if loaded (navigates to /shop/ with XTAL results)
+      if (window.XTAL && typeof window.XTAL.search === 'function') {
+        window.XTAL.search(val);
+      } else {
+        // Fallback: navigate to search page directly
+        window.location.href = '/shop/?Search=' + encodeURIComponent(val);
+      }
     }
   });
 
