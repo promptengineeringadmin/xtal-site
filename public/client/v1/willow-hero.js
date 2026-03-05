@@ -14,7 +14,7 @@
     var s=document.createElement('style');
     s.id='xtal-hero-styles';
     s.textContent=`
-.xtal-hero-wrapper{margin-top:40px;width:100%;background:#f8f6f2;padding:40px calc(3rem + 0.9375rem) 16px;font-family:"Manrope",sans-serif;box-sizing:border-box}
+.xtal-hero-wrapper{margin-top:40px;width:100%;background:#f8f6f2;padding:40px clamp(16px,4vw,64px) 16px;font-family:"Manrope",sans-serif;box-sizing:border-box}
 .xtal-hero-wrapper *{box-sizing:border-box}
 
 .xtal-hero-container{display:grid;grid-template-columns:40% 1fr;gap:48px;align-items:end;margin:0 auto;max-width:1920px;text-align:left}
