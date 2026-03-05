@@ -571,8 +571,11 @@ function boot() {
 
             // Try to find the results container if not yet resolved
             if (!resolveInline()) {
-              // No results container on this page (e.g. homepage) — navigate to search page
-              if (safeSiteUrl) {
+              // Only navigate if we're NOT already on a search page.
+              // On search pages with late-rendering containers (e.g. Angular),
+              // the MutationObserver will re-fire doSearch when the container appears.
+              const isSearchPage = /[?&](Search|search)=/.test(window.location.search)
+              if (safeSiteUrl && !isSearchPage) {
                 console.log(`[xtal.js] No results container — navigating to search page`)
                 window.location.href = `${safeSiteUrl}/shop/?Search=${encodeURIComponent(query)}`
               }
@@ -643,7 +646,7 @@ function boot() {
               if (resolveInline()) {
                 gridObserver?.disconnect()
                 gridObserver = null
-                if (lastQuery) doSearch(lastQuery)
+                if (lastQuery && !searchContext) doSearch(lastQuery)
               }
             })
             gridObserver.observe(document.body, { childList: true, subtree: true })
