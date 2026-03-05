@@ -22,7 +22,7 @@ export async function GET(request: Request) {
 
     // Scroll in batches until we've seen enough or exhausted the collection
     for (let i = 0; i < 10; i++) {
-      const res = await fetch(`${qdrantUrl}/collections/${collection}/points/scroll`, {
+      const res: Response = await fetch(`${qdrantUrl}/collections/${collection}/points/scroll`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
