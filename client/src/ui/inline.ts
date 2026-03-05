@@ -27,6 +27,8 @@ export class InlineRenderer {
       this.originalDisplay = this.target.style.display
       this.target.style.display = "block"
       this.target.style.width = "100%"
+      // Clear early-hide from SDK config cache (visibility:hidden set before config fetch)
+      this.target.style.visibility = ""
     }
   }
 
