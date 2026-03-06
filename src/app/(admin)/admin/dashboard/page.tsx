@@ -148,8 +148,8 @@ export default function DashboardPage() {
           />
         </div>
         <StatCard
-          label="Add to Cart"
-          value={s?.add_to_cart_from_search?.toLocaleString() ?? "0"}
+          label="Cart Rate"
+          value={s ? `${(s.add_to_cart_from_search * 100).toFixed(1)}%` : "0%"}
           icon={ShoppingCart}
           loading={loading}
         />

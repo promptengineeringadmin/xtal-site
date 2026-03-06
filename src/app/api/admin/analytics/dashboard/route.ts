@@ -80,7 +80,6 @@ export async function GET(request: Request) {
           data.summary.unique_sessions = uniqueQueries.size || billableSearches
           const totalClicks = billingUsage.product_click + billingUsage.add_to_cart
           data.summary.total_clicks = totalClicks
-          data.summary.add_to_cart_from_search = billingUsage.add_to_cart
           // Binary CTR: % of unique queries that got at least 1 click
           const queriesWithClicks = new Set<string>()
           for (const e of events) {
@@ -96,6 +95,16 @@ export async function GET(request: Request) {
             : 0
           data.summary.searches_per_session = uniqueQueries.size > 0
             ? billableSearches / uniqueQueries.size
+            : 0
+          // Binary cart rate: % of unique queries with at least 1 add_to_cart
+          const queriesWithCart = new Set<string>()
+          for (const e of events) {
+            if (e.type === "add_to_cart" && e.query) {
+              queriesWithCart.add(e.query.toLowerCase())
+            }
+          }
+          data.summary.add_to_cart_from_search = uniqueQueries.size > 0
+            ? queriesWithCart.size / uniqueQueries.size
             : 0
         }
 
