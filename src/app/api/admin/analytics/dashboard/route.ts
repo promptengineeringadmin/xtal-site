@@ -61,27 +61,40 @@ export async function GET(request: Request) {
           : 0
 
         const billingUsage = await getBillingUsage(collection)
+        // Fetch event log once for all aggregations
+        const events = billingStartMs > 0
+          ? await getBillingEventLog(collection, billingStartMs, Date.now())
+          : []
+
         if (data.summary) {
-          data.summary.total_searches = billingUsage.search
-          data.summary.unique_sessions = billingUsage.search
+          // Billable searches = new searches + aspect clicks (filters are free)
+          const billableSearches = billingUsage.search + billingUsage.aspect_click
+          data.summary.total_searches = billableSearches
+          // Unique sessions: count distinct queries from billing event log
+          const uniqueQueries = new Set<string>()
+          for (const e of events) {
+            if ((e.type === "search" || e.type === "aspect_click") && e.query) {
+              uniqueQueries.add(e.query.toLowerCase())
+            }
+          }
+          data.summary.unique_sessions = uniqueQueries.size || billableSearches
           const totalClicks = billingUsage.product_click + billingUsage.add_to_cart
           data.summary.total_clicks = totalClicks
           data.summary.add_to_cart_from_search = billingUsage.add_to_cart
-          data.summary.click_through_rate = billingUsage.search > 0
-            ? totalClicks / billingUsage.search
+          data.summary.click_through_rate = billableSearches > 0
+            ? totalClicks / billableSearches
             : 0
         }
 
         // Build daily volume and top products from billing event log
-        if (billingStartMs > 0) {
-          const events = await getBillingEventLog(collection, billingStartMs, Date.now())
+        if (events.length > 0) {
           const dailyMap = new Map<string, { searches: number; clicks: number; add_to_carts: number }>()
           const productMap = new Map<string, { product_id: string; product_title: string; clicks: number; queries: Set<string>; add_to_carts: number }>()
 
           for (const e of events) {
             const date = new Date(e.timestamp).toISOString().split("T")[0]
             const day = dailyMap.get(date) || { searches: 0, clicks: 0, add_to_carts: 0 }
-            if (e.type === "search") day.searches++
+            if (e.type === "search" || e.type === "aspect_click") day.searches++
             else if (e.type === "product_click") day.clicks++
             else if (e.type === "add_to_cart") day.add_to_carts++
             dailyMap.set(date, day)
@@ -138,9 +151,10 @@ export async function GET(request: Request) {
             total_orders: attribution.total_orders,
             total_revenue: attribution.total_revenue,
           }
-          const billingUsage = await getBillingUsage(collection)
-          if (data.summary && billingUsage.search > 0) {
-            data.summary.search_conversion_rate = attribution.total_orders / billingUsage.search
+          const billingUsage2 = await getBillingUsage(collection)
+          const billableSearches2 = billingUsage2.search + billingUsage2.aspect_click
+          if (data.summary && billableSearches2 > 0) {
+            data.summary.search_conversion_rate = attribution.total_orders / billableSearches2
           }
         }
       } catch (e) {

@@ -28,6 +28,8 @@ export interface ProxyTimingRecord {
   /** Total proxy wall-clock time (ms) */
   totalMs: number
   aspectsFailed?: boolean
+  /** Billing event type classification (search route only) */
+  eventType?: "search" | "aspect_click" | "filter"
 }
 
 // ─── Constants ──────────────────────────────────────────────────────

@@ -48,7 +48,8 @@ export interface BillableEvent {
  */
 export async function trackBillableEvent(
   collection: string,
-  event: Omit<BillableEvent, "timestamp">
+  event: Omit<BillableEvent, "timestamp">,
+  overrideTimestamp?: number
 ): Promise<void> {
   // Gate: skip if billing hasn't started yet for this customer
   try {
@@ -62,8 +63,8 @@ export async function trackBillableEvent(
   }
 
   const kv = getRedis()
-  const now = Date.now()
-  const cutoff = now - LOG_TTL_MS
+  const now = overrideTimestamp || Date.now()
+  const cutoff = Date.now() - LOG_TTL_MS
 
   const logEntry: BillableEvent = { ...event, timestamp: now }
 

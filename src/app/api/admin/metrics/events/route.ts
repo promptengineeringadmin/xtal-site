@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { adminFetch } from "@/lib/admin/api"
 import { getProxyTimings, matchProxyTiming } from "@/lib/admin/proxy-timing"
+import { getCustomer } from "@/lib/api/billing-customer"
 import type { MetricEvent, SearchEventData } from "@/lib/admin/types"
 
 export async function GET(request: Request) {
@@ -36,8 +37,24 @@ export async function GET(request: Request) {
     const res = await adminFetch(`/api/metrics/events?${params.toString()}`)
     const data = await res.json()
 
+    // Filter out events before billing_start so activity aligns with dashboard
+    let events: MetricEvent[] = data.events ?? []
+    if (collection) {
+      try {
+        const customer = await getCustomer(collection)
+        if (customer?.billing_start) {
+          const billingStartMs = new Date(customer.billing_start).getTime()
+          events = events.filter(
+            (e) => new Date(e.timestamp).getTime() >= billingStartMs
+          )
+          data.events = events
+        }
+      } catch {
+        // Non-critical — show unfiltered events
+      }
+    }
+
     // Enrich search_request events with proxy timing from Redis
-    const events: MetricEvent[] = data.events ?? []
     if (events.length > 0 && collection) {
       try {
         const timestamps = events.map((e) => new Date(e.timestamp).getTime())

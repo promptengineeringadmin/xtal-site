@@ -62,6 +62,14 @@ export async function POST(request: Request) {
 
     const data = await res.json()
 
+    // Classify event type for proxy timing + billing
+    const eventType: "search" | "aspect_click" | "filter" | undefined =
+      body.is_demo ? undefined
+      : !body.search_context ? "search"
+      : body.selected_aspects?.length ? "aspect_click"
+      : (body.search_context && (body.facet_filters || body.price_range)) ? "filter"
+      : undefined
+
     // Background: log proxy timing to Redis for admin drilldowns
     waitUntil(logProxyTiming({
       query: (body.query ?? "").toLowerCase(),
@@ -71,6 +79,7 @@ export async function POST(request: Request) {
       redisMs: 0,
       backendMs,
       totalMs: backendMs,
+      eventType,
     }))
 
     // Background: track billable events (skip demo page searches)
