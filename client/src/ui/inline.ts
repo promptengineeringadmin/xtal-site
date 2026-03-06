@@ -122,7 +122,7 @@ export class InlineRenderer {
     ]
     const phraseEl = document.createElement("p")
     phraseEl.style.cssText =
-      "margin:0 0 16px 0;font-size:13px;color:#767676;text-align:center;transition:opacity 0.3s;min-height:2.6em;display:flex;align-items:center;justify-content:center;"
+      "margin:0 0 16px 0;font-size:13px;line-height:1.5;color:#767676;text-align:center;transition:opacity 0.3s;min-height:2.6em;display:flex;align-items:center;justify-content:center;"
     phraseEl.textContent = phrases[0]
     wrap.appendChild(phraseEl)
 
@@ -146,7 +146,7 @@ export class InlineRenderer {
         idx = (idx + 1) % phrases.length
         phraseEl.textContent = phrases[idx]
         phraseEl.style.opacity = "1"
-      }, 300)
+      }, 400)
     }, 2500)
 
     slot.appendChild(wrap)
