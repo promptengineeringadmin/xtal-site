@@ -126,6 +126,21 @@ export async function GET(request: Request) {
             .map(p => ({ product_id: p.product_id, product_title: p.product_title, clicks: p.clicks, from_queries: p.queries.size, add_to_carts: p.add_to_carts }))
             .sort((a, b) => b.clicks - a.clicks)
             .slice(0, 10)
+
+          // Aggregate top queries from billing log (respects billing_start)
+          const queryMap = new Map<string, { display: string; searches: number; clicks: number }>()
+          for (const e of events) {
+            if (!e.query) continue
+            const key = e.query.toLowerCase()
+            const entry = queryMap.get(key) || { display: e.query, searches: 0, clicks: 0 }
+            if (e.type === "search" || e.type === "aspect_click") entry.searches++
+            else if (e.type === "product_click" || e.type === "add_to_cart") entry.clicks++
+            queryMap.set(key, entry)
+          }
+          data.top_queries = Array.from(queryMap.values())
+            .map(q => ({ query: q.display, searches: q.searches, clicks: q.clicks, ctr: q.searches > 0 ? q.clicks / q.searches : 0 }))
+            .sort((a, b) => b.searches - a.searches)
+            .slice(0, 20)
         }
       } catch {
         // Non-critical — fall through with backend data
