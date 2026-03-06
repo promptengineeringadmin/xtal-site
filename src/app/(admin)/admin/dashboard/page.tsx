@@ -9,6 +9,8 @@ import {
   ShoppingCart,
   Target,
   Loader2,
+  DollarSign,
+  Package,
 } from "lucide-react"
 import StatCard from "@/components/admin/StatCard"
 import TimeRangeSelector from "@/components/admin/TimeRangeSelector"
@@ -146,6 +148,22 @@ export default function DashboardPage() {
           icon={TrendingUp}
           loading={loading}
         />
+        {data?.attribution && (
+          <>
+            <StatCard
+              label="XTAL Orders"
+              value={data.attribution.total_orders.toLocaleString()}
+              icon={Package}
+              loading={loading}
+            />
+            <StatCard
+              label="XTAL Revenue"
+              value={`$${data.attribution.total_revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+              icon={DollarSign}
+              loading={loading}
+            />
+          </>
+        )}
       </div>
 
       {/* Volume chart */}

@@ -3,6 +3,7 @@ import { adminFetch } from "@/lib/admin/api"
 import { getAllCustomers } from "@/lib/api/billing-customer"
 import { getBillingUsage, getBillingEventLog } from "@/lib/api/billing-usage"
 import { getCustomer } from "@/lib/api/billing-customer"
+import { getKlaviyoAttribution } from "@/lib/api/attribution/klaviyo"
 
 export async function GET(request: Request) {
   try {
@@ -114,6 +115,35 @@ export async function GET(request: Request) {
         }
       } catch {
         // Non-critical — fall through with backend data
+      }
+
+      // Attribution: Klaviyo transaction data (if configured)
+      try {
+        const customer = await getCustomer(collection)
+        if (customer?.klaviyo_api_key && customer?.klaviyo_metric_id) {
+          const now = new Date()
+          const startDate = customer.billing_start
+            ? new Date(customer.billing_start).toISOString().split("T")[0]
+            : new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0]
+          const endDate = now.toISOString().split("T")[0]
+
+          const attribution = await getKlaviyoAttribution(
+            customer.klaviyo_api_key,
+            customer.klaviyo_metric_id,
+            startDate,
+            endDate,
+          )
+          data.attribution = {
+            total_orders: attribution.total_orders,
+            total_revenue: attribution.total_revenue,
+          }
+          const billingUsage = await getBillingUsage(collection)
+          if (data.summary && billingUsage.search > 0) {
+            data.summary.search_conversion_rate = attribution.total_orders / billingUsage.search
+          }
+        }
+      } catch (e) {
+        console.warn("Klaviyo attribution fetch failed:", e)
       }
     }
 
