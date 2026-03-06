@@ -75,6 +75,13 @@ export function attachInterceptor(
 
       const parent = input.parentElement
       if (parent) {
+        // Hide merchant's existing search button to avoid duplicate icons
+        const existingBtn = parent.querySelector<HTMLElement>('button[type="submit"], input[type="submit"]')
+        if (existingBtn) {
+          existingBtn.style.display = "none"
+          cleanups.push(() => { existingBtn.style.display = "" })
+        }
+
         const pos = getComputedStyle(parent).position
         if (pos === "static") parent.style.position = "relative"
         parent.appendChild(btn)
