@@ -213,6 +213,14 @@ export class InlineRenderer {
     slot.appendChild(grid)
   }
 
+  renderCustom(element: HTMLElement) {
+    this.clearPhraseTimer()
+    this.clearFilterLoading()
+    const slot = this.gridSlot || this.target
+    slot.innerHTML = ""
+    slot.appendChild(element)
+  }
+
   renderEmpty(query: string) {
     this.clearPhraseTimer()
     this.clearFilterLoading()

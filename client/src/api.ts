@@ -39,6 +39,13 @@ export interface SearchFullResponse {
   computed_facets?: Record<string, Record<string, number>>
   aspects: string[]
   aspects_enabled: boolean
+  is_sku_search?: boolean
+  sku_found?: boolean
+}
+
+export interface ShowcaseQuery {
+  query: string
+  label: string
 }
 
 export interface XtalConfig {
@@ -59,6 +66,7 @@ export interface XtalConfig {
   resultsPerPage?: number
   searchPagePath?: string
   searchQueryParam?: string
+  showcaseQueries?: ShowcaseQuery[]
 }
 
 export class XtalAPI {
@@ -119,6 +127,23 @@ export class XtalAPI {
     })
 
     if (!res.ok) throw new Error(`Search failed: ${res.status}`)
+    return res.json()
+  }
+
+  /** Non-billable search for showcase prefetch */
+  async searchShowcase(query: string, limit = 4): Promise<SearchFullResponse> {
+    const res = await fetch(`${this.apiBase}/api/xtal/search-full`, {
+      method: "POST",
+      mode: "cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query,
+        collection: this.shopId,
+        limit,
+        _showcase: true,
+      }),
+    })
+    if (!res.ok) throw new Error(`Showcase search failed: ${res.status}`)
     return res.json()
   }
 

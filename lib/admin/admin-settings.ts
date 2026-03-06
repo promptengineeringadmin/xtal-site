@@ -463,3 +463,34 @@ export async function saveHiddenFacets(
   const kv = getRedis()
   await kv.set(hiddenFacetsKey(collection), facets)
 }
+
+// ── Showcase queries (for SKU-not-found screen) ──────────────
+export interface ShowcaseQuery {
+  query: string
+  label: string
+}
+
+function showcaseQueriesKey(collection: string) {
+  return `admin:settings:${collection}:showcase_queries`
+}
+
+export async function getShowcaseQueries(
+  collection: string
+): Promise<ShowcaseQuery[] | null> {
+  try {
+    const kv = getRedis()
+    const stored = await kv.get<ShowcaseQuery[]>(showcaseQueriesKey(collection))
+    if (stored && Array.isArray(stored) && stored.length > 0) return stored
+  } catch {
+    // Redis unavailable
+  }
+  return null
+}
+
+export async function setShowcaseQueries(
+  collection: string,
+  queries: ShowcaseQuery[]
+): Promise<void> {
+  const kv = getRedis()
+  await kv.set(showcaseQueriesKey(collection), queries)
+}

@@ -119,8 +119,8 @@ export async function POST(request: Request) {
     }))
 
     // Background: track search as billable event (aspect generation is free)
-    // Skip billing for demo page searches
-    if (!body.is_demo)
+    // Skip billing for demo page searches and showcase prefetches
+    if (!body.is_demo && !body._showcase)
     waitUntil(trackBillableEvent(collection, {
       type: "search",
       query: body.query ?? "",

@@ -13,6 +13,7 @@ import {
   getPricePresets,
   getResultsPerPage,
   getHiddenFacets,
+  getShowcaseQueries,
 } from "@/lib/admin/admin-settings"
 
 export async function OPTIONS() {
@@ -32,7 +33,7 @@ export async function GET(request: Request) {
     )
   }
 
-  const [enabled, searchSelector, displayMode, resultsSelector, siteUrl, cardTemplate, productUrlPattern, filtersEnabled, pricePresets, resultsPerPage, hiddenFacets] =
+  const [enabled, searchSelector, displayMode, resultsSelector, siteUrl, cardTemplate, productUrlPattern, filtersEnabled, pricePresets, resultsPerPage, hiddenFacets, showcaseQueries] =
     await Promise.all([
       getSnippetEnabled(shopId),
       getSnippetSearchSelector(shopId),
@@ -45,6 +46,7 @@ export async function GET(request: Request) {
       getPricePresets(shopId),
       getResultsPerPage(shopId),
       getHiddenFacets(shopId),
+      getShowcaseQueries(shopId),
     ])
 
   return NextResponse.json(
@@ -60,6 +62,7 @@ export async function GET(request: Request) {
       ...(pricePresets ? { pricePresets } : {}),
       ...(hiddenFacets.length > 0 ? { hiddenFacets } : {}),
       resultsPerPage,
+      ...(showcaseQueries ? { showcaseQueries } : {}),
     },
     {
       headers: {

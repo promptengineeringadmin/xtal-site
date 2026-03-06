@@ -1,4 +1,4 @@
-import { XtalAPI, type Product, type SearchContext, type XtalConfig } from "./api"
+import { XtalAPI, type Product, type SearchContext, type XtalConfig, type ShowcaseQuery } from "./api"
 import { InlineRenderer } from "./ui/inline"
 import { FilterRail } from "./ui/filter-rail"
 import { renderTemplatedCard, type CardHandlers, type CardTemplate } from "./ui/template"
@@ -6,6 +6,8 @@ import { renderProductCard } from "./ui/results"
 import { attachInterceptor } from "./interceptor"
 import { appendUtm } from "./utm"
 import { detectCartAdapter } from "./cart/detect"
+import { renderShowcase, renderShowcaseLoading, showcaseCSS } from "./ui/showcase"
+import { getShowcaseData } from "./showcase-cache"
 
 /** Selectors that must never be used as resultsSelector (page-destruction risk) */
 const BLOCKED_SELECTORS = new Set(["body", "html", "head", "*"])
@@ -660,6 +662,24 @@ function boot() {
                 const searchInput = document.querySelector<HTMLInputElement>(selector)
                 if (searchInput && searchInput.value !== query) {
                   searchInput.value = query
+                }
+
+                // SKU not found: show showcase screen instead of confusing fallback results
+                if (res.is_sku_search && !res.sku_found && config.showcaseQueries?.length) {
+                  filterRail?.update({}, {}, null, 0)
+                  // Show loading skeleton immediately
+                  inline?.renderCustom(renderShowcaseLoading(query))
+                  // Fetch showcase data (cached after first load)
+                  getShowcaseData(config.showcaseQueries, shopId!, api).then((rows) => {
+                    if (rows.length > 0) {
+                      inline?.renderCustom(renderShowcase(query, rows, doSearch))
+                    } else {
+                      inline?.renderEmpty(query)
+                    }
+                  }).catch(() => {
+                    inline?.renderEmpty(query)
+                  })
+                  return
                 }
 
                 if (res.results.length === 0) {
