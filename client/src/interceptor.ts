@@ -14,13 +14,17 @@ export function attachInterceptor(
   function hookInput(input: HTMLInputElement): CleanupFn {
     const cleanups: CleanupFn[] = []
 
+    const submitQuery = () => {
+      const value = input.value.trim()
+      if (value.length >= 1) onQuery(value)
+    }
+
     const form = input.closest("form")
     if (form) {
       const handleSubmit = (e: Event) => {
         e.preventDefault()
         e.stopImmediatePropagation()
-        const value = input.value.trim()
-        if (value.length >= 1) onQuery(value)
+        submitQuery()
       }
       form.addEventListener("submit", handleSubmit, true)
       cleanups.push(() => form.removeEventListener("submit", handleSubmit, true))
@@ -30,12 +34,53 @@ export function attachInterceptor(
       if (e.key === "Enter") {
         e.preventDefault()
         e.stopImmediatePropagation()
-        const value = input.value.trim()
-        if (value.length >= 1) onQuery(value)
+        submitQuery()
       }
     }
     input.addEventListener("keydown", handleKeydown, true)
     cleanups.push(() => input.removeEventListener("keydown", handleKeydown, true))
+
+    // Mobile enhancements: zoom prevention + search button
+    const isMobile = window.matchMedia("(max-width: 767px)").matches
+    if (isMobile) {
+      // Prevent iOS auto-zoom on input focus (requires font-size >= 16px)
+      const currentSize = parseFloat(getComputedStyle(input).fontSize) || 0
+      if (currentSize < 16) input.style.fontSize = "16px"
+      input.style.touchAction = "manipulation"
+      input.style.maxWidth = "100%"
+      input.style.boxSizing = "border-box"
+
+      // Inject a visible search submit button
+      const btn = document.createElement("button")
+      btn.type = "button"
+      btn.className = "xtal-mobile-search-btn"
+      btn.setAttribute("aria-label", "Search")
+      btn.style.cssText =
+        "position:absolute;right:4px;top:50%;transform:translateY(-50%);" +
+        "width:34px;height:34px;border:none;border-radius:50%;" +
+        "background:#333;color:#fff;cursor:pointer;" +
+        "display:flex;align-items:center;justify-content:center;" +
+        "z-index:1;padding:0;flex-shrink:0;"
+      btn.innerHTML =
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" ' +
+        'stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' +
+        '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.34-4.34"/></svg>'
+      btn.addEventListener("click", (e) => {
+        e.preventDefault()
+        submitQuery()
+      })
+
+      // Make room for the button inside the input
+      input.style.paddingRight = "42px"
+
+      const parent = input.parentElement
+      if (parent) {
+        const pos = getComputedStyle(parent).position
+        if (pos === "static") parent.style.position = "relative"
+        parent.appendChild(btn)
+        cleanups.push(() => btn.remove())
+      }
+    }
 
     return () => cleanups.forEach((fn) => fn())
   }
