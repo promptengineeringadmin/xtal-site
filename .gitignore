@@ -80,3 +80,6 @@ tmp/
 /*.jpg
 /*.png
 /*.pdf
+
+# Scraped API data (may contain third-party keys)
+scripts/*.json
