@@ -1,9 +1,8 @@
-// Paste this entire block into the browser console on www.willowgroupltd.com
-// Run window.xtalHeroRemove() to remove the banner
+<!-- XTAL Search Hero Banner — paste into Willow Umbraco Header Scripts -->
+<script>
 (function(){
-  if(document.getElementById('xtal-hero-banner')){console.log('Banner already injected');return;}
+  if(document.getElementById('xtal-hero-banner')) return;
 
-  // Inject styles
   var s=document.createElement('style');
   s.id='xtal-hero-styles';
   s.textContent=`
@@ -65,7 +64,6 @@
 `;
   document.head.appendChild(s);
 
-  // Inject HTML
   var html = '<div class="xtal-hero-wrapper" role="search" aria-label="Product search" id="xtal-hero-banner">'
     + '<div class="xtal-hero-container">'
     + '<div class="xtal-hero-left">'
@@ -93,7 +91,7 @@
   } else {
     var main = document.querySelector('main');
     if (main) main.insertAdjacentHTML('afterbegin', html);
-    else { console.error('No injection target found'); return; }
+    else return;
   }
 
   var banner = document.getElementById('xtal-hero-banner');
@@ -182,14 +180,5 @@
       input.focus();
     });
   });
-
-  window.xtalHeroRemove = function() {
-    cancelAnimationFrame(rafId);
-    clearTimeout(resumeTimeout);
-    banner.remove();
-    var styleEl = document.getElementById('xtal-hero-styles');
-    if (styleEl) styleEl.remove();
-    delete window.xtalHeroRemove;
-    console.log('Banner removed');
-  };
 })();
+</script>
