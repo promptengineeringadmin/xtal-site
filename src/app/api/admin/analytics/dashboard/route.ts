@@ -63,21 +63,54 @@ export async function GET(request: Request) {
         if (data.summary) {
           data.summary.total_searches = billingUsage.search
           data.summary.unique_sessions = billingUsage.search
+          data.summary.total_clicks = billingUsage.product_click
+          data.summary.add_to_cart_from_search = billingUsage.add_to_cart
+          data.summary.click_through_rate = billingUsage.search > 0
+            ? billingUsage.product_click / billingUsage.search
+            : 0
         }
 
-        // Build daily volume from billing event log
+        // Build daily volume and top products from billing event log
         if (billingStartMs > 0) {
           const events = await getBillingEventLog(collection, billingStartMs, Date.now())
           const dailyMap = new Map<string, { searches: number; clicks: number; add_to_carts: number }>()
+          const productMap = new Map<string, { product_id: string; product_title: string; clicks: number; queries: Set<string>; add_to_carts: number }>()
+
           for (const e of events) {
             const date = new Date(e.timestamp).toISOString().split("T")[0]
             const day = dailyMap.get(date) || { searches: 0, clicks: 0, add_to_carts: 0 }
             if (e.type === "search") day.searches++
+            else if (e.type === "product_click") day.clicks++
+            else if (e.type === "add_to_cart") day.add_to_carts++
             dailyMap.set(date, day)
+
+            // Aggregate top products
+            if ((e.type === "product_click" || e.type === "add_to_cart") && e.product_id) {
+              const p = productMap.get(e.product_id) || {
+                product_id: e.product_id,
+                product_title: e.product_title || e.product_id,
+                clicks: 0,
+                queries: new Set<string>(),
+                add_to_carts: 0,
+              }
+              if (e.type === "product_click") {
+                p.clicks++
+                if (e.query) p.queries.add(e.query)
+              } else {
+                p.add_to_carts++
+              }
+              productMap.set(e.product_id, p)
+            }
           }
+
           data.daily_volume = Array.from(dailyMap.entries())
             .sort(([a], [b]) => a.localeCompare(b))
             .map(([date, vol]) => ({ date, ...vol }))
+
+          data.top_products = Array.from(productMap.values())
+            .map(p => ({ product_id: p.product_id, product_title: p.product_title, clicks: p.clicks, from_queries: p.queries.size, add_to_carts: p.add_to_carts }))
+            .sort((a, b) => b.clicks - a.clicks)
+            .slice(0, 10)
         }
       } catch {
         // Non-critical — fall through with backend data
