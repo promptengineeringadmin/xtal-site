@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server"
 import { adminFetch } from "@/lib/admin/api"
 import { getAllCustomers } from "@/lib/api/billing-customer"
-import { getBillingUsage } from "@/lib/api/billing-usage"
+import { getBillingUsage, getBillingEventLog } from "@/lib/api/billing-usage"
+import { getCustomer } from "@/lib/api/billing-customer"
 
 export async function GET(request: Request) {
   try {
@@ -50,15 +51,36 @@ export async function GET(request: Request) {
     const data = await res.json()
     if (launchDate) data.launch_date = launchDate
 
-    // Override total_searches with billing log count (respects billing_start)
+    // Override counts and daily volume with billing log (respects billing_start)
     if (collection) {
       try {
+        const customer = await getCustomer(collection)
+        const billingStartMs = customer?.billing_start
+          ? new Date(customer.billing_start).getTime()
+          : 0
+
         const billingUsage = await getBillingUsage(collection)
         if (data.summary) {
           data.summary.total_searches = billingUsage.search
+          data.summary.unique_sessions = billingUsage.search
+        }
+
+        // Build daily volume from billing event log
+        if (billingStartMs > 0) {
+          const events = await getBillingEventLog(collection, billingStartMs, Date.now())
+          const dailyMap = new Map<string, { searches: number; clicks: number; add_to_carts: number }>()
+          for (const e of events) {
+            const date = new Date(e.timestamp).toISOString().split("T")[0]
+            const day = dailyMap.get(date) || { searches: 0, clicks: 0, add_to_carts: 0 }
+            if (e.type === "search") day.searches++
+            dailyMap.set(date, day)
+          }
+          data.daily_volume = Array.from(dailyMap.entries())
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([date, vol]) => ({ date, ...vol }))
         }
       } catch {
-        // Non-critical — fall through with backend count
+        // Non-critical — fall through with backend data
       }
     }
 
