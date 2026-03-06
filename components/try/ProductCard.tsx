@@ -26,10 +26,6 @@ function formatPrice(price: number | number[]): string {
   return `$${price.toFixed(2)}`
 }
 
-function isHighConfidence(score?: number): boolean {
-  return !!score && score >= 0.85
-}
-
 const EXPLAIN_PHRASES = [
   "Analyzing match quality\u2026",
   "Comparing to your search intent\u2026",
@@ -114,7 +110,6 @@ export default function ProductCard({ product, score, query, onExplain, onReport
   return (
     <div
       ref={cardRef}
-      aria-label={isHighConfidence(score) ? "High relevance match" : undefined}
       className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col ${dismissed ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}
     >
       {/* Image */}
@@ -132,9 +127,6 @@ export default function ProductCard({ product, score, query, onExplain, onReport
           </div>
         )}
       </div>
-
-      {/* Relevance indicator — internal divider */}
-      {isHighConfidence(score) && <div className="h-[2px] bg-amber-400" />}
 
       {/* Content */}
       <div className="p-3 flex flex-col flex-1">

@@ -201,5 +201,13 @@ export function renderTemplatedCard(
     }
   )
 
+  // Make entire card clickable for PDP navigation
+  el.style.cursor = "pointer"
+  el.addEventListener("click", (e) => {
+    const target = e.target as HTMLElement
+    if (target.closest('a, button, [data-xtal-action="add-to-cart"]')) return
+    handlers.onViewProduct(product)
+  })
+
   return el
 }
