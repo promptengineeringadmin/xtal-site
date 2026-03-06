@@ -52,7 +52,7 @@ export interface BillingCustomer {
   // Deployment info
   website?: string // e.g. "www.willowgroupltd.com"
   deployment_method?: "gtm" | "direct" | "shopify_app" | "other"
-  launch_date?: string // ISO date — when SDK went live
+  launch_date?: string // ISO datetime — when SDK went live
 
   // Pricing
   billing_model: "usage" | "flat"
