@@ -54,6 +54,10 @@ export interface BillingCustomer {
   deployment_method?: "gtm" | "direct" | "shopify_app" | "other"
   launch_date?: string // ISO datetime — when SDK went live
 
+  // Integrations
+  klaviyo_api_key?: string // private key for transaction attribution
+  klaviyo_metric_id?: string // Placed Order metric ID (per-account)
+
   // Pricing
   billing_model: "usage" | "flat"
   price_per_search: number // default 0.10

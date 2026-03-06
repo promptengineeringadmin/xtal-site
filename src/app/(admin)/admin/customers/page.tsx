@@ -38,6 +38,8 @@ interface BillingCustomer {
   website?: string
   deployment_method?: "gtm" | "direct" | "shopify_app" | "other"
   launch_date?: string
+  klaviyo_api_key?: string
+  klaviyo_metric_id?: string
   billing_model: "usage" | "flat"
   price_per_search: number
   price_per_aspect_click: number
@@ -546,6 +548,8 @@ function CustomerModal({
     website: customer?.website || "",
     deployment_method: customer?.deployment_method || "",
     launch_date: customer?.launch_date || "",
+    klaviyo_api_key: customer?.klaviyo_api_key || "",
+    klaviyo_metric_id: customer?.klaviyo_metric_id || "",
     billing_model: customer?.billing_model || "usage",
     price_per_search: customer?.price_per_search ?? 0.1,
     price_per_aspect_click: customer?.price_per_aspect_click ?? 0.1,
@@ -565,6 +569,8 @@ function CustomerModal({
       deployment_method: (form.deployment_method || undefined) as BillingCustomer["deployment_method"],
       launch_date: form.launch_date || undefined,
       website: form.website || undefined,
+      klaviyo_api_key: form.klaviyo_api_key || undefined,
+      klaviyo_metric_id: form.klaviyo_metric_id || undefined,
       price_per_search: Number(form.price_per_search),
       price_per_aspect_click: Number(form.price_per_aspect_click),
       price_per_explain: Number(form.price_per_explain),
@@ -659,6 +665,22 @@ function CustomerModal({
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
               />
             </div>
+          </div>
+
+          {/* Integrations */}
+          <div className="grid grid-cols-2 gap-3">
+            <Field
+              label="Klaviyo API Key"
+              value={form.klaviyo_api_key}
+              onChange={(v) => setForm({ ...form, klaviyo_api_key: v })}
+              placeholder="pk_..."
+            />
+            <Field
+              label="Klaviyo Metric ID"
+              value={form.klaviyo_metric_id}
+              onChange={(v) => setForm({ ...form, klaviyo_metric_id: v })}
+              placeholder="e.g. QSdXyY"
+            />
           </div>
 
           {/* Status/Type */}
