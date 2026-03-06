@@ -36,7 +36,7 @@ export default function TopQueriesTable({ data, loading }: TopQueriesTableProps)
                 <th className="text-left py-2 pr-4 text-slate-500 font-medium">Query</th>
                 <th className="text-right py-2 px-3 text-slate-500 font-medium">Searches</th>
                 <th className="text-right py-2 px-3 text-slate-500 font-medium">Clicks</th>
-                <th className="text-right py-2 pl-3 text-slate-500 font-medium">CTR</th>
+                <th className="text-right py-2 pl-3 text-slate-500 font-medium">Clicks/Search</th>
               </tr>
             </thead>
             <tbody>

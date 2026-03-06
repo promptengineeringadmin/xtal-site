@@ -81,7 +81,17 @@ export async function GET(request: Request) {
           const totalClicks = billingUsage.product_click + billingUsage.add_to_cart
           data.summary.total_clicks = totalClicks
           data.summary.add_to_cart_from_search = billingUsage.add_to_cart
-          data.summary.click_through_rate = billableSearches > 0
+          // Binary CTR: % of unique queries that got at least 1 click
+          const queriesWithClicks = new Set<string>()
+          for (const e of events) {
+            if ((e.type === "product_click" || e.type === "add_to_cart") && e.query) {
+              queriesWithClicks.add(e.query.toLowerCase())
+            }
+          }
+          data.summary.click_through_rate = uniqueQueries.size > 0
+            ? queriesWithClicks.size / uniqueQueries.size
+            : 0
+          data.summary.clicks_per_search = billableSearches > 0
             ? totalClicks / billableSearches
             : 0
         }
@@ -138,7 +148,7 @@ export async function GET(request: Request) {
             queryMap.set(key, entry)
           }
           data.top_queries = Array.from(queryMap.values())
-            .map(q => ({ query: q.display, searches: q.searches, clicks: q.clicks, ctr: q.searches > 0 ? q.clicks / q.searches : 0 }))
+            .map(q => ({ query: q.display, searches: q.searches, clicks: q.clicks, ctr: q.searches > 0 ? q.clicks / q.searches : 0, converted: q.clicks > 0 }))
             .sort((a, b) => b.searches - a.searches)
             .slice(0, 20)
         }

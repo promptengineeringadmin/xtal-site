@@ -7,6 +7,7 @@ import {
   MousePointerClick,
   TrendingUp,
   ShoppingCart,
+  BarChart3,
   Loader2,
   DollarSign,
   Package,
@@ -129,7 +130,12 @@ export default function DashboardPage() {
           icon={MousePointerClick}
           loading={loading}
         />
-        {/* avg_click_position hidden — not tracked in billing log */}
+        <StatCard
+          label="Clicks / Search"
+          value={s?.clicks_per_search != null ? s.clicks_per_search.toFixed(2) : "0"}
+          icon={BarChart3}
+          loading={loading}
+        />
         <StatCard
           label="Add to Cart"
           value={s?.add_to_cart_from_search?.toLocaleString() ?? "0"}
