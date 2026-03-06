@@ -256,7 +256,7 @@ async function applyBrandPrompt(collection, prompt) {
 
 const DIAL_PRESETS = {
   willow:   { bm25_weight: 0.8, merch_rerank_strength: 0.5,  keyword_rerank_strength: 0.2, query_enhancement_enabled: false },
-  bestbuy:  { bm25_weight: 2.5, merch_rerank_strength: 0.15, keyword_rerank_strength: 0.6, query_enhancement_enabled: true  },
+  bestbuy:  { bm25_weight: 2.5, merch_rerank_strength: 0.15, keyword_rerank_strength: 0.3, query_enhancement_enabled: false },
   xtaldemo: { bm25_weight: 2.0, merch_rerank_strength: 0.25, keyword_rerank_strength: 0.5, query_enhancement_enabled: true  },
 }
 
@@ -496,8 +496,9 @@ async function main() {
       if (collection === "bestbuy") {
         await applySettings(collection, {
           bm25_weight: 2.5,
-          keyword_rerank_strength: 0.6,
+          keyword_rerank_strength: 0.3,
           merch_rerank_strength: 0.15,
+          query_enhancement_enabled: false,
           store_type: "electronics retailer",
         })
         await applyMarketingPrompt(collection, BESTBUY_MARKETING_PROMPT)
