@@ -456,8 +456,6 @@ function boot() {
             gridTarget = document.querySelector<HTMLElement>(resultsSel)
             if (gridTarget) {
               inline = new InlineRenderer(gridTarget)
-              // Initialize filter layout if filters were already prepped
-              if (filtersEnabled) inline.initLayout()
             }
             return inline
           }
@@ -477,7 +475,6 @@ function boot() {
           // race condition where user clicks filter before searchContext exists)
           if (filtersEnabled) {
             injectFilterCSS()
-            inline?.initLayout()
           }
 
           /** Lazily create FilterRail — called once after first search resolves */
