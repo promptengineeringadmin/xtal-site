@@ -59,8 +59,11 @@ function createCard(row: ShowcaseRow, onSearch: (query: string) => void): HTMLEl
   queryEl.textContent = `\u201C${row.query}\u201D`
   card.appendChild(queryEl)
 
-  // Hero image (first product)
-  const [hero, ...thumbs] = row.products
+  // Split products into those with images
+  const withImages = row.products.filter((p) => !!getImageUrl(p))
+  const [hero, ...thumbs] = withImages
+
+  // Hero image (first product with an image)
   if (hero) {
     const heroWrap = document.createElement("div")
     heroWrap.className = "xtal-showcase-hero"
@@ -72,11 +75,11 @@ function createCard(row: ShowcaseRow, onSearch: (query: string) => void): HTMLEl
     card.appendChild(heroWrap)
   }
 
-  // Thumbnail row (remaining 3)
+  // Thumbnail row (remaining products with images, max 3)
   if (thumbs.length > 0) {
     const thumbRow = document.createElement("div")
     thumbRow.className = "xtal-showcase-thumbs"
-    for (const p of thumbs) {
+    for (const p of thumbs.slice(0, 3)) {
       const thumb = document.createElement("div")
       thumb.className = "xtal-showcase-thumb"
       const img = document.createElement("img")
