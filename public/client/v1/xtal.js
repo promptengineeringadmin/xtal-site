@@ -43,14 +43,14 @@
 .xtal-section-header {
   display: flex; align-items: center; justify-content: space-between;
   width: 100%; padding: 6px 0; background: none; border: none;
-  cursor: pointer; font-size: 14px; font-weight: 600; color: #1d1d1b;
+  cursor: pointer; font-size: 14px; font-weight: 400; color: #1d1d1b;
   font-family: inherit;
 }
 .xtal-section-header:hover { color: #000; }
 .xtal-section-label { display: flex; align-items: center; gap: 8px; }
 .xtal-section-badge {
   font-size: 10px; padding: 1px 6px; border-radius: 9999px;
-  background: #1d1d1b; color: #fff; font-weight: 600;
+  background: #1d1d1b; color: #fff; font-weight: 400;
 }
 .xtal-section-chevron { font-size: 12px; color: #999; }
 .xtal-section-content { margin-top: 6px; }
@@ -116,7 +116,7 @@
   background: #1d1d1b; color: #fff;
   border: 1px solid rgba(255,255,255,0.15); cursor: pointer;
   font-family: "Manrope", system-ui, -apple-system, sans-serif;
-  font-size: 15px; font-weight: 600;
+  font-size: 15px; font-weight: 400;
   line-height: 1; letter-spacing: 0.3px; text-transform: none;
   box-sizing: border-box;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15), 0 12px 28px rgba(0,0,0,0.3);
@@ -126,7 +126,7 @@
 .xtal-fab-badge {
   display: flex; align-items: center; justify-content: center;
   width: 22px; height: 22px; border-radius: 50%;
-  background: #fff; color: #1d1d1b; font-size: 12px; font-weight: 700;
+  background: #fff; color: #1d1d1b; font-size: 12px; font-weight: 400;
   line-height: 1; margin-left: 2px;
 }
 .xtal-fab-hidden { display: none !important; }
@@ -155,7 +155,7 @@
   padding: 16px; border-bottom: 1px solid #e5e5e5;
 }
 .xtal-drawer-title {
-  font-family: "Manrope", serif; font-size: 14px; font-weight: 700; color: #1d1d1b;
+  font-family: "Manrope", serif; font-size: 14px; font-weight: 400; color: #1d1d1b;
 }
 .xtal-drawer-close {
   background: none; border: none; cursor: pointer; padding: 8px;
@@ -172,7 +172,7 @@
 .xtal-drawer-apply {
   width: 100%; padding: 12px; background: #1d1d1b; color: #fff;
   border: none; border-radius: 8px; cursor: pointer;
-  font-family: "Manrope", serif; font-size: 14px; font-weight: 600;
+  font-family: "Manrope", serif; font-size: 14px; font-weight: 400;
 }
 .xtal-drawer-apply:hover { background: #333; }
 
