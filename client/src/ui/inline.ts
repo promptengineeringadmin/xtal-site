@@ -117,20 +117,20 @@ export class InlineRenderer {
       const queryEl = document.createElement("p")
       queryEl.style.cssText =
         "margin:0 0 8px 0;font-size:14px;color:#555;font-style:italic;text-align:center;max-width:320px;"
-      queryEl.textContent = `\u201C${displayQuery}\u201D`
+      queryEl.textContent = `"${displayQuery}"`
       wrap.appendChild(queryEl)
     }
 
     // Coaching copy — teach users how AI search works while they wait
     const phrases = [
-      "This isn\u2019t just keyword search \u2014 it\u2019s smarter",
-      "Describe what it\u2019s for, not just what it is",
+      "This isn't just keyword search - it's smarter",
+      "Describe what it's for, not just what it is",
       "Add a color, size, or use case to sharpen results",
       "Full phrases beat single keywords",
       "Know a SKU or name? Great. If not, just type what you need",
       "The more you describe, the better the match",
-      "Try searching the way you\u2019d ask a friend",
-      "Pulling your results together\u2026",
+      "Try searching the way you'd ask a friend",
+      "Pulling your results together...",
     ]
     const phraseEl = document.createElement("p")
     phraseEl.style.cssText =

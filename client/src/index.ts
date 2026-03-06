@@ -275,6 +275,12 @@ function injectEarlyHide(selector: string): void {
 }
 
 function boot() {
+  if ((window as any).__XTAL_BOOTED) {
+    console.log("[xtal.js] Already booted — skipping duplicate init")
+    return
+  }
+  (window as any).__XTAL_BOOTED = true
+
   try {
     // Find our script tag or fall back to window.XTAL_CONFIG (GTM compatibility)
     const scriptTag = document.querySelector<HTMLScriptElement>(
@@ -346,6 +352,14 @@ function boot() {
         cachedConfig?.resultsSelector || staleResultsSelector || globalConfig?.resultsSelector
       if (earlySelector && !BLOCKED_SELECTORS.has(earlySelector.trim().toLowerCase())) {
         injectEarlyHide(earlySelector)
+        // Failsafe: remove early-hide if SDK hasn't taken over within 15s
+        setTimeout(() => {
+          const el = document.getElementById("xtal-sdk-early-hide")
+          if (el) {
+            console.warn("[xtal.js] Failsafe: removing early-hide after 15s timeout")
+            el.remove()
+          }
+        }, 15000)
       }
     }
 
