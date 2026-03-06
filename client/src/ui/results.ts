@@ -103,7 +103,9 @@ export function renderLoading(query?: string): HTMLElement {
   const wrap = document.createElement("div")
   wrap.className = "xtal-loading"
   wrap.style.cssText =
-    "display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;width:100%;"
+    "display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:60px 20px 48px;width:100%;"
+  wrap.setAttribute("role", "status")
+  wrap.setAttribute("aria-live", "polite")
 
   // Spinner ring with sparkle icon
   const ring = document.createElement("div")
@@ -136,8 +138,8 @@ export function renderLoading(query?: string): HTMLElement {
 
   // Static phrase (no cycling — this element gets replaced quickly)
   const phraseEl = document.createElement("p")
-  phraseEl.style.cssText = "margin:0;font-size:13px;color:#999;text-align:center;"
-  phraseEl.textContent = "Finding best matches\u2026"
+  phraseEl.style.cssText = "margin:0;font-size:13px;color:#767676;text-align:center;"
+  phraseEl.textContent = "Finding your results\u2026"
   wrap.appendChild(phraseEl)
 
   return wrap

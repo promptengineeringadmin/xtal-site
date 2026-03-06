@@ -89,7 +89,9 @@ export class InlineRenderer {
 
     const wrap = document.createElement("div")
     wrap.style.cssText =
-      `display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;width:100%;min-height:${minHeight}px;`
+      `display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:60px 20px 48px;width:100%;min-height:${minHeight}px;`
+    wrap.setAttribute("role", "status")
+    wrap.setAttribute("aria-live", "polite")
 
     // Spinner ring with sparkle icon
     const ring = document.createElement("div")
@@ -109,6 +111,21 @@ export class InlineRenderer {
     ring.appendChild(track)
     ring.appendChild(spinner)
     ring.appendChild(sparkle)
+
+    // Coaching copy — above the sparkle so it's visible immediately
+    const phrases = [
+      "XTAL understands full phrases, not just keywords",
+      "For really effective results, try describing who or what it's for",
+      "Know the right SKU or product name? That works too",
+      "Finding your results\u2026",
+    ]
+    const phraseEl = document.createElement("p")
+    phraseEl.style.cssText =
+      "margin:0 0 16px 0;font-size:13px;color:#767676;text-align:center;transition:opacity 0.3s;min-height:2.6em;display:flex;align-items:center;justify-content:center;"
+    phraseEl.textContent = phrases[0]
+    wrap.appendChild(phraseEl)
+
+    // Sparkle spinner
     wrap.appendChild(ring)
 
     // Query echo
@@ -120,23 +137,6 @@ export class InlineRenderer {
       queryEl.textContent = `"${displayQuery}"`
       wrap.appendChild(queryEl)
     }
-
-    // Coaching copy — teach users how AI search works while they wait
-    const phrases = [
-      "This isn't just keyword search - it's smarter",
-      "Describe what it's for, not just what it is",
-      "Add a color, size, or use case to sharpen results",
-      "Full phrases beat single keywords",
-      "Know a SKU or name? Great. If not, just type what you need",
-      "The more you describe, the better the match",
-      "Try searching the way you'd ask a friend",
-      "Pulling your results together...",
-    ]
-    const phraseEl = document.createElement("p")
-    phraseEl.style.cssText =
-      "margin:0;font-size:13px;color:#999;text-align:center;transition:opacity 0.3s;"
-    phraseEl.textContent = phrases[0]
-    wrap.appendChild(phraseEl)
 
     let idx = 0
     this.loadingPhraseTimer = setInterval(() => {
