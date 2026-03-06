@@ -1,6 +1,7 @@
 <!-- XTAL Search Hero Banner — paste into Willow Umbraco Header Scripts -->
 <script>
 (function(){
+  if(window.location.pathname!=='/') return;
   if(document.getElementById('xtal-hero-banner')) return;
 
   var s=document.createElement('style');
