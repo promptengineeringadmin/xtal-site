@@ -519,6 +519,19 @@ function boot() {
                 query: lastQuery,
               })
               window.open(url, "_blank", "noopener,noreferrer")
+
+              // Fire product_click event
+              fetch(`${apiBase}/api/xtal/events`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  product_id: product.id,
+                  product_title: product.title,
+                  action: "product_click",
+                  collection: shopId,
+                  query: lastQuery,
+                }),
+              }).catch(() => {})
             },
             async onAddToCart(product) {
               const result = await cartAdapter.addToCart(product)
@@ -532,6 +545,7 @@ function boot() {
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
                     product_id: product.id,
+                    product_title: product.title,
                     action: "add_to_cart",
                     collection: shopId,
                     query: lastQuery,

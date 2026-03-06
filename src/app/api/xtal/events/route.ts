@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { corsHeaders, handleOptions } from "@/lib/api/cors"
+import { trackBillableEvent } from "@/lib/api/billing-usage"
 
 export async function OPTIONS() {
     return handleOptions()
@@ -37,6 +38,18 @@ export async function POST(request: Request) {
             }),
             signal: AbortSignal.timeout(3000),
         })
+
+        // Fire-and-forget: log engagement events to billing log for dashboard
+        if (collection && (body.action === "product_click" || body.action === "add_to_cart")) {
+            trackBillableEvent(collection, {
+                type: body.action as "product_click" | "add_to_cart",
+                query: body.query || "",
+                status: res.status,
+                latency_ms: 0,
+                product_id: body.product_id,
+                product_title: body.product_title,
+            })
+        }
 
         const data = await res.json()
         return NextResponse.json(data, {

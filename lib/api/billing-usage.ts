@@ -19,7 +19,7 @@ function getRedis(): Redis {
 const LOG_PREFIX = "billing:log:"
 const LOG_TTL_MS = 90 * 24 * 60 * 60 * 1000 // 90 days
 
-export type BillableEventType = "search" | "aspect_click" | "explain"
+export type BillableEventType = "search" | "aspect_click" | "explain" | "product_click" | "add_to_cart"
 
 function logKey(collection: string): string {
   return `${LOG_PREFIX}${collection}`
@@ -34,6 +34,7 @@ export interface BillableEvent {
   latency_ms: number
   timestamp: number
   product_id?: string
+  product_title?: string
   result_count?: number
 }
 
@@ -82,6 +83,8 @@ export interface BillingUsageSummary {
   search: number
   aspect_click: number
   explain: number
+  product_click: number
+  add_to_cart: number
 }
 
 /**
@@ -106,7 +109,7 @@ export async function getBillingUsage(
       const billingStartMs = new Date(customer.billing_start).getTime()
       if (billingStartMs > endMs) {
         // Billing hasn't started in this month yet
-        return { search: 0, aspect_click: 0, explain: 0 }
+        return { search: 0, aspect_click: 0, explain: 0, product_click: 0, add_to_cart: 0 }
       }
       if (billingStartMs > startMs) {
         startMs = billingStartMs
@@ -115,7 +118,7 @@ export async function getBillingUsage(
 
     const events = await getBillingEventLog(collection, startMs, endMs)
 
-    const summary: BillingUsageSummary = { search: 0, aspect_click: 0, explain: 0 }
+    const summary: BillingUsageSummary = { search: 0, aspect_click: 0, explain: 0, product_click: 0, add_to_cart: 0 }
     for (const e of events) {
       if (e.type in summary) {
         summary[e.type]++
@@ -123,7 +126,7 @@ export async function getBillingUsage(
     }
     return summary
   } catch {
-    return { search: 0, aspect_click: 0, explain: 0 }
+    return { search: 0, aspect_click: 0, explain: 0, product_click: 0, add_to_cart: 0 }
   }
 }
 
