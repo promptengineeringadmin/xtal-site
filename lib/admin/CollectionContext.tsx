@@ -38,7 +38,7 @@ export function CollectionProvider({ children }: { children: ReactNode }) {
   // Fetch dynamic collections from Redis (merged with hardcoded)
   const refreshCollections = useCallback(async () => {
     try {
-      const res = await fetch("/api/admin/collections")
+      const res = await fetch("/api/admin/collections", { cache: "no-store" })
       if (res.ok) {
         const data = await res.json()
         if (data.collections) {

@@ -43,6 +43,13 @@ export async function getAllCollections(): Promise<CollectionConfig[]> {
       seen.add(c.id)
     }
   }
+
+  if (merged.length < COLLECTIONS.length) {
+    console.error(
+      `[getAllCollections] BUG: returned ${merged.length} collections, expected at least ${COLLECTIONS.length}. Hardcoded: ${COLLECTIONS.length}, dynamic: ${dynamic.length}`,
+    )
+  }
+
   return merged
 }
 
