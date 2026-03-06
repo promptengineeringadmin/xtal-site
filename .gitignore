@@ -74,3 +74,9 @@ e2e/test-results/
 
 # Temp working files
 tmp/
+
+# Workspace junk (screenshots, leads, plans)
+*.csv
+/*.jpg
+/*.png
+/*.pdf
