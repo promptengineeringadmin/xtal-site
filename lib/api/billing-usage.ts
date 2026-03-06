@@ -16,27 +16,13 @@ function getRedis(): Redis {
 
 // ─── Constants ──────────────────────────────────────────────────────
 
-const COUNTER_PREFIX = "billing:usage:"
 const LOG_PREFIX = "billing:log:"
 const LOG_TTL_MS = 90 * 24 * 60 * 60 * 1000 // 90 days
 
 export type BillableEventType = "search" | "aspect_click" | "explain"
 
-function counterKey(
-  collection: string,
-  yearMonth: string,
-  eventType: BillableEventType
-): string {
-  return `${COUNTER_PREFIX}${collection}:${yearMonth}:${eventType}`
-}
-
 function logKey(collection: string): string {
   return `${LOG_PREFIX}${collection}`
-}
-
-function currentYearMonth(): string {
-  const now = new Date()
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
 }
 
 // ─── Event shape ────────────────────────────────────────────────────
@@ -54,7 +40,7 @@ export interface BillableEvent {
 // ─── Track (fire-and-forget) ────────────────────────────────────────
 
 /**
- * Increment the monthly counter for this event type and log the event.
+ * Log a billable event to the sorted set.
  * Caller should NOT await this — fire-and-forget.
  */
 export async function trackBillableEvent(
@@ -73,7 +59,6 @@ export async function trackBillableEvent(
   }
 
   const kv = getRedis()
-  const month = currentYearMonth()
   const now = Date.now()
   const cutoff = now - LOG_TTL_MS
 
@@ -81,7 +66,6 @@ export async function trackBillableEvent(
 
   return kv
     .pipeline()
-    .incr(counterKey(collection, month, event.type))
     .zadd(logKey(collection), {
       score: now,
       member: JSON.stringify(logEntry),
@@ -102,27 +86,50 @@ export interface BillingUsageSummary {
 
 /**
  * Get the request counts for a collection in a given month, broken down by type.
+ * Counts are derived from the event log, respecting billing_start datetime.
  */
 export async function getBillingUsage(
   collection: string,
   month?: string
 ): Promise<BillingUsageSummary> {
   try {
-    const kv = getRedis()
     const m = month || currentYearMonth()
-    const [search, aspect_click, explain] = await Promise.all([
-      kv.get<number>(counterKey(collection, m, "search")),
-      kv.get<number>(counterKey(collection, m, "aspect_click")),
-      kv.get<number>(counterKey(collection, m, "explain")),
-    ])
-    return {
-      search: search ?? 0,
-      aspect_click: aspect_click ?? 0,
-      explain: explain ?? 0,
+    const [year, mon] = m.split("-").map(Number)
+
+    // Month boundaries
+    let startMs = new Date(year, mon - 1, 1).getTime()
+    const endMs = new Date(year, mon, 0, 23, 59, 59, 999).getTime()
+
+    // Respect billing_start: don't count events before it
+    const customer = await getCustomer(collection)
+    if (customer?.billing_start) {
+      const billingStartMs = new Date(customer.billing_start).getTime()
+      if (billingStartMs > endMs) {
+        // Billing hasn't started in this month yet
+        return { search: 0, aspect_click: 0, explain: 0 }
+      }
+      if (billingStartMs > startMs) {
+        startMs = billingStartMs
+      }
     }
+
+    const events = await getBillingEventLog(collection, startMs, endMs)
+
+    const summary: BillingUsageSummary = { search: 0, aspect_click: 0, explain: 0 }
+    for (const e of events) {
+      if (e.type in summary) {
+        summary[e.type]++
+      }
+    }
+    return summary
   } catch {
     return { search: 0, aspect_click: 0, explain: 0 }
   }
+}
+
+function currentYearMonth(): string {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
 }
 
 // ─── Read: multi-month breakdown ────────────────────────────────────

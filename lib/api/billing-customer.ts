@@ -46,7 +46,7 @@ export interface BillingCustomer {
 
   customer_type: "demo" | "trial" | "paying"
   status: "prospect" | "active" | "paused" | "churned"
-  billing_start?: string // ISO date
+  billing_start?: string // ISO datetime
   billing_end?: string
 
   // Deployment info
