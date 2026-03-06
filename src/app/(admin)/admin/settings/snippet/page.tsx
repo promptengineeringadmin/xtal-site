@@ -16,6 +16,7 @@ export default function SnippetSettingsPage() {
   const [newOrigin, setNewOrigin] = useState("")
   const [inputError, setInputError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [resultsSelector, setResultsSelector] = useState("")
 
   const fetchOrigins = useCallback(async () => {
     try {
@@ -33,7 +34,12 @@ export default function SnippetSettingsPage() {
 
   useEffect(() => {
     fetchOrigins()
-  }, [fetchOrigins])
+    // Fetch resultsSelector for snippet generation
+    fetch(`/api/xtal/config?shopId=${collection}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => { if (data?.resultsSelector) setResultsSelector(data.resultsSelector) })
+      .catch(() => {})
+  }, [fetchOrigins, collection])
 
   async function handleSave() {
     setSaving(true)
@@ -291,9 +297,9 @@ export default function SnippetSettingsPage() {
   if(b)requestAnimationFrame(function(){try{localStorage.setItem('xtal:hero:height',String(b.offsetHeight))}catch(e){}});
 })();
 </script>
-<script>window.XTAL_CONFIG = { shopId: "willow" };</script>
+<script>window.XTAL_CONFIG = { shopId: "willow", resultsSelector: "shopping-multi-view" };</script>
 <script src="https://www.xtalsearch.com/client/v1/xtal.js"></script>
-<script src="https://www.xtalsearch.com/client/v1/willow-hero.js"></script>` : `<script>window.XTAL_CONFIG = { shopId: "${collection}" };</script>
+<script src="https://www.xtalsearch.com/client/v1/willow-hero.js"></script>` : `<script>window.XTAL_CONFIG = { shopId: "${collection}"${resultsSelector ? `, resultsSelector: "${resultsSelector}"` : ""} };</script>
 <script src="https://www.xtalsearch.com/client/v1/xtal.js"></script>`}
               </pre>
             </div>

@@ -260,6 +260,20 @@ function injectFilterCSS() {
   document.head.appendChild(style)
 }
 
+/** Check if the current page is a search page (has ?Search= or ?search= in URL) */
+function isSearchPage(): boolean {
+  return /[?&](Search|search)=/.test(window.location.search)
+}
+
+/** Inject a <style> tag to hide the native results container before config arrives */
+function injectEarlyHide(selector: string): void {
+  if (document.getElementById("xtal-sdk-early-hide")) return
+  const style = document.createElement("style")
+  style.id = "xtal-sdk-early-hide"
+  style.textContent = `${selector} { visibility: hidden !important; min-height: calc(100vh - 160px); }`
+  document.head.appendChild(style)
+}
+
 function boot() {
   try {
     // Find our script tag or fall back to window.XTAL_CONFIG (GTM compatibility)
@@ -267,7 +281,7 @@ function boot() {
       "script[data-shop-id]"
     )
     const globalConfig = (window as any).XTAL_CONFIG as
-      | { shopId?: string; apiBase?: string }
+      | { shopId?: string; apiBase?: string; resultsSelector?: string }
       | undefined
 
     const shopId =
@@ -300,19 +314,39 @@ function boot() {
     // Eliminates flash of native content on repeat visits by allowing
     // the SDK to hide the results container before the network fetch returns.
     const CONFIG_CACHE_TTL = 300_000 // 5 minutes
+    const STALE_MAX_AGE = 86_400_000 // 24 hours — stale config still has valid resultsSelector
     const cacheKey = `xtal:config:${shopId}`
 
     let cachedConfig: XtalConfig | null = null
+    let staleResultsSelector: string | null = null
     try {
       const raw = localStorage.getItem(cacheKey)
       if (raw) {
         const parsed = JSON.parse(raw) as { config: XtalConfig; ts: number }
-        if (Date.now() - parsed.ts < CONFIG_CACHE_TTL) {
+        const age = Date.now() - parsed.ts
+        if (age < CONFIG_CACHE_TTL) {
           cachedConfig = parsed.config
+        } else if (age < STALE_MAX_AGE && parsed.config.resultsSelector) {
+          // Stale but usable — keep resultsSelector for early-hide
+          staleResultsSelector = parsed.config.resultsSelector
         }
       }
     } catch {
       // Private browsing, corrupt data, etc.
+    }
+
+    // ── CMS failsafe flag ──
+    // Tells CMS snippet that SDK is alive and working (extend timeout instead of removing hide)
+    ;(window as any).__XTAL_LOADING = true
+
+    // ── Early-hide injection (before config fetch) ──
+    // Priority: fresh cache > stale cache > XTAL_CONFIG > nothing
+    if (isSearchPage()) {
+      const earlySelector =
+        cachedConfig?.resultsSelector || staleResultsSelector || globalConfig?.resultsSelector
+      if (earlySelector && !BLOCKED_SELECTORS.has(earlySelector.trim().toLowerCase())) {
+        injectEarlyHide(earlySelector)
+      }
     }
 
     /** Save config to localStorage (fire-and-forget) */
@@ -519,7 +553,7 @@ function boot() {
             if (!searchContext || !inline) return
             if (filterDebounceTimer) clearTimeout(filterDebounceTimer)
             filterDebounceTimer = setTimeout(() => {
-              inline?.showLoading(lastQuery)
+              inline?.showFilterLoading()
               api
                 .searchFiltered(lastQuery, searchContext!, {
                   facetFilters,
@@ -544,7 +578,7 @@ function boot() {
                   console.error("[xtal.js] Filter error:", err)
                   beaconError(apiBase, shopId!, String(err), "filter")
                 })
-            }, 150)
+            }, 350)
           }
 
           /** Safe siteUrl for navigation fallback */
@@ -590,6 +624,12 @@ function boot() {
 
                 // Create filter rail on first successful search (deferred to avoid race)
                 ensureFilterRail()
+
+                // Update search input now that results are rendering (not before)
+                const searchInput = document.querySelector<HTMLInputElement>(selector)
+                if (searchInput && searchInput.value !== query) {
+                  searchInput.value = query
+                }
 
                 if (res.results.length === 0) {
                   inline?.renderEmpty(query)
@@ -650,8 +690,6 @@ function boot() {
           const urlParams = new URLSearchParams(window.location.search)
           const urlQuery = urlParams.get("Search") || urlParams.get("search")
           if (urlQuery?.trim()) {
-            const searchInput = document.querySelector<HTMLInputElement>(selector)
-            if (searchInput) searchInput.value = urlQuery.trim()
             doSearch(urlQuery.trim())
           }
 
@@ -683,6 +721,9 @@ function boot() {
             `[xtal.js] Initialized INLINE for ${shopId}. Search: ${selector}, Grid: ${config.resultsSelector}${gridTarget ? "" : " (deferred)"}${filtersEnabled ? ", Filters: ON" : ""}`
           )
         }
+
+        // SDK is initialized — clear CMS failsafe flag
+        ;(window as any).__XTAL_LOADING = false
     }
 
     // Use cached config immediately if available, fetch in background to refresh
@@ -703,6 +744,7 @@ function boot() {
         .catch((err) => {
           console.error("[xtal.js] Failed to fetch config:", err)
           beaconError(apiBase, shopId, String(err), "config")
+          ;(window as any).__XTAL_LOADING = false
         })
     }
   } catch (err) {

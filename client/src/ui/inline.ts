@@ -27,9 +27,11 @@ export class InlineRenderer {
       this.originalDisplay = this.target.style.display
       this.target.style.display = "block"
       this.target.style.width = "100%"
-      // Remove CSS-based early-hide style tag (injected before config fetch)
+      // Remove CSS-based early-hide style tags (CMS-injected and SDK-injected)
       const earlyHide = document.getElementById("xtal-early-hide")
       if (earlyHide) earlyHide.remove()
+      const sdkEarlyHide = document.getElementById("xtal-sdk-early-hide")
+      if (sdkEarlyHide) sdkEarlyHide.remove()
       // Remove CMS-injected loading container (Umbraco Header Scripts)
       const searchLoading = document.getElementById("xtal-search-loading")
       if (searchLoading) searchLoading.remove()
@@ -81,9 +83,13 @@ export class InlineRenderer {
       document.head.appendChild(style)
     }
 
+    // Measure container position for pixel-perfect spinner height (no layout shift)
+    const rect = this.target.getBoundingClientRect()
+    const minHeight = Math.max(200, window.innerHeight - rect.top)
+
     const wrap = document.createElement("div")
     wrap.style.cssText =
-      "display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;width:100%;min-height:50vh;"
+      `display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;width:100%;min-height:${minHeight}px;`
 
     // Spinner ring with sparkle icon
     const ring = document.createElement("div")
@@ -115,12 +121,16 @@ export class InlineRenderer {
       wrap.appendChild(queryEl)
     }
 
-    // Cycling status phrase
+    // Coaching copy — teach users how AI search works while they wait
     const phrases = [
-      "Analyzing search intent\u2026",
-      "Finding best matches\u2026",
-      "Ranking results\u2026",
-      "Almost there\u2026",
+      "This isn\u2019t just keyword search \u2014 it\u2019s smarter",
+      "Describe what it\u2019s for, not just what it is",
+      "Add a color, size, or use case to sharpen results",
+      "Full phrases beat single keywords",
+      "Know a SKU or name? Great. If not, just type what you need",
+      "The more you describe, the better the match",
+      "Try searching the way you\u2019d ask a friend",
+      "Pulling your results together\u2026",
     ]
     const phraseEl = document.createElement("p")
     phraseEl.style.cssText =
@@ -148,8 +158,47 @@ export class InlineRenderer {
     }
   }
 
+  /** Dim existing grid + show small overlay spinner (for filter refinements) */
+  showFilterLoading() {
+    const slot = this.gridSlot || this.target
+    const grid = slot.querySelector<HTMLElement>(".xtal-grid")
+    if (grid) {
+      grid.style.opacity = "0.5"
+      grid.style.pointerEvents = "none"
+      grid.style.transition = "opacity 0.15s"
+    }
+    // Add small overlay spinner if not already present
+    if (!slot.querySelector(".xtal-filter-spinner")) {
+      const overlay = document.createElement("div")
+      overlay.className = "xtal-filter-spinner"
+      overlay.style.cssText =
+        "position:absolute;top:20px;left:50%;transform:translateX(-50%);z-index:10;" +
+        "width:32px;height:32px;border:3px solid #e5e5e5;border-top-color:#1d1d1b;" +
+        "border-radius:50%;animation:xtal-inline-spin .8s linear infinite;"
+      // Ensure slot is positioned for absolute child
+      if (getComputedStyle(slot).position === "static") {
+        slot.style.position = "relative"
+      }
+      slot.appendChild(overlay)
+    }
+  }
+
+  /** Remove filter loading state (dim + spinner) */
+  private clearFilterLoading() {
+    const slot = this.gridSlot || this.target
+    const grid = slot.querySelector<HTMLElement>(".xtal-grid")
+    if (grid) {
+      grid.style.opacity = ""
+      grid.style.pointerEvents = ""
+      grid.style.transition = ""
+    }
+    const spinner = slot.querySelector(".xtal-filter-spinner")
+    if (spinner) spinner.remove()
+  }
+
   renderCards(cards: HTMLElement[]) {
     this.clearPhraseTimer()
+    this.clearFilterLoading()
     const slot = this.gridSlot || this.target
     slot.innerHTML = ""
     const grid = document.createElement("div")
@@ -162,6 +211,7 @@ export class InlineRenderer {
 
   renderEmpty(query: string) {
     this.clearPhraseTimer()
+    this.clearFilterLoading()
     const slot = this.gridSlot || this.target
     slot.innerHTML = ""
     const msg = document.createElement("div")
@@ -178,6 +228,8 @@ export class InlineRenderer {
     // Remove early-hide and CMS loading container if still present
     const earlyHide = document.getElementById("xtal-early-hide")
     if (earlyHide) earlyHide.remove()
+    const sdkEarlyHide = document.getElementById("xtal-sdk-early-hide")
+    if (sdkEarlyHide) sdkEarlyHide.remove()
     const searchLoading = document.getElementById("xtal-search-loading")
     if (searchLoading) searchLoading.remove()
     if (this.originalHTML !== null) {
