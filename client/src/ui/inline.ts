@@ -114,8 +114,9 @@ export class InlineRenderer {
 
     // Coaching copy — above the sparkle so it's visible immediately
     const phrases = [
+      "While we gather your results, here\u2019s how XTAL works",
       "XTAL understands full phrases, not just keywords",
-      "For really effective results, try describing who or what it's for",
+      "For really effective results, try describing who or what it\u2019s for",
       "Know the right SKU or product name? That works too",
       "Finding your results\u2026",
     ]
