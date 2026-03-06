@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { adminFetch } from "@/lib/admin/api"
 import { getAllCustomers } from "@/lib/api/billing-customer"
+import { getBillingUsage } from "@/lib/api/billing-usage"
 
 export async function GET(request: Request) {
   try {
@@ -48,6 +49,19 @@ export async function GET(request: Request) {
 
     const data = await res.json()
     if (launchDate) data.launch_date = launchDate
+
+    // Override total_searches with billing log count (respects billing_start)
+    if (collection) {
+      try {
+        const billingUsage = await getBillingUsage(collection)
+        if (data.summary) {
+          data.summary.total_searches = billingUsage.search
+        }
+      } catch {
+        // Non-critical — fall through with backend count
+      }
+    }
+
     return NextResponse.json(data)
   } catch (error) {
     console.error("Analytics dashboard proxy error:", error)
