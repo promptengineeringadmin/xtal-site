@@ -16,7 +16,8 @@ export async function GET(request: Request) {
     const source = searchParams.get("source")
     const sort = searchParams.get("sort") || "name"
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10))
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "0", 10)))
+    const rawLimit = parseInt(searchParams.get("limit") || "0", 10)
+    const limit = rawLimit > 0 ? Math.min(100, rawLimit) : 0
 
     let collections = await getAllCollections()
 
