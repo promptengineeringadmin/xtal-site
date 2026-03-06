@@ -100,6 +100,7 @@ export interface AnalyticsSummary {
   total_clicks: number
   click_through_rate: number
   clicks_per_search: number
+  searches_per_session: number
   avg_searches_per_session: number
   searches_without_clicks: number
   avg_click_position: number

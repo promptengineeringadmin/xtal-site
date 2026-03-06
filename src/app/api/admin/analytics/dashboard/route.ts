@@ -94,6 +94,9 @@ export async function GET(request: Request) {
           data.summary.clicks_per_search = billableSearches > 0
             ? totalClicks / billableSearches
             : 0
+          data.summary.searches_per_session = uniqueQueries.size > 0
+            ? billableSearches / uniqueQueries.size
+            : 0
         }
 
         // Build daily volume and top products from billing event log

@@ -8,6 +8,7 @@ import {
   TrendingUp,
   ShoppingCart,
   BarChart3,
+  Repeat,
   Loader2,
   DollarSign,
   Package,
@@ -130,12 +131,22 @@ export default function DashboardPage() {
           icon={MousePointerClick}
           loading={loading}
         />
-        <StatCard
-          label="Clicks / Search"
-          value={s?.clicks_per_search != null ? s.clicks_per_search.toFixed(2) : "0"}
-          icon={BarChart3}
-          loading={loading}
-        />
+        <div className="flex flex-col gap-2">
+          <StatCard
+            label="Clicks / Search"
+            value={s?.clicks_per_search != null ? s.clicks_per_search.toFixed(2) : "0"}
+            icon={BarChart3}
+            loading={loading}
+            compact
+          />
+          <StatCard
+            label="Searches / Session"
+            value={s?.searches_per_session != null ? s.searches_per_session.toFixed(1) : "0"}
+            icon={Repeat}
+            loading={loading}
+            compact
+          />
+        </div>
         <StatCard
           label="Add to Cart"
           value={s?.add_to_cart_from_search?.toLocaleString() ?? "0"}
