@@ -64,10 +64,11 @@ export async function GET(request: Request) {
         if (data.summary) {
           data.summary.total_searches = billingUsage.search
           data.summary.unique_sessions = billingUsage.search
-          data.summary.total_clicks = billingUsage.product_click
+          const totalClicks = billingUsage.product_click + billingUsage.add_to_cart
+          data.summary.total_clicks = totalClicks
           data.summary.add_to_cart_from_search = billingUsage.add_to_cart
           data.summary.click_through_rate = billingUsage.search > 0
-            ? billingUsage.product_click / billingUsage.search
+            ? totalClicks / billingUsage.search
             : 0
         }
 

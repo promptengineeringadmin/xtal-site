@@ -540,13 +540,15 @@ function boot() {
               )
 
               if (result.success) {
+                // Fallback adapter just opens product page — log as product_click
+                const action = cartAdapter.name === "fallback" ? "product_click" : "add_to_cart"
                 fetch(`${apiBase}/api/xtal/events`, {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
                     product_id: product.id,
                     product_title: product.title,
-                    action: "add_to_cart",
+                    action,
                     collection: shopId,
                     query: lastQuery,
                   }),
