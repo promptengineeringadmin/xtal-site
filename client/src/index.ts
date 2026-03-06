@@ -614,6 +614,9 @@ function boot() {
               ? config.siteUrl.replace(/\/$/, "")
               : ""
 
+          const searchPagePath = config.searchPagePath || "/shop/"
+          const searchQueryParam = config.searchQueryParam || "Search"
+
           const doSearch = (query: string) => {
             lastQuery = query
 
@@ -622,10 +625,11 @@ function boot() {
               // Only navigate if we're NOT already on a search page.
               // On search pages with late-rendering containers (e.g. Angular),
               // the MutationObserver will re-fire doSearch when the container appears.
-              const isSearchPage = /[?&](Search|search)=/.test(window.location.search)
+              const paramPattern = new RegExp(`[?&]${searchQueryParam}=`, "i")
+              const isSearchPage = paramPattern.test(window.location.search)
               if (safeSiteUrl && !isSearchPage) {
                 console.log(`[xtal.js] No results container — navigating to search page`)
-                window.location.href = `${safeSiteUrl}/shop/?Search=${encodeURIComponent(query)}`
+                window.location.href = `${safeSiteUrl}${searchPagePath}?${searchQueryParam}=${encodeURIComponent(query)}`
               }
               return
             }
@@ -676,7 +680,7 @@ function boot() {
                 inline?.restore()
                 // Fallback: navigate to merchant's native search
                 if (safeSiteUrl && lastQuery) {
-                  window.location.href = `${safeSiteUrl}/shop/?Search=${encodeURIComponent(lastQuery)}`
+                  window.location.href = `${safeSiteUrl}${searchPagePath}?${searchQueryParam}=${encodeURIComponent(lastQuery)}`
                 }
               })
           }
@@ -709,11 +713,11 @@ function boot() {
             }, config.observerTimeoutMs ?? 10000)
           }
 
-          // Auto-trigger from URL ?Search= param (e.g. navigated from homepage hero)
+          // Auto-trigger from URL param (e.g. navigated from homepage hero)
           // Only use URL param — never the input value alone, because browsers
           // restore form values on navigation (bfcache) which causes false triggers.
           const urlParams = new URLSearchParams(window.location.search)
-          const urlQuery = urlParams.get("Search") || urlParams.get("search")
+          const urlQuery = urlParams.get(searchQueryParam) || urlParams.get(searchQueryParam.toLowerCase())
           if (urlQuery?.trim()) {
             doSearch(urlQuery.trim())
           }

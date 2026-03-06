@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { waitUntil } from "@vercel/functions"
 import { getRandomExplainPrompt } from "@/lib/admin/explain-prompt"
 import { corsHeaders, handleOptions } from "@/lib/api/cors"
 import { isValidCollection } from "@/lib/admin/demo-collections"
@@ -80,15 +81,15 @@ export async function POST(request: Request) {
 
     const data = await res.json()
 
-    // Fire-and-forget: track explain as billable event (skip for demo pages)
+    // Background: track explain as billable event (skip for demo pages)
     if (!body.is_demo) {
-      trackBillableEvent(collection, {
+      waitUntil(trackBillableEvent(collection, {
         type: "explain",
         query: body.query ?? "",
         status: res.status,
         latency_ms: 0,
         product_id: body.product_id,
-      })
+      }))
     }
 
     return NextResponse.json(

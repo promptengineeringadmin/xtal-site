@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { waitUntil } from "@vercel/functions"
 import { getAspectsPrompt, DEFAULT_ASPECTS_SYSTEM_PROMPT } from "@/lib/admin/aspects-prompt"
 import { getStoreType, getAspectsEnabled } from "@/lib/admin/admin-settings"
 import { corsHeaders, handleOptions } from "@/lib/api/cors"
@@ -105,8 +106,8 @@ export async function POST(request: Request) {
     const aspectsData =
       aspectsResult.status === "fulfilled" ? aspectsResult.value : null
 
-    // Fire-and-forget: log proxy timing to Redis for admin drilldowns
-    logProxyTiming({
+    // Background: log proxy timing to Redis for admin drilldowns
+    waitUntil(logProxyTiming({
       query: (body.query ?? "").toLowerCase(),
       collection,
       timestamp: t0,
@@ -115,18 +116,18 @@ export async function POST(request: Request) {
       backendMs,
       totalMs: Date.now() - t0,
       aspectsFailed: aspectsResult.status === "rejected",
-    })
+    }))
 
-    // Fire-and-forget: track search as billable event (aspect generation is free)
+    // Background: track search as billable event (aspect generation is free)
     // Skip billing for demo page searches
     if (!body.is_demo)
-    trackBillableEvent(collection, {
+    waitUntil(trackBillableEvent(collection, {
       type: "search",
       query: body.query ?? "",
       status: searchResult.status === "fulfilled" ? 200 : 500,
       latency_ms: backendMs,
       result_count: searchData.results?.length,
-    })
+    }))
 
     const response = {
       ...searchData,

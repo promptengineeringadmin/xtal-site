@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { waitUntil } from "@vercel/functions"
 import { corsHeaders, handleOptions } from "@/lib/api/cors"
 import { isValidCollection } from "@/lib/admin/demo-collections"
 import { logProxyTiming } from "@/lib/admin/proxy-timing"
@@ -61,8 +62,8 @@ export async function POST(request: Request) {
 
     const data = await res.json()
 
-    // Fire-and-forget: log proxy timing to Redis for admin drilldowns
-    logProxyTiming({
+    // Background: log proxy timing to Redis for admin drilldowns
+    waitUntil(logProxyTiming({
       query: (body.query ?? "").toLowerCase(),
       collection,
       timestamp: t0,
@@ -70,31 +71,41 @@ export async function POST(request: Request) {
       redisMs: 0,
       backendMs,
       totalMs: backendMs,
-    })
+    }))
 
-    // Fire-and-forget: track billable events (skip demo page searches)
+    // Background: track billable events (skip demo page searches)
     if (body.is_demo) {
       // Demo page — no billing
     } else if (!body.search_context) {
       // New search query — billable
-      trackBillableEvent(collection, {
+      waitUntil(trackBillableEvent(collection, {
         type: "search",
         query: body.query ?? "",
         status: res.status,
         latency_ms: backendMs,
         result_count: data.results?.length,
-      })
+      }))
     } else if (body.selected_aspects?.length) {
       // Aspect pill click (runs new search) — billable
-      trackBillableEvent(collection, {
+      waitUntil(trackBillableEvent(collection, {
         type: "aspect_click",
         query: body.query ?? "",
         status: res.status,
         latency_ms: backendMs,
         result_count: data.results?.length,
-      })
+      }))
+    } else if (body.search_context && (body.facet_filters || body.price_range)) {
+      // Filter refinement — not billable, but tracked for analytics
+      waitUntil(trackBillableEvent(collection, {
+        type: "filter",
+        query: body.query ?? "",
+        status: res.status,
+        latency_ms: backendMs,
+        result_count: data.results?.length,
+        facet_filters: body.facet_filters,
+        price_range: body.price_range,
+      }))
     }
-    // else: filter refinement (facet_filters/price_range only) — not billable
 
     return NextResponse.json(data, {
       status: res.status,

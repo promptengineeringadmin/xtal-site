@@ -19,7 +19,7 @@ function getRedis(): Redis {
 const LOG_PREFIX = "billing:log:"
 const LOG_TTL_MS = 90 * 24 * 60 * 60 * 1000 // 90 days
 
-export type BillableEventType = "search" | "aspect_click" | "explain" | "product_click" | "add_to_cart"
+export type BillableEventType = "search" | "aspect_click" | "explain" | "product_click" | "add_to_cart" | "filter"
 
 function logKey(collection: string): string {
   return `${LOG_PREFIX}${collection}`
@@ -36,13 +36,15 @@ export interface BillableEvent {
   product_id?: string
   product_title?: string
   result_count?: number
+  facet_filters?: Record<string, string[]>
+  price_range?: { min?: number; max?: number }
 }
 
-// ─── Track (fire-and-forget) ────────────────────────────────────────
+// ─── Track (background via waitUntil) ───────────────────────────────
 
 /**
  * Log a billable event to the sorted set.
- * Caller should NOT await this — fire-and-forget.
+ * Callers wrap this in waitUntil() to guarantee completion.
  */
 export async function trackBillableEvent(
   collection: string,
@@ -74,7 +76,7 @@ export async function trackBillableEvent(
     .zremrangebyscore(logKey(collection), 0, cutoff)
     .exec()
     .then(() => {})
-    .catch(() => {})
+    .catch((err) => console.error("[billing] Write error:", collection, event.type, err))
 }
 
 // ─── Read: monthly counts by event type ─────────────────────────────
@@ -85,6 +87,7 @@ export interface BillingUsageSummary {
   explain: number
   product_click: number
   add_to_cart: number
+  filter: number
 }
 
 /**
@@ -109,7 +112,7 @@ export async function getBillingUsage(
       const billingStartMs = new Date(customer.billing_start).getTime()
       if (billingStartMs > endMs) {
         // Billing hasn't started in this month yet
-        return { search: 0, aspect_click: 0, explain: 0, product_click: 0, add_to_cart: 0 }
+        return { search: 0, aspect_click: 0, explain: 0, product_click: 0, add_to_cart: 0, filter: 0 }
       }
       if (billingStartMs > startMs) {
         startMs = billingStartMs
@@ -118,7 +121,7 @@ export async function getBillingUsage(
 
     const events = await getBillingEventLog(collection, startMs, endMs)
 
-    const summary: BillingUsageSummary = { search: 0, aspect_click: 0, explain: 0, product_click: 0, add_to_cart: 0 }
+    const summary: BillingUsageSummary = { search: 0, aspect_click: 0, explain: 0, product_click: 0, add_to_cart: 0, filter: 0 }
     for (const e of events) {
       if (e.type in summary) {
         summary[e.type]++
@@ -126,7 +129,7 @@ export async function getBillingUsage(
     }
     return summary
   } catch {
-    return { search: 0, aspect_click: 0, explain: 0, product_click: 0, add_to_cart: 0 }
+    return { search: 0, aspect_click: 0, explain: 0, product_click: 0, add_to_cart: 0, filter: 0 }
   }
 }
 

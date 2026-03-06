@@ -57,6 +57,8 @@ export interface XtalConfig {
   pricePresets?: { label: string; min?: number; max?: number }[]
   hiddenFacets?: string[]
   resultsPerPage?: number
+  searchPagePath?: string
+  searchQueryParam?: string
 }
 
 export class XtalAPI {
