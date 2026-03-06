@@ -13,6 +13,7 @@ export class InlineRenderer {
   private layoutEl: HTMLElement | null = null
   private railSlot: HTMLElement | null = null
   private gridSlot: HTMLElement | null = null
+  private firstSearchDone = false
 
   constructor(target: HTMLElement) {
     this.target = target
@@ -139,7 +140,9 @@ export class InlineRenderer {
       wrap.appendChild(queryEl)
     }
 
-    let idx = 0
+    let idx = this.firstSearchDone ? 1 + Math.floor(Math.random() * (phrases.length - 1)) : 0
+    this.firstSearchDone = true
+    phraseEl.textContent = phrases[idx]
     this.loadingPhraseTimer = setInterval(() => {
       phraseEl.style.opacity = "0"
       setTimeout(() => {
