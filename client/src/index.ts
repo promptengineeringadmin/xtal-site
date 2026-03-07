@@ -65,17 +65,49 @@ function beaconError(apiBase: string, shopId: string, error: string, context?: s
   }
 }
 
-/** Inject filter rail CSS (all xtal- prefixed to avoid merchant conflicts) */
-function injectFilterCSS() {
-  if (document.getElementById("xtal-filter-styles")) return
+/** Inject grid layout CSS — always needed for inline mode */
+function injectGridCSS() {
+  if (document.getElementById("xtal-grid-styles")) return
   const style = document.createElement("style")
-  style.id = "xtal-filter-styles"
+  style.id = "xtal-grid-styles"
   style.textContent = `
 /* ── Layout ── */
 .xtal-layout { display: flex; gap: 40px; }
 .xtal-rail-slot { flex-shrink: 0; }
 .xtal-grid-slot { flex: 1; min-width: 0; }
 
+/* ── Responsive grid ── */
+.xtal-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 20px !important;
+  padding: 20px 0 40px 0 !important;
+  flex-wrap: initial !important;
+}
+.xtal-grid .product-card { width: auto !important; }
+.xtal-grid .xtal-card {
+  display: flex !important;
+  flex-direction: column !important;
+  text-decoration: none !important;
+  color: inherit !important;
+  overflow: hidden !important;
+}
+@media (min-width: 640px) {
+  .xtal-grid { grid-template-columns: repeat(3, 1fr) !important; }
+}
+@media (min-width: 1024px) {
+  .xtal-grid { grid-template-columns: repeat(4, 1fr) !important; }
+}
+`
+  document.head.appendChild(style)
+}
+
+/** Inject filter rail CSS (all xtal- prefixed to avoid merchant conflicts) */
+function injectFilterCSS() {
+  if (document.getElementById("xtal-filter-styles")) return
+  const style = document.createElement("style")
+  style.id = "xtal-filter-styles"
+  style.textContent = `
 /* ── Desktop filter rail ── */
 .xtal-filter-rail {
   width: 260px;
@@ -92,22 +124,6 @@ function injectFilterCSS() {
 .xtal-filter-rail::-webkit-scrollbar { width: 4px; }
 .xtal-filter-rail::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
 .xtal-filter-rail::-webkit-scrollbar-track { background: transparent; }
-
-/* ── Responsive grid ── */
-.xtal-grid {
-  display: grid !important;
-  grid-template-columns: repeat(2, 1fr) !important;
-  gap: 20px !important;
-  padding: 20px 0 40px 0 !important;
-  flex-wrap: initial !important;
-}
-.xtal-grid .product-card { width: auto !important; }
-@media (min-width: 640px) {
-  .xtal-grid { grid-template-columns: repeat(3, 1fr) !important; }
-}
-@media (min-width: 1024px) {
-  .xtal-grid { grid-template-columns: repeat(4, 1fr) !important; }
-}
 
 /* ── Filter sections ── */
 .xtal-filter-section { border-bottom: 1px solid #e5e5e5; padding-bottom: 12px; margin-bottom: 12px; }
@@ -471,6 +487,9 @@ function boot() {
           let lastTotal = 0
           let lastFacets: Record<string, Record<string, number>> = {}
           let filterDebounceTimer: ReturnType<typeof setTimeout> | null = null
+
+          // Always inject grid layout CSS for inline mode
+          injectGridCSS()
 
           // Inject filter CSS at boot so layout is ready, but defer
           // FilterRail creation until first search resolves (prevents
