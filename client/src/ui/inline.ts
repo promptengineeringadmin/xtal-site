@@ -1,6 +1,7 @@
 /**
- * Inline renderer — replaces the merchant's product grid in-place.
- * No Shadow DOM: cards inherit the merchant's CSS naturally.
+ * Inline renderer — hides the merchant's product grid and renders XTAL
+ * results in a sibling container. This avoids mutating the merchant's
+ * DOM (which can break React/Angular managed components).
  *
  * Uses a persistent .xtal-layout wrapper with two slots:
  * - .xtal-rail-slot: filter rail (persists across loading/results/empty)
@@ -8,7 +9,7 @@
  */
 export class InlineRenderer {
   private target: HTMLElement
-  private originalHTML: string | null = null
+  private hidden = false
   private originalDisplay: string = ""
   private layoutEl: HTMLElement | null = null
   private railSlot: HTMLElement | null = null
@@ -19,15 +20,12 @@ export class InlineRenderer {
     this.target = target
   }
 
-  /** Capture original HTML on first mutation — ensures fresh snapshot */
-  private captureOriginal() {
-    if (this.originalHTML === null) {
-      this.originalHTML = this.target.innerHTML
-      // Custom elements (e.g. <shopping-multi-view>) default to display:inline.
-      // Force block so children can expand to full width.
+  /** Hide the merchant's grid and ensure our XTAL container exists as a sibling */
+  private ensureXtalContainer() {
+    if (!this.hidden) {
       this.originalDisplay = this.target.style.display
-      this.target.style.display = "block"
-      this.target.style.width = "100%"
+      this.target.style.display = "none"
+      this.hidden = true
       // Remove CSS-based early-hide style tags (CMS-injected and SDK-injected)
       const earlyHide = document.getElementById("xtal-early-hide")
       if (earlyHide) earlyHide.remove()
@@ -37,35 +35,37 @@ export class InlineRenderer {
       const searchLoading = document.getElementById("xtal-search-loading")
       if (searchLoading) searchLoading.remove()
     }
+    if (!this.layoutEl) {
+      this.layoutEl = document.createElement("div")
+      this.layoutEl.className = "xtal-layout"
+      this.layoutEl.style.display = "block"
+      this.layoutEl.style.width = "100%"
+
+      this.railSlot = document.createElement("div")
+      this.railSlot.className = "xtal-rail-slot"
+
+      this.gridSlot = document.createElement("div")
+      this.gridSlot.className = "xtal-grid-slot"
+
+      this.layoutEl.appendChild(this.railSlot)
+      this.layoutEl.appendChild(this.gridSlot)
+
+      // Insert as sibling AFTER the hidden target — preserves merchant DOM
+      this.target.insertAdjacentElement("afterend", this.layoutEl)
+    }
   }
 
   /** Creates the persistent layout wrapper. Returns the rail slot for FilterRail to mount into. */
   initLayout(): HTMLElement {
     if (this.layoutEl) return this.railSlot!
-
-    this.captureOriginal()
-    this.target.innerHTML = ""
-
-    this.layoutEl = document.createElement("div")
-    this.layoutEl.className = "xtal-layout"
-
-    this.railSlot = document.createElement("div")
-    this.railSlot.className = "xtal-rail-slot"
-
-    this.gridSlot = document.createElement("div")
-    this.gridSlot.className = "xtal-grid-slot"
-
-    this.layoutEl.appendChild(this.railSlot)
-    this.layoutEl.appendChild(this.gridSlot)
-    this.target.appendChild(this.layoutEl)
-
-    return this.railSlot
+    this.ensureXtalContainer()
+    return this.railSlot!
   }
 
   private loadingPhraseTimer: ReturnType<typeof setInterval> | null = null
 
   showLoading(query?: string) {
-    this.captureOriginal()
+    this.ensureXtalContainer()
     if (this.loadingPhraseTimer) {
       clearInterval(this.loadingPhraseTimer)
       this.loadingPhraseTimer = null
@@ -234,9 +234,6 @@ export class InlineRenderer {
   }
 
   restore() {
-    this.layoutEl = null
-    this.railSlot = null
-    this.gridSlot = null
     // Remove early-hide and CMS loading container if still present
     const earlyHide = document.getElementById("xtal-early-hide")
     if (earlyHide) earlyHide.remove()
@@ -244,11 +241,17 @@ export class InlineRenderer {
     if (sdkEarlyHide) sdkEarlyHide.remove()
     const searchLoading = document.getElementById("xtal-search-loading")
     if (searchLoading) searchLoading.remove()
-    if (this.originalHTML !== null) {
-      this.target.innerHTML = this.originalHTML
+    // Remove sibling XTAL container
+    if (this.layoutEl) {
+      this.layoutEl.remove()
+      this.layoutEl = null
+      this.railSlot = null
+      this.gridSlot = null
+    }
+    // Unhide the merchant's original grid
+    if (this.hidden) {
       this.target.style.display = this.originalDisplay
-      this.target.style.width = ""
-      this.originalHTML = null
+      this.hidden = false
     }
   }
 
