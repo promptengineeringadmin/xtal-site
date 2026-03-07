@@ -289,7 +289,7 @@ function boot() {
       "script[data-shop-id]"
     )
     const globalConfig = (window as any).XTAL_CONFIG as
-      | { shopId?: string; apiBase?: string; resultsSelector?: string }
+      | { shopId?: string; apiBase?: string; resultsSelector?: string; isAuthenticated?: boolean }
       | undefined
 
     const shopId =
@@ -315,6 +315,11 @@ function boot() {
     if (!apiBase) {
       apiBase = globalConfig?.apiBase || "https://www.xtalsearch.com"
     }
+
+    // Auth state — merchant page sets window.XTAL_CONFIG.isAuthenticated
+    // based on their session (e.g. AngularJS $session.isAuthenticated).
+    // Defaults to true so prices show for merchants that don't gate pricing.
+    const isAuthenticated = globalConfig?.isAuthenticated !== false
 
     const api = new XtalAPI(apiBase, shopId)
 
@@ -570,10 +575,11 @@ function boot() {
                   shopId!,
                   cardHandlers,
                   cartAdapter.name,
-                  resolveProductUrl(product)
+                  resolveProductUrl(product),
+                  isAuthenticated
                 )
               }
-              return renderProductCard(product, lastQuery, shopId!, null, cardHandlers, resolveProductUrl(product))
+              return renderProductCard(product, lastQuery, shopId!, null, cardHandlers, resolveProductUrl(product), isAuthenticated)
             })
           }
 

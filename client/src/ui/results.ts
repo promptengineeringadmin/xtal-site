@@ -21,7 +21,8 @@ export function renderProductCard(
   shopId: string,
   template?: CardTemplate | null,
   handlers?: CardHandlers,
-  resolvedUrl?: string
+  resolvedUrl?: string,
+  isAuthenticated = true
 ): HTMLElement {
   if (template && handlers) {
     return renderTemplatedCard(template.html, product, query, shopId, handlers)
@@ -75,7 +76,14 @@ export function renderProductCard(
 
   const price = document.createElement("div")
   price.className = "xtal-card-price"
-  price.textContent = formatPrice(product.price)
+  if (isAuthenticated) {
+    price.textContent = formatPrice(product.price)
+  } else {
+    price.textContent = "Log in to see pricing"
+    price.style.fontSize = "12px"
+    price.style.color = "#888"
+    price.style.fontStyle = "italic"
+  }
   body.appendChild(price)
 
   link.appendChild(body)

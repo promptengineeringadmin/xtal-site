@@ -12,7 +12,7 @@ export interface CardTemplate {
 }
 
 /** Build a flat key→string map from a Product for template interpolation */
-function buildTemplateData(product: Product, resolvedUrl?: string): Record<string, string> {
+function buildTemplateData(product: Product, resolvedUrl?: string, isAuthenticated = true): Record<string, string> {
   const price = Array.isArray(product.price)
     ? product.price[0] ?? 0
     : product.price
@@ -32,6 +32,7 @@ function buildTemplateData(product: Product, resolvedUrl?: string): Record<strin
     product_url: resolvedUrl || product.product_url || "",
     available: product.available ? "true" : "",
     description: product.description ?? "",
+    isAuthenticated: isAuthenticated ? "true" : "",
   }
 
   if (compareAt && compareAt > price) {
@@ -141,9 +142,10 @@ export function renderTemplatedCard(
   shopId: string,
   handlers: CardHandlers,
   cartAdapterName?: string,
-  resolvedUrl?: string
+  resolvedUrl?: string,
+  isAuthenticated = true
 ): HTMLElement {
-  const data = buildTemplateData(product, resolvedUrl)
+  const data = buildTemplateData(product, resolvedUrl, isAuthenticated)
 
   let html = processConditionals(template, data)
   html = interpolateTokens(html, data)
